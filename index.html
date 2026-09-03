@@ -44,7 +44,7 @@
 </head>
 <body class="h-screen w-screen overflow-hidden flex flex-col">
 
-  <!-- TOP BAR WITH MENU EDIT BUTTON -->
+  <!-- TOP BAR -->
   <header class="bg-[#101116] border-b border-[#2a2d3d] px-2.5 py-1.5 flex items-center justify-between text-xs z-30 flex-shrink-0">
     <div class="flex items-center space-x-1.5">
       <span class="px-1.5 py-0.5 rounded brand-red font-bold text-[9px] text-white">POS</span>
@@ -159,15 +159,79 @@
     </section>
   </main>
 
-  <!-- 2. EDIT MENU VIEW -->
-  <main id="view-menu" class="flex-1 overflow-y-auto p-3 bg-[#121319] hidden">
-    <div class="max-w-xl mx-auto">
-      <div class="flex justify-between items-center mb-3">
-        <h2 class="text-xs font-bold text-white"><i class="fa-solid fa-pen-to-square text-amber-400 mr-1.5"></i> Edit Menu & Prices</h2>
-        <button onclick="resetMenuToOriginal()" class="px-2 py-1 rounded bg-neutral-800 text-[10px] text-amber-400 border border-neutral-700">
-          Reset Default Prices
-        </button>
+  <!-- 2. EDIT MENU VIEW (WITH ADD ITEM FORM) -->
+  <main id="view-menu" class="flex-1 overflow-y-auto p-3 bg-[#121319] hidden pb-16">
+    <div class="max-w-xl mx-auto space-y-3">
+      
+      <!-- Top Action Controls -->
+      <div class="flex justify-between items-center">
+        <h2 class="text-xs font-bold text-white"><i class="fa-solid fa-pen-to-square text-amber-400 mr-1.5"></i> Menu Manager</h2>
+        <div class="flex space-x-1.5">
+          <button onclick="toggleAddForm()" class="px-2 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-[10px] text-white font-bold">
+            <i class="fa-solid fa-plus mr-0.5"></i> Add New Item
+          </button>
+          <button onclick="resetMenuToOriginal()" class="px-2 py-1 rounded bg-neutral-800 text-[10px] text-amber-400 border border-neutral-700">
+            Reset Defaults
+          </button>
+        </div>
       </div>
+
+      <!-- Add New Item Card (Collapsible) -->
+      <div id="add-item-card" class="bg-[#1b1c26] border border-emerald-500/40 p-2.5 rounded-xl hidden space-y-2">
+        <h3 class="text-xs font-bold text-emerald-400"><i class="fa-solid fa-utensils mr-1"></i> Add Custom Food Item</h3>
+        
+        <div class="space-y-1.5">
+          <div>
+            <label class="text-[9px] text-neutral-400 block mb-0.5">Item Name</label>
+            <input id="new-item-name" type="text" placeholder="e.g. Cheese Garlic Bread" class="w-full bg-[#13141a] border border-neutral-700 rounded p-1.5 text-xs text-white focus:outline-none focus:border-emerald-500" />
+          </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-[9px] text-neutral-400 block mb-0.5">Category</label>
+              <select id="new-item-category" class="w-full bg-[#13141a] border border-neutral-700 rounded p-1.5 text-[11px] text-white focus:outline-none focus:border-emerald-500">
+                <!-- Dynamically Populated -->
+              </select>
+            </div>
+            <div>
+              <label class="text-[9px] text-neutral-400 block mb-0.5">Pricing Type</label>
+              <select id="new-item-type" onchange="toggleSizeInputs(this.value)" class="w-full bg-[#13141a] border border-neutral-700 rounded p-1.5 text-[11px] text-white focus:outline-none focus:border-emerald-500">
+                <option value="single">Single Price</option>
+                <option value="sizes">Sizes (Regular / Med / Large)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Single Price Input -->
+          <div id="new-single-price-wrap">
+            <label class="text-[9px] text-neutral-400 block mb-0.5">Price (₹)</label>
+            <input id="new-item-price" type="number" placeholder="₹ Amount" class="w-full bg-[#13141a] border border-neutral-700 rounded p-1.5 text-xs text-white font-mono focus:outline-none focus:border-emerald-500" />
+          </div>
+
+          <!-- Multi-Size Price Inputs (Hidden by default) -->
+          <div id="new-sizes-price-wrap" class="hidden grid grid-cols-3 gap-1.5">
+            <div>
+              <label class="text-[9px] text-neutral-400 block mb-0.5">Regular (₹)</label>
+              <input id="new-item-price-reg" type="number" placeholder="₹" class="w-full bg-[#13141a] border border-neutral-700 rounded p-1.5 text-xs text-white font-mono focus:outline-none focus:border-emerald-500" />
+            </div>
+            <div>
+              <label class="text-[9px] text-neutral-400 block mb-0.5">Medium (₹)</label>
+              <input id="new-item-price-med" type="number" placeholder="₹" class="w-full bg-[#13141a] border border-neutral-700 rounded p-1.5 text-xs text-white font-mono focus:outline-none focus:border-emerald-500" />
+            </div>
+            <div>
+              <label class="text-[9px] text-neutral-400 block mb-0.5">Large (₹)</label>
+              <input id="new-item-price-lrg" type="number" placeholder="₹" class="w-full bg-[#13141a] border border-neutral-700 rounded p-1.5 text-xs text-white font-mono focus:outline-none focus:border-emerald-500" />
+            </div>
+          </div>
+
+          <div class="flex justify-end space-x-1.5 pt-1">
+            <button onclick="toggleAddForm()" class="px-2.5 py-1 bg-neutral-700 hover:bg-neutral-600 rounded text-[10px] text-neutral-200">Cancel</button>
+            <button onclick="saveNewItem()" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 rounded text-[10px] text-white font-bold">Save Item</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Existing Menu List -->
       <div id="menu-editor-list" class="space-y-1.5"></div>
     </div>
   </main>
@@ -240,137 +304,137 @@
   <script>
     const DEFAULT_MENU = [
       // 1. Pizza Mania
-      { id: 101, name: 'Onion Pizza', category: '1. Pizza Mania', price_regular: 70, available: true, stock: 50 },
-      { id: 102, name: 'Capsicum Pizza', category: '1. Pizza Mania', price_regular: 80, available: true, stock: 50 },
-      { id: 103, name: 'Tomato Pizza', category: '1. Pizza Mania', price_regular: 80, available: true, stock: 50 },
-      { id: 104, name: 'Mushroom Pizza', category: '1. Pizza Mania', price_regular: 80, available: true, stock: 50 },
-      { id: 105, name: 'Corn Pizza', category: '1. Pizza Mania', price_regular: 90, available: true, stock: 50 },
-      { id: 106, name: 'Capsicum & Paneer', category: '1. Pizza Mania', price_regular: 110, available: true, stock: 50 },
-      { id: 107, name: 'Onion & Paneer', category: '1. Pizza Mania', price_regular: 110, available: true, stock: 50 },
-      { id: 108, name: 'Capsicum & Corn', category: '1. Pizza Mania', price_regular: 110, available: true, stock: 50 },
-      { id: 109, name: 'Pineapple & Corn', category: '1. Pizza Mania', price_regular: 120, available: true, stock: 50 },
-      { id: 110, name: 'Delicious Special (Mania)', category: '1. Pizza Mania', price_regular: 140, available: true, stock: 50 },
+      { id: 101, name: 'Onion Pizza', category: '1. Pizza Mania', price_regular: 70, available: true },
+      { id: 102, name: 'Capsicum Pizza', category: '1. Pizza Mania', price_regular: 80, available: true },
+      { id: 103, name: 'Tomato Pizza', category: '1. Pizza Mania', price_regular: 80, available: true },
+      { id: 104, name: 'Mushroom Pizza', category: '1. Pizza Mania', price_regular: 80, available: true },
+      { id: 105, name: 'Corn Pizza', category: '1. Pizza Mania', price_regular: 90, available: true },
+      { id: 106, name: 'Capsicum & Paneer', category: '1. Pizza Mania', price_regular: 110, available: true },
+      { id: 107, name: 'Onion & Paneer', category: '1. Pizza Mania', price_regular: 110, available: true },
+      { id: 108, name: 'Capsicum & Corn', category: '1. Pizza Mania', price_regular: 110, available: true },
+      { id: 109, name: 'Pineapple & Corn', category: '1. Pizza Mania', price_regular: 120, available: true },
+      { id: 110, name: 'Delicious Special (Mania)', category: '1. Pizza Mania', price_regular: 140, available: true },
 
       // 2. Special Veg Pizza (R/M/L)
-      { id: 201, name: 'Margherita (Double Cheese)', category: '2. Special Veg Pizza', price_regular: 150, price_medium: 300, price_large: 400, available: true, stock: 40 },
-      { id: 202, name: 'Cheese & Mushroom', category: '2. Special Veg Pizza', price_regular: 150, price_medium: 300, price_large: 400, available: true, stock: 40 },
-      { id: 203, name: 'Cheese & Corn', category: '2. Special Veg Pizza', price_regular: 150, price_medium: 300, price_large: 400, available: true, stock: 40 },
-      { id: 204, name: 'Achari Wonder', category: '2. Special Veg Pizza', price_regular: 150, price_medium: 300, price_large: 400, available: true, stock: 40 },
-      { id: 205, name: 'Mix Veg Pizza', category: '2. Special Veg Pizza', price_regular: 150, price_medium: 300, price_large: 400, available: true, stock: 40 },
+      { id: 201, name: 'Margherita (Double Cheese)', category: '2. Special Veg Pizza', price_regular: 150, price_medium: 300, price_large: 400, available: true },
+      { id: 202, name: 'Cheese & Mushroom', category: '2. Special Veg Pizza', price_regular: 150, price_medium: 300, price_large: 400, available: true },
+      { id: 203, name: 'Cheese & Corn', category: '2. Special Veg Pizza', price_regular: 150, price_medium: 300, price_large: 400, available: true },
+      { id: 204, name: 'Achari Wonder', category: '2. Special Veg Pizza', price_regular: 150, price_medium: 300, price_large: 400, available: true },
+      { id: 205, name: 'Mix Veg Pizza', category: '2. Special Veg Pizza', price_regular: 150, price_medium: 300, price_large: 400, available: true },
 
       // 1 Veg Pizza (R/M/L)
-      { id: 206, name: 'Makhni Lover Pizza', category: '1 Veg', price_regular: 190, price_medium: 380, price_large: 590, available: true, stock: 40 },
-      { id: 207, name: 'Farm House Pizza', category: '1 Veg', price_regular: 190, price_medium: 380, price_large: 590, available: true, stock: 40 },
-      { id: 208, name: 'Delicious Pasta Pizza', category: '1 Veg', price_regular: 190, price_medium: 380, price_large: 590, available: true, stock: 40 },
-      { id: 209, name: 'Paneer Lover Pizza', category: '1 Veg', price_regular: 190, price_medium: 380, price_large: 590, available: true, stock: 40 },
-      { id: 210, name: 'Country House Pizza', category: '1 Veg', price_regular: 190, price_medium: 380, price_large: 590, available: true, stock: 40 },
-      { id: 211, name: 'Maxican Green Wave', category: '1 Veg', price_regular: 190, price_medium: 380, price_large: 590, available: true, stock: 40 },
-      { id: 212, name: 'Spicy Corn Lover', category: '1 Veg', price_regular: 190, price_medium: 380, price_large: 590, available: true, stock: 40 },
+      { id: 206, name: 'Makhni Lover Pizza', category: '1 Veg', price_regular: 190, price_medium: 380, price_large: 590, available: true },
+      { id: 207, name: 'Farm House Pizza', category: '1 Veg', price_regular: 190, price_medium: 380, price_large: 590, available: true },
+      { id: 208, name: 'Delicious Pasta Pizza', category: '1 Veg', price_regular: 190, price_medium: 380, price_large: 590, available: true },
+      { id: 209, name: 'Paneer Lover Pizza', category: '1 Veg', price_regular: 190, price_medium: 380, price_large: 590, available: true },
+      { id: 210, name: 'Country House Pizza', category: '1 Veg', price_regular: 190, price_medium: 380, price_large: 590, available: true },
+      { id: 211, name: 'Maxican Green Wave', category: '1 Veg', price_regular: 190, price_medium: 380, price_large: 590, available: true },
+      { id: 212, name: 'Spicy Corn Lover', category: '1 Veg', price_regular: 190, price_medium: 380, price_large: 590, available: true },
 
       // 2 Veg Pizza (R/M/L)
-      { id: 213, name: 'Delicious Loaded Pizza', category: '2 Veg', price_regular: 250, price_medium: 500, price_large: 630, available: true, stock: 40 },
-      { id: 214, name: 'Veg Delight Pizza', category: '2 Veg', price_regular: 250, price_medium: 500, price_large: 630, available: true, stock: 40 },
-      { id: 215, name: 'Sweet & Spicy Pizza', category: '2 Veg', price_regular: 250, price_medium: 500, price_large: 630, available: true, stock: 40 },
-      { id: 216, name: 'Veggie Fresh Pizza', category: '2 Veg', price_regular: 250, price_medium: 500, price_large: 630, available: true, stock: 40 },
-      { id: 217, name: 'Veg Paradise Pizza', category: '2 Veg', price_regular: 250, price_medium: 500, price_large: 630, available: true, stock: 40 },
-      { id: 218, name: 'Delicious Supreme', category: '2 Veg', price_regular: 250, price_medium: 500, price_large: 630, available: true, stock: 40 },
+      { id: 213, name: 'Delicious Loaded Pizza', category: '2 Veg', price_regular: 250, price_medium: 500, price_large: 630, available: true },
+      { id: 214, name: 'Veg Delight Pizza', category: '2 Veg', price_regular: 250, price_medium: 500, price_large: 630, available: true },
+      { id: 215, name: 'Sweet & Spicy Pizza', category: '2 Veg', price_regular: 250, price_medium: 500, price_large: 630, available: true },
+      { id: 216, name: 'Veggie Fresh Pizza', category: '2 Veg', price_regular: 250, price_medium: 500, price_large: 630, available: true },
+      { id: 217, name: 'Veg Paradise Pizza', category: '2 Veg', price_regular: 250, price_medium: 500, price_large: 630, available: true },
+      { id: 218, name: 'Delicious Supreme', category: '2 Veg', price_regular: 250, price_medium: 500, price_large: 630, available: true },
 
       // 3 Veg Pizza (R/M/L)
-      { id: 219, name: 'Kadhai Lover Pizza', category: '3 Veg', price_regular: 270, price_medium: 550, price_large: 650, available: true, stock: 40 },
-      { id: 220, name: 'Tandoori Paneer Lover', category: '3 Veg', price_regular: 270, price_medium: 550, price_large: 650, available: true, stock: 40 },
-      { id: 221, name: 'Achari Lover Pizza', category: '3 Veg', price_regular: 270, price_medium: 550, price_large: 650, available: true, stock: 40 },
-      { id: 222, name: 'Delicious Eatz Special Pizza', category: '3 Veg', price_regular: 270, price_medium: 550, price_large: 650, available: true, stock: 40 },
+      { id: 219, name: 'Kadhai Lover Pizza', category: '3 Veg', price_regular: 270, price_medium: 550, price_large: 650, available: true },
+      { id: 220, name: 'Tandoori Paneer Lover', category: '3 Veg', price_regular: 270, price_medium: 550, price_large: 650, available: true },
+      { id: 221, name: 'Achari Lover Pizza', category: '3 Veg', price_regular: 270, price_medium: 550, price_large: 650, available: true },
+      { id: 222, name: 'Delicious Eatz Special Pizza', category: '3 Veg', price_regular: 270, price_medium: 550, price_large: 650, available: true },
 
       // Burger
-      { id: 301, name: 'Allu Petty Burger', category: 'Burger', price_regular: 40, available: true, stock: 60 },
-      { id: 302, name: 'Harb Petty Burger', category: 'Burger', price_regular: 50, available: true, stock: 60 },
-      { id: 303, name: 'Spicy Burger', category: 'Burger', price_regular: 60, available: true, stock: 60 },
-      { id: 304, name: 'Cheesy Burger', category: 'Burger', price_regular: 70, available: true, stock: 60 },
-      { id: 305, name: 'Paneer Burger', category: 'Burger', price_regular: 80, available: true, stock: 60 },
-      { id: 306, name: 'Mushroom Burger', category: 'Burger', price_regular: 70, available: true, stock: 60 },
-      { id: 307, name: 'Spicy Paneer Burger', category: 'Burger', price_regular: 120, available: true, stock: 60 },
-      { id: 308, name: 'Double Petty Burger', category: 'Burger', price_regular: 110, available: true, stock: 60 },
-      { id: 309, name: 'Special Burger', category: 'Burger', price_regular: 100, available: true, stock: 60 },
+      { id: 301, name: 'Allu Petty Burger', category: 'Burger', price_regular: 40, available: true },
+      { id: 302, name: 'Harb Petty Burger', category: 'Burger', price_regular: 50, available: true },
+      { id: 303, name: 'Spicy Burger', category: 'Burger', price_regular: 60, available: true },
+      { id: 304, name: 'Cheesy Burger', category: 'Burger', price_regular: 70, available: true },
+      { id: 305, name: 'Paneer Burger', category: 'Burger', price_regular: 80, available: true },
+      { id: 306, name: 'Mushroom Burger', category: 'Burger', price_regular: 70, available: true },
+      { id: 307, name: 'Spicy Paneer Burger', category: 'Burger', price_regular: 120, available: true },
+      { id: 308, name: 'Double Petty Burger', category: 'Burger', price_regular: 110, available: true },
+      { id: 309, name: 'Special Burger', category: 'Burger', price_regular: 100, available: true },
 
       // Sandwich
-      { id: 401, name: 'Grilled Sandwich', category: 'Sandwich', price_regular: 70, available: true, stock: 40 },
-      { id: 402, name: 'Spicy Sandwich', category: 'Sandwich', price_regular: 80, available: true, stock: 40 },
-      { id: 403, name: 'Mix Veg Sandwich', category: 'Sandwich', price_regular: 100, available: true, stock: 40 },
-      { id: 404, name: 'Creamy Sandwich', category: 'Sandwich', price_regular: 90, available: true, stock: 40 },
-      { id: 405, name: 'Paneer & Mushroom Sandwich', category: 'Sandwich', price_regular: 100, available: true, stock: 40 },
-      { id: 406, name: 'Paneer Sandwich', category: 'Sandwich', price_regular: 100, available: true, stock: 40 },
-      { id: 407, name: 'Delicious Spl. Sandwich', category: 'Sandwich', price_regular: 120, available: true, stock: 40 },
+      { id: 401, name: 'Grilled Sandwich', category: 'Sandwich', price_regular: 70, available: true },
+      { id: 402, name: 'Spicy Sandwich', category: 'Sandwich', price_regular: 80, available: true },
+      { id: 403, name: 'Mix Veg Sandwich', category: 'Sandwich', price_regular: 100, available: true },
+      { id: 404, name: 'Creamy Sandwich', category: 'Sandwich', price_regular: 90, available: true },
+      { id: 405, name: 'Paneer & Mushroom Sandwich', category: 'Sandwich', price_regular: 100, available: true },
+      { id: 406, name: 'Paneer Sandwich', category: 'Sandwich', price_regular: 100, available: true },
+      { id: 407, name: 'Delicious Spl. Sandwich', category: 'Sandwich', price_regular: 120, available: true },
 
       // Pasta
-      { id: 501, name: 'Red Pasta', category: 'Pasta', price_regular: 80, available: true, stock: 40 },
-      { id: 502, name: 'White Pasta', category: 'Pasta', price_regular: 80, available: true, stock: 40 },
-      { id: 503, name: 'Spicy Pasta', category: 'Pasta', price_regular: 100, available: true, stock: 40 },
-      { id: 504, name: 'Mix Veg Pasta', category: 'Pasta', price_regular: 100, available: true, stock: 40 },
-      { id: 505, name: 'Makhni Pasta', category: 'Pasta', price_regular: 120, available: true, stock: 40 },
-      { id: 506, name: 'Cheesy Pasta', category: 'Pasta', price_regular: 90, available: true, stock: 40 },
+      { id: 501, name: 'Red Pasta', category: 'Pasta', price_regular: 80, available: true },
+      { id: 502, name: 'White Pasta', category: 'Pasta', price_regular: 80, available: true },
+      { id: 503, name: 'Spicy Pasta', category: 'Pasta', price_regular: 100, available: true },
+      { id: 504, name: 'Mix Veg Pasta', category: 'Pasta', price_regular: 100, available: true },
+      { id: 505, name: 'Makhni Pasta', category: 'Pasta', price_regular: 120, available: true },
+      { id: 506, name: 'Cheesy Pasta', category: 'Pasta', price_regular: 90, available: true },
 
       // Wraps
-      { id: 601, name: 'Mix Veg Wrap', category: 'Wraps', price_regular: 80, available: true, stock: 40 },
-      { id: 602, name: 'Allu Tikki Wrap', category: 'Wraps', price_regular: 80, available: true, stock: 40 },
-      { id: 603, name: 'Paneer Wrap', category: 'Wraps', price_regular: 100, available: true, stock: 40 },
-      { id: 604, name: 'Spicy Paneer Wrap', category: 'Wraps', price_regular: 120, available: true, stock: 40 },
-      { id: 605, name: 'Spicy Wrap', category: 'Wraps', price_regular: 80, available: true, stock: 40 },
-      { id: 606, name: 'Paneer Mushroom Wrap', category: 'Wraps', price_regular: 100, available: true, stock: 40 },
-      { id: 607, name: 'Delicious Special Wrap', category: 'Wraps', price_regular: 140, available: true, stock: 40 },
+      { id: 601, name: 'Mix Veg Wrap', category: 'Wraps', price_regular: 80, available: true },
+      { id: 602, name: 'Allu Tikki Wrap', category: 'Wraps', price_regular: 80, available: true },
+      { id: 603, name: 'Paneer Wrap', category: 'Wraps', price_regular: 100, available: true },
+      { id: 604, name: 'Spicy Paneer Wrap', category: 'Wraps', price_regular: 120, available: true },
+      { id: 605, name: 'Spicy Wrap', category: 'Wraps', price_regular: 80, available: true },
+      { id: 606, name: 'Paneer Mushroom Wrap', category: 'Wraps', price_regular: 100, available: true },
+      { id: 607, name: 'Delicious Special Wrap', category: 'Wraps', price_regular: 140, available: true },
 
       // Veg Sides (M/L)
-      { id: 701, name: 'French Fries', category: 'Veg Sides', price_regular: 90, price_medium: 90, price_large: 110, available: true, stock: 60 },
-      { id: 702, name: 'Peri Peri Fries', category: 'Veg Sides', price_regular: 100, price_medium: 100, price_large: 120, available: true, stock: 60 },
-      { id: 703, name: 'Loaded Fries', category: 'Veg Sides', price_regular: 120, price_medium: 120, price_large: 150, available: true, stock: 60 },
-      { id: 704, name: 'Garlic Bread', category: 'Veg Sides', price_regular: 100, available: true, stock: 40 },
-      { id: 705, name: 'Paneer Garlic Bread', category: 'Veg Sides', price_regular: 120, available: true, stock: 40 },
-      { id: 706, name: 'Calazone', category: 'Veg Sides', price_regular: 100, available: true, stock: 40 },
-      { id: 707, name: 'Potato Pops', category: 'Veg Sides', price_regular: 80, available: true, stock: 50 },
-      { id: 708, name: 'Veg Fingers', category: 'Veg Sides', price_regular: 90, available: true, stock: 50 },
-      { id: 709, name: 'Veg Parcel', category: 'Veg Sides', price_regular: 60, available: true, stock: 50 },
-      { id: 710, name: 'Paneer Parcel', category: 'Veg Sides', price_regular: 80, available: true, stock: 50 },
-      { id: 711, name: 'Mix Veg Parcel', category: 'Veg Sides', price_regular: 100, available: true, stock: 50 },
+      { id: 701, name: 'French Fries', category: 'Veg Sides', price_regular: 90, price_medium: 90, price_large: 110, available: true },
+      { id: 702, name: 'Peri Peri Fries', category: 'Veg Sides', price_regular: 100, price_medium: 100, price_large: 120, available: true },
+      { id: 703, name: 'Loaded Fries', category: 'Veg Sides', price_regular: 120, price_medium: 120, price_large: 150, available: true },
+      { id: 704, name: 'Garlic Bread', category: 'Veg Sides', price_regular: 100, available: true },
+      { id: 705, name: 'Paneer Garlic Bread', category: 'Veg Sides', price_regular: 120, available: true },
+      { id: 706, name: 'Calazone', category: 'Veg Sides', price_regular: 100, available: true },
+      { id: 707, name: 'Potato Pops', category: 'Veg Sides', price_regular: 80, available: true },
+      { id: 708, name: 'Veg Fingers', category: 'Veg Sides', price_regular: 90, available: true },
+      { id: 709, name: 'Veg Parcel', category: 'Veg Sides', price_regular: 60, available: true },
+      { id: 710, name: 'Paneer Parcel', category: 'Veg Sides', price_regular: 80, available: true },
+      { id: 711, name: 'Mix Veg Parcel', category: 'Veg Sides', price_regular: 100, available: true },
 
       // Soup & Salad
-      { id: 801, name: 'Mushroom Soup', category: 'Soup & Salad', price_regular: 80, available: true, stock: 40 },
-      { id: 802, name: 'Mix Soup', category: 'Soup & Salad', price_regular: 80, available: true, stock: 40 },
-      { id: 803, name: 'Corn Soup', category: 'Soup & Salad', price_regular: 70, available: true, stock: 40 },
-      { id: 804, name: 'Veg Salad', category: 'Soup & Salad', price_regular: 80, price_medium: 80, price_large: 100, available: true, stock: 40 },
-      { id: 805, name: 'Creamy Salad', category: 'Soup & Salad', price_regular: 100, price_medium: 100, price_large: 120, available: true, stock: 40 },
-      { id: 806, name: 'Cheesy Salad', category: 'Soup & Salad', price_regular: 110, price_medium: 110, price_large: 140, available: true, stock: 40 },
+      { id: 801, name: 'Mushroom Soup', category: 'Soup & Salad', price_regular: 80, available: true },
+      { id: 802, name: 'Mix Soup', category: 'Soup & Salad', price_regular: 80, available: true },
+      { id: 803, name: 'Corn Soup', category: 'Soup & Salad', price_regular: 70, available: true },
+      { id: 804, name: 'Veg Salad', category: 'Soup & Salad', price_regular: 80, price_medium: 80, price_large: 100, available: true },
+      { id: 805, name: 'Creamy Salad', category: 'Soup & Salad', price_regular: 100, price_medium: 100, price_large: 120, available: true },
+      { id: 806, name: 'Cheesy Salad', category: 'Soup & Salad', price_regular: 110, price_medium: 110, price_large: 140, available: true },
 
       // Shakes
-      { id: 901, name: 'Vanilla Shake', category: 'Shakes', price_regular: 90, available: true, stock: 50 },
-      { id: 902, name: 'Strawberry Shake', category: 'Shakes', price_regular: 90, available: true, stock: 50 },
-      { id: 903, name: 'Butterscotch Shake', category: 'Shakes', price_regular: 90, available: true, stock: 50 },
-      { id: 904, name: 'Mango Shake', category: 'Shakes', price_regular: 90, available: true, stock: 50 },
-      { id: 905, name: 'Choco Shake', category: 'Shakes', price_regular: 90, available: true, stock: 50 },
-      { id: 906, name: 'Kit Kat Shake', category: 'Shakes', price_regular: 100, available: true, stock: 50 },
-      { id: 907, name: 'Brownie Shake', category: 'Shakes', price_regular: 100, available: true, stock: 50 },
-      { id: 908, name: 'Kesar Shake', category: 'Shakes', price_regular: 100, available: true, stock: 50 },
-      { id: 909, name: 'Paan Shake', category: 'Shakes', price_regular: 100, available: true, stock: 50 },
-      { id: 910, name: 'Bubble Shake', category: 'Shakes', price_regular: 100, available: true, stock: 50 },
-      { id: 911, name: 'Black Current Shake', category: 'Shakes', price_regular: 100, available: true, stock: 50 },
-      { id: 912, name: 'Oreo Shake', category: 'Shakes', price_regular: 100, available: true, stock: 50 },
+      { id: 901, name: 'Vanilla Shake', category: 'Shakes', price_regular: 90, available: true },
+      { id: 902, name: 'Strawberry Shake', category: 'Shakes', price_regular: 90, available: true },
+      { id: 903, name: 'Butterscotch Shake', category: 'Shakes', price_regular: 90, available: true },
+      { id: 904, name: 'Mango Shake', category: 'Shakes', price_regular: 90, available: true },
+      { id: 905, name: 'Choco Shake', category: 'Shakes', price_regular: 90, available: true },
+      { id: 906, name: 'Kit Kat Shake', category: 'Shakes', price_regular: 100, available: true },
+      { id: 907, name: 'Brownie Shake', category: 'Shakes', price_regular: 100, available: true },
+      { id: 908, name: 'Kesar Shake', category: 'Shakes', price_regular: 100, available: true },
+      { id: 909, name: 'Paan Shake', category: 'Shakes', price_regular: 100, available: true },
+      { id: 910, name: 'Bubble Shake', category: 'Shakes', price_regular: 100, available: true },
+      { id: 911, name: 'Black Current Shake', category: 'Shakes', price_regular: 100, available: true },
+      { id: 912, name: 'Oreo Shake', category: 'Shakes', price_regular: 100, available: true },
 
       // Beverages
-      { id: 1001, name: 'Mint Mojito', category: 'Beverages', price_regular: 90, available: true, stock: 50 },
-      { id: 1002, name: 'Mango Mojito', category: 'Beverages', price_regular: 80, available: true, stock: 50 },
-      { id: 1003, name: 'Lemon Soda', category: 'Beverages', price_regular: 70, available: true, stock: 50 },
-      { id: 1004, name: 'Cold Coffee', category: 'Beverages', price_regular: 90, available: true, stock: 60 },
-      { id: 1005, name: 'Hot Coffee', category: 'Beverages', price_regular: 50, available: true, stock: 60 },
+      { id: 1001, name: 'Mint Mojito', category: 'Beverages', price_regular: 90, available: true },
+      { id: 1002, name: 'Mango Mojito', category: 'Beverages', price_regular: 80, available: true },
+      { id: 1003, name: 'Lemon Soda', category: 'Beverages', price_regular: 70, available: true },
+      { id: 1004, name: 'Cold Coffee', category: 'Beverages', price_regular: 90, available: true },
+      { id: 1005, name: 'Hot Coffee', category: 'Beverages', price_regular: 50, available: true },
 
       // Meals
-      { id: 1101, name: 'Allu Tikki Meal', category: 'Meals', price_regular: 130, available: true, stock: 30 },
-      { id: 1102, name: 'Single Meal', category: 'Meals', price_regular: 150, available: true, stock: 30 },
-      { id: 1103, name: 'Couple Meal', category: 'Meals', price_regular: 310, available: true, stock: 30 },
-      { id: 1104, name: 'Family Meal', category: 'Meals', price_regular: 700, available: true, stock: 20 }
+      { id: 1101, name: 'Allu Tikki Meal', category: 'Meals', price_regular: 130, available: true },
+      { id: 1102, name: 'Single Meal', category: 'Meals', price_regular: 150, available: true },
+      { id: 1103, name: 'Couple Meal', category: 'Meals', price_regular: 310, available: true },
+      { id: 1104, name: 'Family Meal', category: 'Meals', price_regular: 700, available: true }
     ];
 
-    const CATEGORIES = ['All', '1. Pizza Mania', '2. Special Veg Pizza', '1 Veg', '2 Veg', '3 Veg', 'Burger', 'Sandwich', 'Pasta', 'Wraps', 'Veg Sides', 'Soup & Salad', 'Shakes', 'Beverages', 'Meals'];
+    const DEFAULT_CATEGORIES = ['1. Pizza Mania', '2. Special Veg Pizza', '1 Veg', '2 Veg', '3 Veg', 'Burger', 'Sandwich', 'Pasta', 'Wraps', 'Veg Sides', 'Soup & Salad', 'Shakes', 'Beverages', 'Meals'];
 
-    let menu = JSON.parse(localStorage.getItem('de_menu_v4')) || DEFAULT_MENU;
-    let orders = JSON.parse(localStorage.getItem('de_petpooja_orders_v4')) || [];
+    let menu = JSON.parse(localStorage.getItem('de_menu_v5')) || DEFAULT_MENU;
+    let orders = JSON.parse(localStorage.getItem('de_petpooja_orders_v5')) || [];
     let cart = {};
     let activeCategory = 'All';
     let currentOrderMode = 'Dine-in';
@@ -378,23 +442,32 @@
     let selectedPayment = 'Cash';
 
     function saveState() {
-      localStorage.setItem('de_menu_v4', JSON.stringify(menu));
-      localStorage.setItem('de_petpooja_orders_v4', JSON.stringify(orders));
+      localStorage.setItem('de_menu_v5', JSON.stringify(menu));
+      localStorage.setItem('de_petpooja_orders_v5', JSON.stringify(orders));
     }
 
     function resetMenuToOriginal() {
-      if (confirm('Reset all items back to standard prices?')) {
+      if (confirm('Reset all items back to standard factory prices and menu?')) {
         menu = JSON.parse(JSON.stringify(DEFAULT_MENU));
         saveState();
+        renderCategories();
         renderItems();
         renderMenuEditor();
       }
     }
 
+    function getUniqueCategories() {
+      const cats = new Set(DEFAULT_CATEGORIES);
+      menu.forEach(it => cats.add(it.category));
+      return Array.from(cats);
+    }
+
     function renderCategories() {
       const bar = document.getElementById('category-bar');
       bar.innerHTML = '';
-      CATEGORIES.forEach(cat => {
+      
+      const allCats = ['All', ...getUniqueCategories()];
+      allCats.forEach(cat => {
         const btn = document.createElement('button');
         btn.innerText = cat;
         btn.className = `px-2 py-0.5 rounded font-semibold whitespace-nowrap text-[10px] transition ${
@@ -421,7 +494,7 @@
       });
 
       items.forEach(it => {
-        const hasSizes = it.price_medium !== undefined && it.price_medium !== null;
+        const hasSizes = it.price_medium !== undefined && it.price_medium !== null && it.price_medium > 0;
         const btn = document.createElement('button');
         btn.className = `bg-[#1a1b24] hover:bg-[#222430] border border-[#2b2e3e] active:border-red-500 rounded-lg p-1.5 flex flex-col justify-between text-left h-20 transition ${!it.available ? 'opacity-40' : ''}`;
         btn.onclick = () => handleItemSelect(it);
@@ -442,7 +515,7 @@
 
     function handleItemSelect(item) {
       if (!item.available) return alert('This item is currently disabled.');
-      if (item.price_medium !== undefined && item.price_medium !== null) {
+      if (item.price_medium !== undefined && item.price_medium !== null && item.price_medium > 0) {
         document.getElementById('size-modal-title').innerText = item.name;
         const container = document.getElementById('size-modal-options');
         container.innerHTML = `
@@ -654,7 +727,93 @@
       renderCart();
     }
 
-    // MENU EDITOR LOGIC
+    // ADD ITEM & MENU EDITOR LOGIC
+    function toggleAddForm() {
+      const card = document.getElementById('add-item-card');
+      card.classList.toggle('hidden');
+      if (!card.classList.contains('hidden')) {
+        populateCategoryDropdown();
+        document.getElementById('new-item-name').focus();
+      }
+    }
+
+    function populateCategoryDropdown() {
+      const select = document.getElementById('new-item-category');
+      select.innerHTML = '';
+      getUniqueCategories().forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c;
+        opt.innerText = c;
+        select.appendChild(opt);
+      });
+    }
+
+    function toggleSizeInputs(type) {
+      if (type === 'sizes') {
+        document.getElementById('new-single-price-wrap').classList.add('hidden');
+        document.getElementById('new-sizes-price-wrap').classList.remove('hidden');
+      } else {
+        document.getElementById('new-single-price-wrap').classList.remove('hidden');
+        document.getElementById('new-sizes-price-wrap').classList.add('hidden');
+      }
+    }
+
+    function saveNewItem() {
+      const name = document.getElementById('new-item-name').value.trim();
+      const category = document.getElementById('new-item-category').value;
+      const type = document.getElementById('new-item-type').value;
+
+      if (!name) return alert('Please enter item name');
+
+      const newItem = {
+        id: Date.now(),
+        name: name,
+        category: category,
+        available: true
+      };
+
+      if (type === 'sizes') {
+        const reg = parseFloat(document.getElementById('new-item-price-reg').value) || 0;
+        const med = parseFloat(document.getElementById('new-item-price-med').value) || 0;
+        const lrg = parseFloat(document.getElementById('new-item-price-lrg').value) || 0;
+
+        if (reg <= 0) return alert('Please enter at least Regular price');
+        newItem.price_regular = reg;
+        newItem.price_medium = med;
+        newItem.price_large = lrg;
+      } else {
+        const price = parseFloat(document.getElementById('new-item-price').value) || 0;
+        if (price <= 0) return alert('Please enter item price');
+        newItem.price_regular = price;
+      }
+
+      menu.unshift(newItem);
+      saveState();
+
+      // Reset form
+      document.getElementById('new-item-name').value = '';
+      document.getElementById('new-item-price').value = '';
+      document.getElementById('new-item-price-reg').value = '';
+      document.getElementById('new-item-price-med').value = '';
+      document.getElementById('new-item-price-lrg').value = '';
+      toggleAddForm();
+
+      renderCategories();
+      renderItems();
+      renderMenuEditor();
+      alert(`"${name}" added successfully to ${category}!`);
+    }
+
+    function deleteItem(id) {
+      if (confirm('Delete this item from menu?')) {
+        menu = menu.filter(it => it.id !== id);
+        saveState();
+        renderCategories();
+        renderItems();
+        renderMenuEditor();
+      }
+    }
+
     function renderMenuEditor() {
       const container = document.getElementById('menu-editor-list');
       container.innerHTML = '';
@@ -664,7 +823,10 @@
         card.className = 'bg-[#1a1b24] border border-[#2a2d3d] p-2 rounded-lg flex items-center justify-between text-xs';
         card.innerHTML = `
           <div class="flex-1 pr-2">
-            <p class="font-bold text-white text-[11px]">${it.name}</p>
+            <div class="flex items-center space-x-2">
+              <p class="font-bold text-white text-[11px]">${it.name}</p>
+              <button onclick="deleteItem(${it.id})" class="text-neutral-500 hover:text-red-400 text-[10px]"><i class="fa-solid fa-trash"></i></button>
+            </div>
             <p class="text-[9px] text-neutral-400">${it.category}</p>
             <div class="flex items-center space-x-1.5 mt-1">
               <span class="text-[9px] text-amber-400 font-bold">₹</span>
