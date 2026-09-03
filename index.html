@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Delicious Eatz - Petpooja POS</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #17181f;
+      color: #e2e8f0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .font-mono { font-family: 'Space Mono', monospace; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    .brand-red { background-color: #e53935; }
+    .brand-red-hover:hover { background-color: #d32f2f; }
+    .brand-blue { background-color: #1976d2; }
+
+    @media print {
+      body * { visibility: hidden !important; }
+      #printable-receipt, #printable-receipt * { visibility: visible !important; }
+      #printable-receipt {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 4mm !important;
+        box-shadow: none !important;
+        background: #fff !important;
+        color: #000 !important;
+      }
+      .format-58mm { width: 58mm !important; font-size: 10px !important; }
+      .format-80mm { width: 80mm !important; font-size: 12px !important; }
+    }
+  </style>
+</head>
+<body class="h-screen w-screen overflow-hidden flex flex-col">
+
+  <!-- TOP BAR -->
+  <header class="bg-[#101116] border-b border-[#2a2d3d] px-2.5 py-1.5 flex items-center justify-between text-xs z-30 flex-shrink-0">
+    <div class="flex items-center space-x-1.5">
+      <span class="px-1.5 py-0.5 rounded brand-red font-bold text-[9px] text-white">POS</span>
+      <span class="font-black tracking-wider text-[11px] text-white">DELICIOUS EATZ</span>
+      <span class="text-neutral-500 text-[10px]">|</span>
+      <span class="text-neutral-400 text-[10px]">Budhabarh</span>
+    </div>
+
+    <div class="flex items-center space-x-2 font-mono text-neutral-300 text-[10px]">
+      <span id="clock" class="font-bold">--:--:--</span>
+      <button onclick="switchView('orders')" class="px-2 py-0.5 bg-[#252836] hover:bg-[#323648] border border-neutral-700 rounded text-neutral-200 font-sans">
+        <i class="fa-solid fa-clock-rotate-left mr-0.5"></i> Orders
+      </button>
+      <button onclick="switchView('register')" id="btn-back-pos" class="px-2 py-0.5 brand-blue hover:bg-blue-700 rounded text-white font-sans hidden">
+        <i class="fa-solid fa-cash-register mr-0.5"></i> POS
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN TERMINAL (SIDE-BY-SIDE ON ALL SCREENS) -->
+  <main id="view-register" class="flex-1 flex flex-row overflow-hidden">
+    
+    <!-- LEFT PANEL: ITEMS & CATEGORIES (60% WIDTH) -->
+    <section class="w-[58%] sm:w-[60%] flex flex-col overflow-hidden bg-[#121319] border-r border-[#2a2d3d]">
+      <!-- Search -->
+      <div class="p-1.5 border-b border-[#2a2d3d] bg-[#181922] flex items-center space-x-1.5 flex-shrink-0">
+        <div class="relative flex-1">
+          <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2 text-[10px] text-neutral-400"></i>
+          <input id="item-search" type="text" placeholder="Search menu..." oninput="renderItems()" class="w-full pl-7 pr-2 py-1 bg-[#20222d] border border-neutral-700 rounded-md text-[11px] text-white focus:outline-none focus:border-red-500" />
+        </div>
+      </div>
+
+      <!-- Categories Scroll Ribbon -->
+      <div id="category-bar" class="flex items-center space-x-1 p-1.5 bg-[#15161f] border-b border-[#2a2d3d] overflow-x-auto no-scrollbar text-xs flex-shrink-0">
+        <!-- Injected via JS -->
+      </div>
+
+      <!-- Food Items Grid -->
+      <div id="items-grid" class="flex-1 overflow-y-auto p-1.5 grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1.5 content-start no-scrollbar">
+        <!-- Injected via JS -->
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: BILL / TICKET (42% WIDTH) -->
+    <section class="w-[42%] sm:w-[40%] bg-[#1a1b23] flex flex-col justify-between flex-shrink-0">
+      
+      <!-- Order Mode & Delivery Selector -->
+      <div class="p-1.5 bg-[#14151b] border-b border-[#2a2d3d] text-xs flex-shrink-0 space-y-1">
+        <div class="flex items-center justify-between">
+          <span class="text-[9px] font-bold text-neutral-400 uppercase tracking-wider">Type</span>
+          <span id="current-invoice-tag" class="font-mono text-neutral-400 text-[9px]">#DE-PENDING</span>
+        </div>
+
+        <!-- 3 Buttons -->
+        <div class="grid grid-cols-3 gap-1">
+          <button onclick="setOrderMode('Dine-in', this)" class="mode-btn py-1 rounded text-[10px] font-bold bg-blue-600 text-white truncate">Dine</button>
+          <button onclick="setOrderMode('Takeaway', this)" class="mode-btn py-1 rounded text-[10px] font-semibold bg-[#20222d] text-neutral-300 truncate">Away</button>
+          <button onclick="setOrderMode('Delivery', this)" class="mode-btn py-1 rounded text-[10px] font-semibold bg-[#20222d] text-amber-400 truncate">Deliv</button>
+        </div>
+
+        <!-- Table selection -->
+        <div id="table-select-row" class="flex items-center space-x-1 overflow-x-auto no-scrollbar pt-0.5">
+          <button onclick="setTable('T1', this)" class="table-chip px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/40 text-[9px] font-bold">T1</button>
+          <button onclick="setTable('T2', this)" class="table-chip px-1.5 py-0.5 rounded bg-[#20222d] text-neutral-300 text-[9px]">T2</button>
+          <button onclick="setTable('T3', this)" class="table-chip px-1.5 py-0.5 rounded bg-[#20222d] text-neutral-300 text-[9px]">T3</button>
+          <button onclick="setTable('T4', this)" class="table-chip px-1.5 py-0.5 rounded bg-[#20222d] text-neutral-300 text-[9px]">T4</button>
+          <button onclick="setTable('T5', this)" class="table-chip px-1.5 py-0.5 rounded bg-[#20222d] text-neutral-300 text-[9px]">T5</button>
+        </div>
+
+        <!-- Delivery Phone Input -->
+        <div id="delivery-phone-wrap" class="hidden pt-0.5">
+          <div class="flex items-center bg-[#20222c] border border-amber-500 rounded px-1.5 py-1">
+            <i class="fa-solid fa-phone text-amber-400 text-[10px] mr-1"></i>
+            <input id="delivery-phone-input" type="tel" placeholder="Phone #..." class="w-full bg-transparent text-[10px] text-white placeholder-neutral-500 focus:outline-none font-mono" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Ticket Items List -->
+      <div class="flex-1 overflow-y-auto p-1.5 space-y-1 no-scrollbar" id="cart-items-container">
+        <!-- Injected via JS -->
+      </div>
+
+      <!-- Totals & Payment Actions -->
+      <div class="p-1.5 bg-[#13141a] border-t border-[#2a2d3d] flex flex-col space-y-1.5 flex-shrink-0">
+        <div class="space-y-0.5 text-[10px] text-neutral-300 font-medium">
+          <div class="flex justify-between">
+            <span class="text-neutral-400">Subtotal</span>
+            <span id="cart-subtotal" class="font-mono">₹0</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-neutral-400">Discount (₹)</span>
+            <input id="cart-discount" type="number" value="0" min="0" oninput="recalcCart()" class="w-12 bg-[#21232e] border border-neutral-700 rounded px-1 py-0.5 text-right text-amber-400 font-mono focus:outline-none text-[10px]" />
+          </div>
+          <div class="flex justify-between items-center text-white text-xs font-black pt-1 border-t border-[#2a2d3d]">
+            <span>Net</span>
+            <span id="cart-grand" class="text-emerald-400 font-mono text-sm">₹0</span>
+          </div>
+        </div>
+
+        <!-- Payment Mode Selectors -->
+        <div class="grid grid-cols-3 gap-1">
+          <button onclick="setPayment('Cash', this)" class="pay-btn py-1 rounded text-[9px] font-bold bg-amber-500 text-black">Cash</button>
+          <button onclick="setPayment('UPI', this)" class="pay-btn py-1 rounded text-[9px] font-semibold bg-[#252835] text-neutral-300">UPI</button>
+          <button onclick="setPayment('Card', this)" class="pay-btn py-1 rounded text-[9px] font-semibold bg-[#252835] text-neutral-300">Card</button>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="grid grid-cols-2 gap-1 pt-0.5">
+          <button onclick="clearCart()" class="py-1.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-[10px] font-bold">
+            <i class="fa-solid fa-trash-can mr-0.5 text-red-400"></i> Clear
+          </button>
+          <button onclick="settleBillAndPrint()" class="py-1.5 rounded brand-red brand-red-hover text-white text-[10px] font-bold tracking-wide">
+            <i class="fa-solid fa-print mr-0.5"></i> Settle
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ORDERS HISTORY VIEW -->
+  <main id="view-orders" class="flex-1 overflow-y-auto p-3 bg-[#121319] hidden">
+    <div class="max-w-xl mx-auto">
+      <div class="flex justify-between items-center mb-3">
+        <h2 class="text-xs font-bold text-white"><i class="fa-solid fa-list-check text-amber-400 mr-1.5"></i> Cleared Bills Record</h2>
+        <span id="order-count-badge" class="px-2 py-0.5 rounded bg-[#20222d] border border-neutral-700 text-[10px] text-neutral-300 font-mono">0 Orders</span>
+      </div>
+      <div id="orders-table" class="space-y-1.5"></div>
+    </div>
+  </main>
+
+  <!-- THERMAL RECEIPT CONTAINER -->
+  <div id="printable-receipt" class="hidden">
+    <div class="format-58mm font-mono text-xs">
+      <div style="text-align: center; border-bottom: 1px dashed #000; padding-bottom: 6px;">
+        <p style="font-size: 15px; font-weight: 900; margin: 0;">DELICIOUS EATZ</p>
+        <p style="margin: 2px 0 0; font-size: 10px;">Near HDFC Bank, Mansar Road, Budhabarh</p>
+        <p style="margin: 2px 0 0; font-size: 10px;">Ph: 83600-84534, 78889-50664</p>
+      </div>
+
+      <div style="padding: 4px 0; border-bottom: 1px dashed #000; font-size: 11px;">
+        <div style="display: flex; justify-content: space-between;">
+          <span id="pr-invoice">DE-1000</span>
+          <span id="pr-time">12:00</span>
+        </div>
+        <div id="pr-mode" style="margin-top: 2px;">Type: Dine-in (T1)</div>
+        <div id="pr-phone" style="display: none; margin-top: 2px; font-weight: bold;">Contact: -</div>
+      </div>
+
+      <div id="pr-items" style="padding: 6px 0; border-bottom: 1px dashed #000;"></div>
+
+      <div style="padding: 4px 0; border-bottom: 1px dashed #000; font-size: 11px;">
+        <div style="display: flex; justify-content: space-between;">
+          <span>Subtotal:</span><span id="pr-sub">₹0</span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span>Discount:</span><span id="pr-disc">₹0</span>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; padding: 6px 0; border-bottom: 1px dashed #000;">
+        <span>NET AMOUNT:</span>
+        <span id="pr-grand">₹0</span>
+      </div>
+
+      <div style="font-size: 10px; padding-top: 4px; display: flex; justify-content: space-between;">
+        <span>Payment Mode:</span>
+        <span id="pr-pay">Cash</span>
+      </div>
+
+      <p style="text-align: center; font-size: 10px; margin-top: 8px;">*** Thank you! Visit Again ***</p>
+    </div>
+  </div>
+
+  <!-- VARIANT SIZE MODAL -->
+  <div id="size-modal" class="fixed inset-0 bg-black/75 flex items-center justify-center p-3 z-50 hidden">
+    <div class="bg-[#1b1c25] border border-[#2d3040] w-full max-w-xs rounded-xl p-3 shadow-2xl">
+      <div class="flex justify-between items-center mb-2">
+        <h4 id="size-modal-title" class="text-xs font-bold text-white">Select Size</h4>
+        <button onclick="closeSizeModal()" class="text-neutral-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div id="size-modal-options" class="space-y-1.5"></div>
+    </div>
+  </div>
+
+  <script>
+    const MENU_ITEMS = [
+      // 1. Pizza Mania
+      { id: 101, name: 'Onion Pizza', category: '1. Pizza Mania', price_regular: 70 },
+      { id: 102, name: 'Capsicum Pizza', category: '1. Pizza Mania', price_regular: 80 },
+      { id: 103, name: 'Tomato Pizza', category: '1. Pizza Mania', price_regular: 80 },
+      { id: 104, name: 'Mushroom Pizza', category: '1. Pizza Mania', price_regular: 80 },
+      { id: 105, name: 'Corn Pizza', category: '1. Pizza Mania', price_regular: 90 },
+      { id: 106, name: 'Capsicum & Paneer', category: '1. Pizza Mania', price_regular: 110 },
+      { id: 107, name: 'Onion & Paneer', category: '1. Pizza Mania', price_regular: 110 },
+      { id: 108, name: 'Capsicum & Corn', category: '1. Pizza Mania', price_regular: 110 },
+      { id: 109, name: 'Pineapple & Corn', category: '1. Pizza Mania', price_regular: 120 },
+      { id: 110, name: 'Delicious Special (Mania)', category: '1. Pizza Mania', price_regular: 140 },
+
+      // 2. Special Veg Pizza (R/M/L)
+      { id: 201, name: 'Margherita (Double Cheese)', category: '2. Special Veg Pizza', price_regular: 150, price_medium: 300, price_large: 400 },
+      { id: 202, name: 'Cheese & Mushroom', category: '2. Special Veg Pizza', price_regular: 150, price_medium: 300, price_large: 400 },
+      { id: 203, name: 'Cheese & Corn', category: '2. Special Veg Pizza', price_regular: 150, price_medium: 300, price_large: 400 },
+      { id: 204, name: 'Achari Wonder', category: '2. Special Veg Pizza', price_regular: 150, price_medium: 300, price_large: 400 },
+      { id: 205, name: 'Mix Veg Pizza', category: '2. Special Veg Pizza', price_regular: 150, price_medium: 300, price_large: 400 },
+
+      // 1 Veg Pizza (R/M/L)
+      { id: 206, name: 'Makhni Lover Pizza', category: '1 Veg', price_regular: 190, price_medium: 380, price_large: 590 },
+      { id: 207, name: 'Farm House Pizza', category: '1 Veg', price_regular: 190, price_medium: 380, price_large: 590 },
+      { id: 208, name: 'Delicious Pasta Pizza', category: '1 Veg', price_regular: 190, price_medium: 380, price_large: 590 },
+      { id: 209, name: 'Paneer Lover Pizza', category: '1 Veg', price_regular: 190, price_medium: 380, price_large: 590 },
+      { id: 210, name: 'Country House Pizza', category: '1 Veg', price_regular: 190, price_medium: 380, price_large: 590 },
+      { id: 211, name: 'Maxican Green Wave', category: '1 Veg', price_regular: 190, price_medium: 380, price_large: 590 },
+      { id: 212, name: 'Spicy Corn Lover', category: '1 Veg', price_regular: 190, price_medium: 380, price_large: 590 },
+
+      // 2 Veg Pizza (R/M/L)
+      { id: 213, name: 'Delicious Loaded Pizza', category: '2 Veg', price_regular: 250, price_medium: 500, price_large: 630 },
+      { id: 214, name: 'Veg Delight Pizza', category: '2 Veg', price_regular: 250, price_medium: 500, price_large: 630 },
+      { id: 215, name: 'Sweet & Spicy Pizza', category: '2 Veg', price_regular: 250, price_medium: 500, price_large: 630 },
+      { id: 216, name: 'Veggie Fresh Pizza', category: '2 Veg', price_regular: 250, price_medium: 500, price_large: 630 },
+      { id: 217, name: 'Veg Paradise Pizza', category: '2 Veg', price_regular: 250, price_medium: 500, price_large: 630 },
+      { id: 218, name: 'Delicious Supreme', category: '2 Veg', price_regular: 250, price_medium: 500, price_large: 630 },
+
+      // 3 Veg Pizza (R/M/L)
+      { id: 219, name: 'Kadhai Lover Pizza', category: '3 Veg', price_regular: 270, price_medium: 550, price_large: 650 },
+      { id: 220, name: 'Tandoori Paneer Lover', category: '3 Veg', price_regular: 270, price_medium: 550, price_large: 650 },
+      { id: 221, name: 'Achari Lover Pizza', category: '3 Veg', price_regular: 270, price_medium: 550, price_large: 650 },
+      { id: 222, name: 'Delicious Eatz Special Pizza', category: '3 Veg', price_regular: 270, price_medium: 550, price_large: 650 },
+
+      // Burger
+      { id: 301, name: 'Allu Petty Burger', category: 'Burger', price_regular: 40 },
+      { id: 302, name: 'Harb Petty Burger', category: 'Burger', price_regular: 50 },
+      { id: 303, name: 'Spicy Burger', category: 'Burger', price_regular: 60 },
+      { id: 304, name: 'Cheesy Burger', category: 'Burger', price_regular: 70 },
+      { id: 305, name: 'Paneer Burger', category: 'Burger', price_regular: 80 },
+      { id: 306, name: 'Mushroom Burger', category: 'Burger', price_regular: 70 },
+      { id: 307, name: 'Spicy Paneer Burger', category: 'Burger', price_regular: 120 },
+      { id: 308, name: 'Double Petty Burger', category: 'Burger', price_regular: 110 },
+      { id: 309, name: 'Special Burger', category: 'Burger', price_regular: 100 },
+
+      // Sandwich
+      { id: 401, name: 'Grilled Sandwich', category: 'Sandwich', price_regular: 70 },
+      { id: 402, name: 'Spicy Sandwich', category: 'Sandwich', price_regular: 80 },
+      { id: 403, name: 'Mix Veg Sandwich', category: 'Sandwich', price_regular: 100 },
+      { id: 404, name: 'Creamy Sandwich', category: 'Sandwich', price_regular: 90 },
+      { id: 405, name: 'Paneer & Mushroom Sandwich', category: 'Sandwich', price_regular: 100 },
+      { id: 406, name: 'Paneer Sandwich', category: 'Sandwich', price_regular: 100 },
+      { id: 407, name: 'Delicious Spl. Sandwich', category: 'Sandwich', price_regular: 120 },
+
+      // Pasta
+      { id: 501, name: 'Red Pasta', category: 'Pasta', price_regular: 80 },
+      { id: 502, name: 'White Pasta', category: 'Pasta', price_regular: 80 },
+      { id: 503, name: 'Spicy Pasta', category: 'Pasta', price_regular: 100 },
+      { id: 504, name: 'Mix Veg Pasta', category: 'Pasta', price_regular: 100 },
+      { id: 505, name: 'Makhni Pasta', category: 'Pasta', price_regular: 120 },
+      { id: 506, name: 'Cheesy Pasta', category: 'Pasta', price_regular: 90 },
+
+      // Wraps
+      { id: 601, name: 'Mix Veg Wrap', category: 'Wraps', price_regular: 80 },
+      { id: 602, name: 'Allu Tikki Wrap', category: 'Wraps', price_regular: 80 },
+      { id: 603, name: 'Paneer Wrap', category: 'Wraps', price_regular: 100 },
+      { id: 604, name: 'Spicy Paneer Wrap', category: 'Wraps', price_regular: 120 },
+      { id: 605, name: 'Spicy Wrap', category: 'Wraps', price_regular: 80 },
+      { id: 606, name: 'Paneer Mushroom Wrap', category: 'Wraps', price_regular: 100 },
+      { id: 607, name: 'Delicious Special Wrap', category: 'Wraps', price_regular: 140 },
+
+      // Veg Sides (M/L)
+      { id: 701, name: 'French Fries', category: 'Veg Sides', price_regular: 90, price_medium: 90, price_large: 110 },
+      { id: 702, name: 'Peri Peri Fries', category: 'Veg Sides', price_regular: 100, price_medium: 100, price_large: 120 },
+      { id: 703, name: 'Loaded Fries', category: 'Veg Sides', price_regular: 120, price_medium: 120, price_large: 150 },
+      { id: 704, name: 'Garlic Bread', category: 'Veg Sides', price_regular: 100 },
+      { id: 705, name: 'Paneer Garlic Bread', category: 'Veg Sides', price_regular: 120 },
+      { id: 706, name: 'Calazone', category: 'Veg Sides', price_regular: 100 },
+      { id: 707, name: 'Potato Pops', category: 'Veg Sides', price_regular: 80 },
+      { id: 708, name: 'Veg Fingers', category: 'Veg Sides', price_regular: 90 },
+      { id: 709, name: 'Veg Parcel', category: 'Veg Sides', price_regular: 60 },
+      { id: 710, name: 'Paneer Parcel', category: 'Veg Sides', price_regular: 80 },
+      { id: 711, name: 'Mix Veg Parcel', category: 'Veg Sides', price_regular: 100 },
+
+      // Soup & Salad
+      { id: 801, name: 'Mushroom Soup', category: 'Soup & Salad', price_regular: 80 },
+      { id: 802, name: 'Mix Soup', category: 'Soup & Salad', price_regular: 80 },
+      { id: 803, name: 'Corn Soup', category: 'Soup & Salad', price_regular: 70 },
+      { id: 804, name: 'Veg Salad', category: 'Soup & Salad', price_regular: 80, price_medium: 80, price_large: 100 },
+      { id: 805, name: 'Creamy Salad', category: 'Soup & Salad', price_regular: 100, price_medium: 100, price_large: 120 },
+      { id: 806, name: 'Cheesy Salad', category: 'Soup & Salad', price_regular: 110, price_medium: 110, price_large: 140 },
+
+      // Shakes
+      { id: 901, name: 'Vanilla Shake', category: 'Shakes', price_regular: 90 },
+      { id: 902, name: 'Strawberry Shake', category: 'Shakes', price_regular: 90 },
+      { id: 903, name: 'Butterscotch Shake', category: 'Shakes', price_regular: 90 },
+      { id: 904, name: 'Mango Shake', category: 'Shakes', price_regular: 90 },
+      { id: 905, name: 'Choco Shake', category: 'Shakes', price_regular: 90 },
+      { id: 906, name: 'Kit Kat Shake', category: 'Shakes', price_regular: 100 },
+      { id: 907, name: 'Brownie Shake', category: 'Shakes', price_regular: 100 },
+      { id: 908, name: 'Kesar Shake', category: 'Shakes', price_regular: 100 },
+      { id: 909, name: 'Paan Shake', category: 'Shakes', price_regular: 100 },
+      { id: 910, name: 'Bubble Shake', category: 'Shakes', price_regular: 100 },
+      { id: 911, name: 'Black Current Shake', category: 'Shakes', price_regular: 100 },
+      { id: 912, name: 'Oreo Shake', category: 'Shakes', price_regular: 100 },
+
+      // Beverages
+      { id: 1001, name: 'Mint Mojito', category: 'Beverages', price_regular: 90 },
+      { id: 1002, name: 'Mango Mojito', category: 'Beverages', price_regular: 80 },
+      { id: 1003, name: 'Lemon Soda', category: 'Beverages', price_regular: 70 },
+      { id: 1004, name: 'Cold Coffee', category: 'Beverages', price_regular: 90 },
+      { id: 1005, name: 'Hot Coffee', category: 'Beverages', price_regular: 50 },
+
+      // Meals
+      { id: 1101, name: 'Allu Tikki Meal', category: 'Meals', price_regular: 130 },
+      { id: 1102, name: 'Single Meal', category: 'Meals', price_regular: 150 },
+      { id: 1103, name: 'Couple Meal', category: 'Meals', price_regular: 310 },
+      { id: 1104, name: 'Family Meal', category: 'Meals', price_regular: 700 }
+    ];
+
+    const CATEGORIES = ['All', '1. Pizza Mania', '2. Special Veg Pizza', '1 Veg', '2 Veg', '3 Veg', 'Burger', 'Sandwich', 'Pasta', 'Wraps', 'Veg Sides', 'Soup & Salad', 'Shakes', 'Beverages', 'Meals'];
+
+    let cart = {};
+    let activeCategory = 'All';
+    let currentOrderMode = 'Dine-in';
+    let selectedTable = 'T1';
+    let selectedPayment = 'Cash';
+    let orders = JSON.parse(localStorage.getItem('de_petpooja_orders_v3')) || [];
+
+    setInterval(() => {
+      document.getElementById('clock').innerText = new Date().toLocaleTimeString();
+    }, 1000);
+
+    function renderCategories() {
+      const bar = document.getElementById('category-bar');
+      bar.innerHTML = '';
+      CATEGORIES.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.innerText = cat;
+        btn.className = `px-2 py-0.5 rounded font-semibold whitespace-nowrap text-[10px] transition ${
+          cat === activeCategory ? 'bg-red-600 text-white' : 'bg-[#20222d] text-neutral-300 hover:bg-[#282a38]'
+        }`;
+        btn.onclick = () => {
+          activeCategory = cat;
+          renderCategories();
+          renderItems();
+        };
+        bar.appendChild(btn);
+      });
+    }
+
+    function renderItems() {
+      const grid = document.getElementById('items-grid');
+      grid.innerHTML = '';
+      const query = (document.getElementById('item-search').value || '').toLowerCase();
+
+      const items = MENU_ITEMS.filter(it => {
+        const matchesCat = activeCategory === 'All' || it.category === activeCategory;
+        const matchesQuery = it.name.toLowerCase().includes(query);
+        return matchesCat && matchesQuery;
+      });
+
+      items.forEach(it => {
+        const hasSizes = it.price_medium !== undefined;
+        const btn = document.createElement('button');
+        btn.className = 'bg-[#1a1b24] hover:bg-[#222430] border border-[#2b2e3e] active:border-red-500 rounded-lg p-1.5 flex flex-col justify-between text-left h-20 transition';
+        btn.onclick = () => handleItemSelect(it);
+
+        btn.innerHTML = `
+          <div>
+            <span class="text-[7px] font-semibold text-neutral-400 block">${it.category}</span>
+            <p class="text-[10px] font-bold text-white line-clamp-2 leading-tight mt-0.5">${it.name}</p>
+          </div>
+          <div class="flex justify-between items-center w-full mt-1">
+            <span class="font-mono text-[11px] font-bold text-amber-400">₹${it.price_regular}</span>
+            ${hasSizes ? '<span class="text-[7px] px-1 py-0.2 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30 font-semibold">Sizes</span>' : ''}
+          </div>
+        `;
+        grid.appendChild(btn);
+      });
+    }
+
+    function handleItemSelect(item) {
+      if (item.price_medium !== undefined) {
+        document.getElementById('size-modal-title').innerText = item.name;
+        const container = document.getElementById('size-modal-options');
+        container.innerHTML = `
+          <button onclick="addToCart(${item.id}, 'Regular', ${item.price_regular})" class="w-full py-1.5 bg-[#232634] hover:bg-[#2c3042] rounded-lg flex justify-between px-2.5 text-xs font-bold text-white">
+            <span>Regular (R)</span><span class="font-mono text-amber-400">₹${item.price_regular}</span>
+          </button>
+          <button onclick="addToCart(${item.id}, 'Medium', ${item.price_medium})" class="w-full py-1.5 bg-[#232634] hover:bg-[#2c3042] rounded-lg flex justify-between px-2.5 text-xs font-bold text-white">
+            <span>Medium (M)</span><span class="font-mono text-amber-400">₹${item.price_medium}</span>
+          </button>
+          <button onclick="addToCart(${item.id}, 'Large', ${item.price_large})" class="w-full py-1.5 bg-[#232634] hover:bg-[#2c3042] rounded-lg flex justify-between px-2.5 text-xs font-bold text-white">
+            <span>Large (L)</span><span class="font-mono text-amber-400">₹${item.price_large}</span>
+          </button>
+        `;
+        document.getElementById('size-modal').classList.remove('hidden');
+      } else {
+        addToCart(item.id, 'Std', item.price_regular);
+      }
+    }
+
+    function closeSizeModal() {
+      document.getElementById('size-modal').classList.add('hidden');
+    }
+
+    function addToCart(id, variant, price) {
+      const item = MENU_ITEMS.find(i => i.id === id);
+      const key = `${id}_${variant}`;
+      if (cart[key]) {
+        cart[key].qty += 1;
+      } else {
+        cart[key] = { id, name: item.name, variant, price, qty: 1 };
+      }
+      closeSizeModal();
+      renderCart();
+    }
+
+    function updateQty(key, delta) {
+      if (cart[key]) {
+        cart[key].qty += delta;
+        if (cart[key].qty <= 0) delete cart[key];
+      }
+      renderCart();
+    }
+
+    function removeItem(key) {
+      delete cart[key];
+      renderCart();
+    }
+
+    function clearCart() {
+      if (Object.keys(cart).length === 0) return;
+      if (confirm('Clear running order?')) {
+        cart = {};
+        document.getElementById('cart-discount').value = 0;
+        document.getElementById('delivery-phone-input').value = '';
+        renderCart();
+      }
+    }
+
+    function renderCart() {
+      const container = document.getElementById('cart-items-container');
+      container.innerHTML = '';
+      const entries = Object.entries(cart);
+
+      if (entries.length === 0) {
+        container.innerHTML = `
+          <div class="h-28 flex flex-col items-center justify-center text-neutral-600 text-[11px]">
+            <i class="fa-solid fa-receipt text-xl mb-1"></i>
+            <span>No items added</span>
+          </div>
+        `;
+      } else {
+        entries.forEach(([key, it]) => {
+          const row = document.createElement('div');
+          row.className = 'bg-[#15161d] border border-[#262837] rounded p-1.5 flex items-center justify-between text-[11px]';
+          row.innerHTML = `
+            <div class="flex-1 pr-1 truncate">
+              <p class="font-bold text-white truncate text-[10px]">${it.name}</p>
+              <p class="text-[8px] text-neutral-400">${it.variant !== 'Std' ? it.variant + ' · ' : ''}₹${it.price}</p>
+            </div>
+            <div class="flex items-center space-x-1 flex-shrink-0">
+              <button onclick="updateQty('${key}', -1)" class="w-4 h-4 rounded bg-[#20222d] text-white font-bold flex items-center justify-center text-[10px]">-</button>
+              <span class="w-3 text-center font-mono font-bold text-amber-400 text-[10px]">${it.qty}</span>
+              <button onclick="updateQty('${key}', 1)" class="w-4 h-4 rounded bg-[#20222d] text-white font-bold flex items-center justify-center text-[10px]">+</button>
+              <span class="w-9 text-right font-mono font-bold text-white text-[10px]">₹${it.price * it.qty}</span>
+              <button onclick="removeItem('${key}')" class="text-neutral-500 hover:text-red-400 pl-0.5 text-[9px]"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+          `;
+          container.appendChild(row);
+        });
+      }
+
+      recalcCart();
+    }
+
+    function recalcCart() {
+      let sub = 0;
+      Object.values(cart).forEach(it => sub += it.price * it.qty);
+      const disc = Math.min(sub, Math.max(0, parseFloat(document.getElementById('cart-discount').value) || 0));
+      const grand = sub - disc;
+
+      document.getElementById('cart-subtotal').innerText = `₹${sub}`;
+      document.getElementById('cart-grand').innerText = `₹${grand}`;
+      return { sub, disc, grand };
+    }
+
+    function setOrderMode(mode, btn) {
+      currentOrderMode = mode;
+      document.querySelectorAll('.mode-btn').forEach(b => {
+        b.className = 'mode-btn py-1 rounded text-[10px] font-semibold bg-[#20222d] text-neutral-300 truncate';
+      });
+
+      if (mode === 'Dine-in') {
+        btn.className = 'mode-btn py-1 rounded text-[10px] font-bold bg-blue-600 text-white truncate';
+        document.getElementById('table-select-row').classList.remove('hidden');
+        document.getElementById('delivery-phone-wrap').classList.add('hidden');
+      } else if (mode === 'Takeaway') {
+        btn.className = 'mode-btn py-1 rounded text-[10px] font-bold bg-purple-600 text-white truncate';
+        document.getElementById('table-select-row').classList.add('hidden');
+        document.getElementById('delivery-phone-wrap').classList.add('hidden');
+      } else if (mode === 'Delivery') {
+        btn.className = 'mode-btn py-1 rounded text-[10px] font-bold bg-amber-500 text-black truncate';
+        document.getElementById('table-select-row').classList.add('hidden');
+        document.getElementById('delivery-phone-wrap').classList.remove('hidden');
+        document.getElementById('delivery-phone-input').focus();
+      }
+    }
+
+    function setTable(table, btn) {
+      selectedTable = table;
+      document.querySelectorAll('.table-chip').forEach(c => {
+        c.className = 'table-chip px-1.5 py-0.5 rounded bg-[#20222d] text-neutral-300 text-[9px]';
+      });
+      btn.className = 'table-chip px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/40 text-[9px] font-bold';
+    }
+
+    function setPayment(mode, btn) {
+      selectedPayment = mode;
+      document.querySelectorAll('.pay-btn').forEach(b => {
+        b.className = 'pay-btn py-1 rounded text-[9px] font-semibold bg-[#252835] text-neutral-300';
+      });
+      btn.className = 'pay-btn py-1 rounded text-[9px] font-bold bg-amber-500 text-black';
+    }
+
+    function settleBillAndPrint() {
+      const itemsPurchased = Object.values(cart);
+      if (itemsPurchased.length === 0) return alert('Add items to order first!');
+
+      const phone = document.getElementById('delivery-phone-input').value.trim();
+      if (currentOrderMode === 'Delivery' && !phone) {
+        alert('Please enter customer contact number for Delivery!');
+        document.getElementById('delivery-phone-input').focus();
+        return;
+      }
+
+      const { sub, disc, grand } = recalcCart();
+      const invoiceNo = `DE-${Math.floor(1000 + Math.random() * 9000)}`;
+      const timestamp = new Date();
+
+      const record = {
+        invoice_no: invoiceNo,
+        time: timestamp.toISOString(),
+        mode: currentOrderMode,
+        table: currentOrderMode === 'Dine-in' ? selectedTable : null,
+        phone: currentOrderMode === 'Delivery' ? phone : null,
+        items: itemsPurchased,
+        subtotal: sub,
+        discount: disc,
+        grand_total: grand,
+        payment_mode: selectedPayment
+      };
+
+      orders.unshift(record);
+      localStorage.setItem('de_petpooja_orders_v3', JSON.stringify(orders));
+
+      // Receipt population
+      document.getElementById('pr-invoice').innerText = invoiceNo;
+      document.getElementById('pr-time').innerText = timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      document.getElementById('pr-mode').innerText = `Type: ${currentOrderMode}${currentOrderMode === 'Dine-in' ? ' (' + selectedTable + ')' : ''}`;
+      
+      const prPhone = document.getElementById('pr-phone');
+      if (currentOrderMode === 'Delivery' && phone) {
+        prPhone.innerText = `Contact: ${phone}`;
+        prPhone.style.display = 'block';
+      } else {
+        prPhone.style.display = 'none';
+      }
+
+      const prItems = document.getElementById('pr-items');
+      prItems.innerHTML = '';
+      itemsPurchased.forEach(it => {
+        const row = document.createElement('div');
+        row.style.display = 'flex';
+        row.style.justifyContent = 'space-between';
+        row.style.fontSize = '11px';
+        row.innerHTML = `<span>${it.name} ${it.variant !== 'Std' ? '(' + it.variant + ')' : ''} ×${it.qty}</span><span>₹${it.price * it.qty}</span>`;
+        prItems.appendChild(row);
+      });
+
+      document.getElementById('pr-sub').innerText = `₹${sub}`;
+      document.getElementById('pr-disc').innerText = `-₹${disc}`;
+      document.getElementById('pr-grand').innerText = `₹${grand}`;
+      document.getElementById('pr-pay').innerText = `${selectedPayment} (₹${grand})`;
+
+      window.print();
+
+      cart = {};
+      document.getElementById('cart-discount').value = 0;
+      document.getElementById('delivery-phone-input').value = '';
+      renderCart();
+    }
+
+    function switchView(view) {
+      if (view === 'orders') {
+        document.getElementById('view-register').classList.add('hidden');
+        document.getElementById('view-orders').classList.remove('hidden');
+        document.getElementById('btn-back-pos').classList.remove('hidden');
+        renderOrders();
+      } else {
+        document.getElementById('view-orders').classList.add('hidden');
+        document.getElementById('view-register').classList.remove('hidden');
+        document.getElementById('btn-back-pos').classList.add('hidden');
+      }
+    }
+
+    function renderOrders() {
+      const container = document.getElementById('orders-table');
+      container.innerHTML = '';
+      document.getElementById('order-count-badge').innerText = `${orders.length} Bills`;
+
+      if (orders.length === 0) {
+        container.innerHTML = '<p class="text-neutral-500 text-xs py-8 text-center">No settled bills yet.</p>';
+        return;
+      }
+
+      orders.forEach(o => {
+        const card = document.createElement('div');
+        card.className = 'bg-[#1a1b24] border border-[#2a2d3d] p-2.5 rounded-lg flex justify-between items-center text-xs';
+        card.innerHTML = `
+          <div>
+            <div class="flex items-center space-x-1.5">
+              <span class="font-mono font-bold text-white text-[11px]">${o.invoice_no}</span>
+              <span class="px-1.5 py-0.5 rounded text-[9px] bg-amber-500/10 text-amber-400 font-semibold">${o.mode}${o.table ? ' (' + o.table + ')' : ''}</span>
+              <span class="px-1.5 py-0.5 rounded text-[9px] bg-blue-500/10 text-blue-400">${o.payment_mode}</span>
+            </div>
+            <p class="text-neutral-400 text-[9px] mt-0.5">${new Date(o.time).toLocaleString()}</p>
+            ${o.phone ? `<p class="text-emerald-400 text-[10px] font-mono mt-0.5 font-bold"><i class="fa-solid fa-phone mr-1"></i>${o.phone}</p>` : ''}
+          </div>
+          <p class="text-sm font-black font-mono text-emerald-400">₹${o.grand_total}</p>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // Startup
+    renderCategories();
+    renderItems();
+    renderCart();
+  </script>
+</body>
+</html>
