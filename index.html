@@ -24,7 +24,7 @@
         <i class="fa-solid fa-bolt mr-1 text-[10px]"></i> POS
       </div>
       <span class="font-extrabold text-sm tracking-tight text-white">EATZ</span>
-      <span class="text-[10px] text-neutral-400 bg-[#1e293b] px-2 py-0.5 rounded font-mono">DIRECT PRINT & LEDGER</span>
+      <span class="text-[10px] text-neutral-400 bg-[#1e293b] px-2 py-0.5 rounded font-mono">CLOUD SYNC ACTIVE</span>
     </div>
 
     <div class="flex items-center space-x-2">
@@ -148,7 +148,7 @@
     <div class="bg-white rounded-xl shadow-xl overflow-hidden flex flex-col flex-1 border border-neutral-300">
       <div class="p-3 bg-[#0f172a] text-white flex items-center justify-between">
         <div>
-          <h2 class="text-sm font-black uppercase tracking-wider">Sales Ledger & Reports</h2>
+          <h2 class="text-sm font-black uppercase tracking-wider">Sales Ledger & Cloud Sync</h2>
           <p id="sales-report-date-tag" class="text-[11px] text-neutral-400 font-mono">Today</p>
         </div>
 
@@ -370,9 +370,9 @@
 
     const DEFAULT_CATEGORIES = ['1. Pizza Mania', '2. Special Veg Pizza', '1 Veg', '2 Veg', '3 Veg', 'Burger', 'Sandwich', 'Pasta', 'Wraps', 'Veg Sides', 'Soup & Salad', 'Shakes', 'Beverages', 'Meals'];
 
-    let menu = JSON.parse(localStorage.getItem('de_menu_v27')) || DEFAULT_MENU;
-    let orders = JSON.parse(localStorage.getItem('de_petpooja_orders_v27')) || [];
-    let heldOrders = JSON.parse(localStorage.getItem('de_held_orders_v27')) || [];
+    let menu = JSON.parse(localStorage.getItem('de_menu_v28')) || DEFAULT_MENU;
+    let orders = JSON.parse(localStorage.getItem('de_petpooja_orders_v28')) || [];
+    let heldOrders = JSON.parse(localStorage.getItem('de_held_orders_v28')) || [];
     let cart = {};
     let activeCategory = 'All';
     let currentOrderMode = 'Dine In';
@@ -383,9 +383,9 @@
     let activeResumedHoldId = null;
 
     function saveState() {
-      localStorage.setItem('de_menu_v27', JSON.stringify(menu));
-      localStorage.setItem('de_petpooja_orders_v27', JSON.stringify(orders));
-      localStorage.setItem('de_held_orders_v27', JSON.stringify(heldOrders));
+      localStorage.setItem('de_menu_v28', JSON.stringify(menu));
+      localStorage.setItem('de_petpooja_orders_v28', JSON.stringify(orders));
+      localStorage.setItem('de_held_orders_v28', JSON.stringify(heldOrders));
       updateHeldBadge();
       renderTableCards();
     }
@@ -884,7 +884,7 @@
       });
     }
 
-    // CLOUD SYNC & FETCH
+    // CLOUD SYNC & AUTO-FETCH ON BOOT
     function syncToCloud(record) {
       const payload = {
         data: {
@@ -928,7 +928,9 @@
             });
 
             saveState();
-            renderSalesReport();
+            if (!document.getElementById('view-sales').classList.contains('hidden')) {
+              renderSalesReport();
+            }
           }
         })
         .catch(err => console.error('Cloud Fetch Error:', err));
@@ -1408,6 +1410,8 @@
       if (view === 'menu') renderMenuEditor();
     }
 
+    // Automatically pull cloud records right on app launch
+    fetchCloudSales();
     renderTableCards();
     renderCategories();
     renderItems();
