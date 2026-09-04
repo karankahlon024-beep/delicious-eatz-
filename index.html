@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Delicious Eatz - Petpooja POS</title>
+  <title>Delicious Eatz POS</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
   <style>
@@ -22,33 +22,6 @@
     .brand-red { background-color: #e53935; }
     .brand-red-hover:hover { background-color: #d32f2f; }
     .brand-blue { background-color: #1976d2; }
-
-    @media print {
-      @page {
-        size: landscape;
-        margin: 4mm;
-      }
-      body * { visibility: hidden !important; }
-      #printable-receipt, #printable-receipt * { visibility: visible !important; }
-      #printable-receipt {
-        display: block !important;
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100% !important;
-        max-width: 140mm;
-        margin: 0 !important;
-        padding: 4mm !important;
-        box-shadow: none !important;
-        background: #fff !important;
-        color: #000 !important;
-      }
-      .receipt-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 8mm;
-      }
-    }
   </style>
 </head>
 <body class="h-screen w-screen overflow-hidden flex flex-col">
@@ -58,11 +31,8 @@
     <div class="flex items-center space-x-1.5">
       <span class="px-1.5 py-0.5 rounded brand-red font-bold text-[9px] text-white">POS</span>
       <span class="font-black tracking-wider text-[11px] text-white">DELICIOUS EATZ</span>
-      <span class="text-neutral-500 text-[10px]">|</span>
-      <span class="text-neutral-400 text-[10px]">Budhabarh</span>
     </div>
 
-    <!-- Navigation Action Buttons -->
     <div class="flex items-center space-x-1.5 font-mono text-neutral-300 text-[10px]">
       <button onclick="switchView('held')" id="btn-held-count" class="px-2 py-0.5 bg-[#252836] hover:bg-[#323648] border border-amber-500/50 rounded text-amber-400 font-sans font-semibold">
         <i class="fa-solid fa-pause mr-0.5"></i> Held (<span id="held-count-badge">0</span>)
@@ -79,52 +49,42 @@
     </div>
   </header>
 
-  <!-- 1. MAIN TERMINAL (REGISTER) -->
+  <!-- 1. MAIN TERMINAL -->
   <main id="view-register" class="flex-1 flex flex-row overflow-hidden">
     
     <!-- LEFT PANEL: ITEMS & CATEGORIES -->
     <section class="w-[58%] sm:w-[60%] flex flex-col overflow-hidden bg-[#121319] border-r border-[#2a2d3d]">
-      <!-- Search -->
       <div class="p-1.5 border-b border-[#2a2d3d] bg-[#181922] flex items-center space-x-1.5 flex-shrink-0">
         <div class="relative flex-1">
           <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2 text-[10px] text-neutral-400"></i>
           <input id="item-search" type="text" placeholder="Search menu..." oninput="renderItems()" class="w-full pl-7 pr-2 py-1 bg-[#20222d] border border-neutral-700 rounded-md text-[11px] text-white focus:outline-none focus:border-red-500" />
         </div>
       </div>
-
-      <!-- Categories Ribbon -->
       <div id="category-bar" class="flex items-center space-x-1 p-1.5 bg-[#15161f] border-b border-[#2a2d3d] overflow-x-auto no-scrollbar text-xs flex-shrink-0"></div>
-
-      <!-- Food Items Grid -->
       <div id="items-grid" class="flex-1 overflow-y-auto p-1.5 grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1.5 content-start no-scrollbar"></div>
     </section>
 
-    <!-- RIGHT PANEL: BILL / TICKET (ALL ACTIONS ON TOP) -->
+    <!-- RIGHT PANEL: CHECKOUT CONTROLS -->
     <section class="w-[42%] sm:w-[40%] bg-[#1a1b23] flex flex-col overflow-hidden flex-shrink-0">
-      
-      <!-- TOP ACTION BLOCK: VISIBLE IN UPPER SCREEN -->
       <div class="p-1.5 bg-[#14151b] border-b border-[#2a2d3d] text-xs flex-shrink-0 space-y-1.5 shadow-md">
         
-        <!-- Type & Table Row -->
         <div class="flex items-center justify-between">
           <div class="grid grid-cols-3 gap-1 flex-1 mr-2">
-            <button onclick="setOrderMode('Dine-in', this)" class="mode-btn py-0.5 rounded text-[9px] font-bold bg-blue-600 text-white truncate">Dine</button>
+            <button onclick="setOrderMode('Dine In', this)" class="mode-btn py-0.5 rounded text-[9px] font-bold bg-blue-600 text-white truncate">Dine</button>
             <button onclick="setOrderMode('Takeaway', this)" class="mode-btn py-0.5 rounded text-[9px] font-semibold bg-[#20222d] text-neutral-300 truncate">Away</button>
             <button onclick="setOrderMode('Delivery', this)" class="mode-btn py-0.5 rounded text-[9px] font-semibold bg-[#20222d] text-amber-400 truncate">Deliv</button>
           </div>
-          <span id="current-invoice-tag" class="font-mono text-neutral-400 text-[9px]">#DE-PENDING</span>
+          <span id="current-invoice-tag" class="font-mono text-neutral-400 text-[9px]">#PENDING</span>
         </div>
 
-        <!-- Table selection -->
         <div id="table-select-row" class="flex items-center space-x-1 overflow-x-auto no-scrollbar">
-          <button onclick="setTable('T1', this)" class="table-chip px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/40 text-[9px] font-bold">T1</button>
-          <button onclick="setTable('T2', this)" class="table-chip px-1.5 py-0.5 rounded bg-[#20222d] text-neutral-300 text-[9px]">T2</button>
-          <button onclick="setTable('T3', this)" class="table-chip px-1.5 py-0.5 rounded bg-[#20222d] text-neutral-300 text-[9px]">T3</button>
-          <button onclick="setTable('T4', this)" class="table-chip px-1.5 py-0.5 rounded bg-[#20222d] text-neutral-300 text-[9px]">T4</button>
-          <button onclick="setTable('T5', this)" class="table-chip px-1.5 py-0.5 rounded bg-[#20222d] text-neutral-300 text-[9px]">T5</button>
+          <button onclick="setTable('1', this)" class="table-chip px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/40 text-[9px] font-bold">1</button>
+          <button onclick="setTable('2', this)" class="table-chip px-1.5 py-0.5 rounded bg-[#20222d] text-neutral-300 text-[9px]">2</button>
+          <button onclick="setTable('3', this)" class="table-chip px-1.5 py-0.5 rounded bg-[#20222d] text-neutral-300 text-[9px]">3</button>
+          <button onclick="setTable('4', this)" class="table-chip px-1.5 py-0.5 rounded bg-[#20222d] text-neutral-300 text-[9px]">4</button>
+          <button onclick="setTable('5', this)" class="table-chip px-1.5 py-0.5 rounded bg-[#20222d] text-neutral-300 text-[9px]">5</button>
         </div>
 
-        <!-- Delivery Phone Input -->
         <div id="delivery-phone-wrap" class="hidden">
           <div class="flex items-center bg-[#20222c] border border-amber-500 rounded px-1.5 py-0.5">
             <i class="fa-solid fa-phone text-amber-400 text-[9px] mr-1"></i>
@@ -133,15 +93,22 @@
         </div>
 
         <!-- Totals Line -->
-        <div class="bg-[#1b1d28] p-1.5 rounded border border-[#2b2e3e] flex items-center justify-between text-[10px]">
-          <div class="flex items-center space-x-2">
+        <div class="bg-[#1b1d28] p-1.5 rounded border border-[#2b2e3e] flex flex-col space-y-0.5 text-[10px]">
+          <div class="flex items-center justify-between">
             <span class="text-neutral-400">Sub: <strong id="cart-subtotal" class="text-white font-mono">₹0</strong></span>
-            <span class="text-neutral-400">Disc:</span>
-            <input id="cart-discount" type="number" value="0" min="0" oninput="recalcCart()" class="w-10 bg-[#121319] border border-neutral-700 rounded px-1 text-right text-amber-400 font-mono text-[9px]" />
+            <div class="flex items-center space-x-1">
+              <span class="text-neutral-400">Disc:</span>
+              <input id="cart-discount" type="number" value="0" min="0" oninput="recalcCart()" class="w-10 bg-[#121319] border border-neutral-700 rounded px-1 text-right text-amber-400 font-mono text-[9px]" />
+            </div>
+            <div class="text-right">
+              <span class="text-[9px] text-neutral-400">Net:</span>
+              <span id="cart-grand" class="text-emerald-400 font-mono font-black text-sm ml-1">₹0</span>
+            </div>
           </div>
-          <div class="text-right">
-            <span class="text-[9px] text-neutral-400 mr-1">Net:</span>
-            <span id="cart-grand" class="text-emerald-400 font-mono font-black text-sm">₹0</span>
+          <!-- BOGO line -->
+          <div id="bogo-applied-info" class="hidden text-emerald-400 text-[9px] font-bold flex justify-between border-t border-neutral-700/60 pt-0.5">
+            <span><i class="fa-solid fa-tag mr-0.5"></i> BOGO Free Item:</span>
+            <span id="bogo-discount-amount" class="font-mono">-₹0</span>
           </div>
         </div>
 
@@ -152,15 +119,18 @@
           <button onclick="setPayment('Card', this)" class="pay-btn py-1 rounded text-[9px] font-semibold bg-[#252835] text-neutral-300">Card</button>
         </div>
 
-        <!-- Action Buttons: Hold, Clear, Settle -->
-        <div class="grid grid-cols-3 gap-1">
-          <button onclick="holdCurrentCart()" class="py-1.5 rounded bg-amber-600 hover:bg-amber-500 text-black text-[10px] font-bold tracking-wide">
+        <!-- Action Row -->
+        <div class="grid grid-cols-4 gap-1">
+          <button id="btn-bogo-toggle" onclick="toggleBogo()" class="py-1.5 rounded bg-[#20222d] text-neutral-300 hover:bg-[#2a2d3c] border border-neutral-700 text-[10px] font-bold tracking-tight">
+            <i class="fa-solid fa-gift mr-0.5 text-amber-400"></i> BOGO
+          </button>
+          <button onclick="holdCurrentCart()" class="py-1.5 rounded bg-amber-600 hover:bg-amber-500 text-black text-[10px] font-bold tracking-tight">
             <i class="fa-solid fa-pause mr-0.5"></i> Hold
           </button>
-          <button onclick="clearCart()" class="py-1.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-[10px] font-bold">
+          <button onclick="clearCart()" class="py-1.5 rounded bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-[10px] font-bold tracking-tight">
             <i class="fa-solid fa-trash-can mr-0.5 text-red-400"></i> Clear
           </button>
-          <button onclick="settleBillAndPrint()" class="py-1.5 rounded brand-red brand-red-hover text-white text-[10px] font-bold tracking-wide shadow-lg">
+          <button onclick="settleBillAndPrint()" class="py-1.5 rounded brand-red brand-red-hover text-white text-[10px] font-bold tracking-tight shadow-lg">
             <i class="fa-solid fa-print mr-0.5"></i> Settle
           </button>
         </div>
@@ -175,7 +145,7 @@
   <main id="view-held" class="flex-1 overflow-y-auto p-3 bg-[#121319] hidden pb-16">
     <div class="max-w-xl mx-auto space-y-3">
       <div class="flex justify-between items-center">
-        <h2 class="text-xs font-bold text-white"><i class="fa-solid fa-pause text-amber-400 mr-1.5"></i> Held / Parked Orders</h2>
+        <h2 class="text-xs font-bold text-white"><i class="fa-solid fa-pause text-amber-400 mr-1.5"></i> Held Orders</h2>
         <span id="held-total-badge" class="px-2 py-0.5 rounded bg-[#20222d] border border-neutral-700 text-[10px] text-neutral-300 font-mono">0 Held</span>
       </div>
       <div id="held-orders-list" class="space-y-1.5"></div>
@@ -189,60 +159,55 @@
         <h2 class="text-xs font-bold text-white"><i class="fa-solid fa-pen-to-square text-amber-400 mr-1.5"></i> Menu Manager</h2>
         <div class="flex space-x-1.5">
           <button onclick="toggleAddForm()" class="px-2 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-[10px] text-white font-bold">
-            <i class="fa-solid fa-plus mr-0.5"></i> Add New Item
+            <i class="fa-solid fa-plus mr-0.5"></i> Add New
           </button>
           <button onclick="resetMenuToOriginal()" class="px-2 py-1 rounded bg-neutral-800 text-[10px] text-amber-400 border border-neutral-700">
-            Reset Defaults
+            Reset
           </button>
         </div>
       </div>
 
       <div id="add-item-card" class="bg-[#1b1c26] border border-emerald-500/40 p-2.5 rounded-xl hidden space-y-2">
-        <h3 class="text-xs font-bold text-emerald-400"><i class="fa-solid fa-utensils mr-1"></i> Add Custom Food Item</h3>
+        <h3 class="text-xs font-bold text-emerald-400">Add Item</h3>
         <div class="space-y-1.5">
           <div>
             <label class="text-[9px] text-neutral-400 block mb-0.5">Item Name</label>
-            <input id="new-item-name" type="text" placeholder="e.g. Cheese Garlic Bread" class="w-full bg-[#13141a] border border-neutral-700 rounded p-1.5 text-xs text-white focus:outline-none focus:border-emerald-500" />
+            <input id="new-item-name" type="text" class="w-full bg-[#13141a] border border-neutral-700 rounded p-1.5 text-xs text-white focus:outline-none" />
           </div>
-
           <div class="grid grid-cols-2 gap-2">
             <div>
               <label class="text-[9px] text-neutral-400 block mb-0.5">Category</label>
-              <select id="new-item-category" class="w-full bg-[#13141a] border border-neutral-700 rounded p-1.5 text-[11px] text-white focus:outline-none focus:border-emerald-500">
-              </select>
+              <select id="new-item-category" class="w-full bg-[#13141a] border border-neutral-700 rounded p-1.5 text-[11px] text-white"></select>
             </div>
             <div>
               <label class="text-[9px] text-neutral-400 block mb-0.5">Pricing Type</label>
-              <select id="new-item-type" onchange="toggleSizeInputs(this.value)" class="w-full bg-[#13141a] border border-neutral-700 rounded p-1.5 text-[11px] text-white focus:outline-none focus:border-emerald-500">
+              <select id="new-item-type" onchange="toggleSizeInputs(this.value)" class="w-full bg-[#13141a] border border-neutral-700 rounded p-1.5 text-[11px] text-white">
                 <option value="single">Single Price</option>
-                <option value="sizes">Sizes (Regular / Med / Large)</option>
+                <option value="sizes">Sizes (R/M/L)</option>
               </select>
             </div>
           </div>
-
           <div id="new-single-price-wrap">
             <label class="text-[9px] text-neutral-400 block mb-0.5">Price (₹)</label>
-            <input id="new-item-price" type="number" placeholder="₹ Amount" class="w-full bg-[#13141a] border border-neutral-700 rounded p-1.5 text-xs text-white font-mono focus:outline-none focus:border-emerald-500" />
+            <input id="new-item-price" type="number" class="w-full bg-[#13141a] border border-neutral-700 rounded p-1.5 text-xs text-white font-mono" />
           </div>
-
           <div id="new-sizes-price-wrap" class="hidden grid grid-cols-3 gap-1.5">
             <div>
-              <label class="text-[9px] text-neutral-400 block mb-0.5">Regular (₹)</label>
-              <input id="new-item-price-reg" type="number" placeholder="₹" class="w-full bg-[#13141a] border border-neutral-700 rounded p-1.5 text-xs text-white font-mono focus:outline-none focus:border-emerald-500" />
+              <label class="text-[9px] text-neutral-400 block mb-0.5">Regular</label>
+              <input id="new-item-price-reg" type="number" class="w-full bg-[#13141a] border border-neutral-700 rounded p-1 text-xs text-white font-mono" />
             </div>
             <div>
-              <label class="text-[9px] text-neutral-400 block mb-0.5">Medium (₹)</label>
-              <input id="new-item-price-med" type="number" placeholder="₹" class="w-full bg-[#13141a] border border-neutral-700 rounded p-1.5 text-xs text-white font-mono focus:outline-none focus:border-emerald-500" />
+              <label class="text-[9px] text-neutral-400 block mb-0.5">Medium</label>
+              <input id="new-item-price-med" type="number" class="w-full bg-[#13141a] border border-neutral-700 rounded p-1 text-xs text-white font-mono" />
             </div>
             <div>
-              <label class="text-[9px] text-neutral-400 block mb-0.5">Large (₹)</label>
-              <input id="new-item-price-lrg" type="number" placeholder="₹" class="w-full bg-[#13141a] border border-neutral-700 rounded p-1.5 text-xs text-white font-mono focus:outline-none focus:border-emerald-500" />
+              <label class="text-[9px] text-neutral-400 block mb-0.5">Large</label>
+              <input id="new-item-price-lrg" type="number" class="w-full bg-[#13141a] border border-neutral-700 rounded p-1 text-xs text-white font-mono" />
             </div>
           </div>
-
           <div class="flex justify-end space-x-1.5 pt-1">
-            <button onclick="toggleAddForm()" class="px-2.5 py-1 bg-neutral-700 hover:bg-neutral-600 rounded text-[10px] text-neutral-200">Cancel</button>
-            <button onclick="saveNewItem()" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 rounded text-[10px] text-white font-bold">Save Item</button>
+            <button onclick="toggleAddForm()" class="px-2.5 py-1 bg-neutral-700 rounded text-[10px] text-neutral-200">Cancel</button>
+            <button onclick="saveNewItem()" class="px-3 py-1 bg-emerald-600 rounded text-[10px] text-white font-bold">Save</button>
           </div>
         </div>
       </div>
@@ -251,52 +216,16 @@
     </div>
   </main>
 
-  <!-- 4. ORDERS HISTORY VIEW -->
+  <!-- 4. ORDERS VIEW -->
   <main id="view-orders" class="flex-1 overflow-y-auto p-3 bg-[#121319] hidden">
     <div class="max-w-xl mx-auto">
       <div class="flex justify-between items-center mb-3">
-        <h2 class="text-xs font-bold text-white"><i class="fa-solid fa-list-check text-amber-400 mr-1.5"></i> Cleared Bills Record</h2>
+        <h2 class="text-xs font-bold text-white"><i class="fa-solid fa-list-check text-amber-400 mr-1.5"></i> Cleared Bills</h2>
         <span id="order-count-badge" class="px-2 py-0.5 rounded bg-[#20222d] border border-neutral-700 text-[10px] text-neutral-300 font-mono">0 Orders</span>
       </div>
       <div id="orders-table" class="space-y-1.5"></div>
     </div>
   </main>
-
-  <!-- THERMAL RECEIPT (DESIGNED FOR HORIZONTAL / TOP PREVIEW) -->
-  <div id="printable-receipt" class="hidden">
-    <div class="font-mono text-xs" style="width: 100%; border: 1px dashed #000; padding: 8px;">
-      <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #000; padding-bottom: 4px;">
-        <div>
-          <span style="font-size: 14px; font-weight: 900;">DELICIOUS EATZ</span>
-          <div style="font-size: 9px;">Near HDFC Bank, Mansar Road, Budhabarh</div>
-          <div style="font-size: 9px;">Ph: 83600-84534, 78889-50664</div>
-        </div>
-        <div style="text-align: right; font-size: 10px;">
-          <div id="pr-invoice" style="font-weight: bold;">DE-1000</div>
-          <div id="pr-time">12:00</div>
-          <div id="pr-mode">Type: Dine-in</div>
-          <div id="pr-phone" style="display: none; font-weight: bold;"></div>
-        </div>
-      </div>
-
-      <div id="pr-items" style="padding: 4px 0; border-bottom: 1px dashed #000; font-size: 11px;"></div>
-
-      <div style="display: flex; justify-content: space-between; padding-top: 4px; font-size: 11px;">
-        <div>
-          <span>Subtotal: <b id="pr-sub">₹0</b></span> |
-          <span>Disc: <b id="pr-disc">₹0</b></span>
-        </div>
-        <div>
-          <span style="font-size: 13px; font-weight: 900;">NET: <span id="pr-grand" style="font-size: 14px;">₹0</span></span>
-          <span id="pr-pay" style="font-size: 10px; margin-left: 8px;">(Cash)</span>
-        </div>
-      </div>
-
-      <div style="text-align: center; font-size: 9px; margin-top: 4px; border-top: 1px dashed #000; padding-top: 2px;">
-        *** Thank you! Visit Again ***
-      </div>
-    </div>
-  </div>
 
   <!-- VARIANT SIZE MODAL -->
   <div id="size-modal" class="fixed inset-0 bg-black/75 flex items-center justify-center p-3 z-50 hidden">
@@ -372,7 +301,7 @@
       { id: 605, name: 'Spicy Wrap', category: 'Wraps', price_regular: 80, available: true },
       { id: 606, name: 'Paneer Mushroom Wrap', category: 'Wraps', price_regular: 100, available: true },
       { id: 607, name: 'Delicious Special Wrap', category: 'Wraps', price_regular: 140, available: true },
-      { id: 701, name: 'French Fries', category: 'Veg Sides', price_regular: 90, price_medium: 90, price_large: 110, available: true },
+      { id: 701, name: 'Fries', category: 'Veg Sides', price_regular: 90, price_medium: 90, price_large: 110, available: true },
       { id: 702, name: 'Peri Peri Fries', category: 'Veg Sides', price_regular: 100, price_medium: 100, price_large: 120, available: true },
       { id: 703, name: 'Loaded Fries', category: 'Veg Sides', price_regular: 120, price_medium: 120, price_large: 150, available: true },
       { id: 704, name: 'Garlic Bread', category: 'Veg Sides', price_regular: 100, available: true },
@@ -389,8 +318,8 @@
       { id: 804, name: 'Veg Salad', category: 'Soup & Salad', price_regular: 80, price_medium: 80, price_large: 100, available: true },
       { id: 805, name: 'Creamy Salad', category: 'Soup & Salad', price_regular: 100, price_medium: 100, price_large: 120, available: true },
       { id: 806, name: 'Cheesy Salad', category: 'Soup & Salad', price_regular: 110, price_medium: 110, price_large: 140, available: true },
-      { id: 901, name: 'Vanilla Shake', category: 'Shakes', price_regular: 90, available: true },
-      { id: 902, name: 'Strawberry Shake', category: 'Shakes', price_regular: 90, available: true },
+      { id: 901, name: 'Strawberry Shake', category: 'Shakes', price_regular: 90, available: true },
+      { id: 902, name: 'Vanilla Shake', category: 'Shakes', price_regular: 90, available: true },
       { id: 903, name: 'Butterscotch Shake', category: 'Shakes', price_regular: 90, available: true },
       { id: 904, name: 'Mango Shake', category: 'Shakes', price_regular: 90, available: true },
       { id: 905, name: 'Choco Shake', category: 'Shakes', price_regular: 90, available: true },
@@ -414,19 +343,20 @@
 
     const DEFAULT_CATEGORIES = ['1. Pizza Mania', '2. Special Veg Pizza', '1 Veg', '2 Veg', '3 Veg', 'Burger', 'Sandwich', 'Pasta', 'Wraps', 'Veg Sides', 'Soup & Salad', 'Shakes', 'Beverages', 'Meals'];
 
-    let menu = JSON.parse(localStorage.getItem('de_menu_v8')) || DEFAULT_MENU;
-    let orders = JSON.parse(localStorage.getItem('de_petpooja_orders_v8')) || [];
-    let heldOrders = JSON.parse(localStorage.getItem('de_held_orders_v8')) || [];
+    let menu = JSON.parse(localStorage.getItem('de_menu_v12')) || DEFAULT_MENU;
+    let orders = JSON.parse(localStorage.getItem('de_petpooja_orders_v12')) || [];
+    let heldOrders = JSON.parse(localStorage.getItem('de_held_orders_v12')) || [];
     let cart = {};
     let activeCategory = 'All';
-    let currentOrderMode = 'Dine-in';
-    let selectedTable = 'T1';
+    let currentOrderMode = 'Dine In';
+    let selectedTable = '1';
     let selectedPayment = 'Cash';
+    let isBogoActive = false;
 
     function saveState() {
-      localStorage.setItem('de_menu_v8', JSON.stringify(menu));
-      localStorage.setItem('de_petpooja_orders_v8', JSON.stringify(orders));
-      localStorage.setItem('de_held_orders_v8', JSON.stringify(heldOrders));
+      localStorage.setItem('de_menu_v12', JSON.stringify(menu));
+      localStorage.setItem('de_petpooja_orders_v12', JSON.stringify(orders));
+      localStorage.setItem('de_held_orders_v12', JSON.stringify(heldOrders));
       updateHeldBadge();
     }
 
@@ -443,8 +373,21 @@
       }
     }
 
+    function toggleBogo() {
+      isBogoActive = !isBogoActive;
+      const btn = document.getElementById('btn-bogo-toggle');
+      if (isBogoActive) {
+        btn.classList.remove('bg-[#20222d]', 'text-neutral-300', 'border-neutral-700');
+        btn.classList.add('bg-emerald-600', 'text-white', 'border-emerald-400');
+      } else {
+        btn.classList.add('bg-[#20222d]', 'text-neutral-300', 'border-neutral-700');
+        btn.classList.remove('bg-emerald-600', 'text-white', 'border-emerald-400');
+      }
+      recalcCart();
+    }
+
     function resetMenuToOriginal() {
-      if (confirm('Reset all items back to standard factory prices and menu?')) {
+      if (confirm('Reset all items back to standard prices?')) {
         menu = JSON.parse(JSON.stringify(DEFAULT_MENU));
         saveState();
         renderCategories();
@@ -515,14 +458,14 @@
         document.getElementById('size-modal-title').innerText = item.name;
         const container = document.getElementById('size-modal-options');
         container.innerHTML = `
-          <button onclick="addToCart(${item.id}, 'Regular', ${item.price_regular})" class="w-full py-1.5 bg-[#232634] hover:bg-[#2c3042] rounded-lg flex justify-between px-2.5 text-xs font-bold text-white">
-            <span>Regular (R)</span><span class="font-mono text-amber-400">₹${item.price_regular}</span>
+          <button onclick="addToCart(${item.id}, 'r', ${item.price_regular})" class="w-full py-1.5 bg-[#232634] hover:bg-[#2c3042] rounded-lg flex justify-between px-2.5 text-xs font-bold text-white">
+            <span>Regular (r)</span><span class="font-mono text-amber-400">₹${item.price_regular}</span>
           </button>
-          <button onclick="addToCart(${item.id}, 'Medium', ${item.price_medium})" class="w-full py-1.5 bg-[#232634] hover:bg-[#2c3042] rounded-lg flex justify-between px-2.5 text-xs font-bold text-white">
-            <span>Medium (M)</span><span class="font-mono text-amber-400">₹${item.price_medium}</span>
+          <button onclick="addToCart(${item.id}, 'm', ${item.price_medium})" class="w-full py-1.5 bg-[#232634] hover:bg-[#2c3042] rounded-lg flex justify-between px-2.5 text-xs font-bold text-white">
+            <span>Medium (m)</span><span class="font-mono text-amber-400">₹${item.price_medium}</span>
           </button>
-          <button onclick="addToCart(${item.id}, 'Large', ${item.price_large})" class="w-full py-1.5 bg-[#232634] hover:bg-[#2c3042] rounded-lg flex justify-between px-2.5 text-xs font-bold text-white">
-            <span>Large (L)</span><span class="font-mono text-amber-400">₹${item.price_large}</span>
+          <button onclick="addToCart(${item.id}, 'l', ${item.price_large})" class="w-full py-1.5 bg-[#232634] hover:bg-[#2c3042] rounded-lg flex justify-between px-2.5 text-xs font-bold text-white">
+            <span>Large (l)</span><span class="font-mono text-amber-400">₹${item.price_large}</span>
           </button>
         `;
         document.getElementById('size-modal').classList.remove('hidden');
@@ -541,7 +484,7 @@
       if (cart[key]) {
         cart[key].qty += 1;
       } else {
-        cart[key] = { id, name: item.name, variant, price, qty: 1 };
+        cart[key] = { id, name: item.name, category: item.category, variant, price, qty: 1 };
       }
       closeSizeModal();
       renderCart();
@@ -562,32 +505,33 @@
 
     function clearCart() {
       if (Object.keys(cart).length === 0) return;
-      if (confirm('Clear running order?')) {
-        resetCartFields();
-      }
+      if (confirm('Clear running order?')) resetCartFields();
     }
 
     function resetCartFields() {
       cart = {};
       document.getElementById('cart-discount').value = 0;
       document.getElementById('delivery-phone-input').value = '';
+      if (isBogoActive) toggleBogo();
       renderCart();
     }
 
     function holdCurrentCart() {
       const itemsInCart = Object.values(cart);
-      if (itemsInCart.length === 0) return alert('Cart is empty. Add items before putting on hold.');
+      if (itemsInCart.length === 0) return alert('Cart is empty.');
 
-      const { sub, disc, grand } = recalcCart();
+      const { sub, disc, bogoDiscount, grand } = recalcCart();
       const phone = document.getElementById('delivery-phone-input').value.trim();
 
       const heldEntry = {
         hold_id: `HOLD-${Date.now().toString().slice(-4)}`,
         timestamp: new Date().toISOString(),
         mode: currentOrderMode,
-        table: currentOrderMode === 'Dine-in' ? selectedTable : null,
+        table: currentOrderMode === 'Dine In' ? selectedTable : null,
         phone: phone || null,
         cart: JSON.parse(JSON.stringify(cart)),
+        isBogoActive: isBogoActive,
+        bogoDiscount: bogoDiscount,
         discount: disc,
         grand: grand
       };
@@ -602,30 +546,13 @@
       const idx = heldOrders.findIndex(h => h.hold_id === holdId);
       if (idx === -1) return;
 
-      if (Object.keys(cart).length > 0) {
-        if (!confirm('Current cart has items. Overwrite with resumed order?')) return;
-      }
-
       const target = heldOrders[idx];
       cart = JSON.parse(JSON.stringify(target.cart));
       document.getElementById('cart-discount').value = target.discount || 0;
-      if (target.phone) {
-        document.getElementById('delivery-phone-input').value = target.phone;
-      }
-
-      if (target.mode === 'Dine-in') {
-        const btn = Array.from(document.querySelectorAll('.mode-btn')).find(b => b.innerText.includes('Dine'));
-        if (btn) setOrderMode('Dine-in', btn);
-        if (target.table) {
-          const tBtn = Array.from(document.querySelectorAll('.table-chip')).find(b => b.innerText === target.table);
-          if (tBtn) setTable(target.table, tBtn);
-        }
-      } else if (target.mode === 'Takeaway') {
-        const btn = Array.from(document.querySelectorAll('.mode-btn')).find(b => b.innerText.includes('Away'));
-        if (btn) setOrderMode('Takeaway', btn);
-      } else if (target.mode === 'Delivery') {
-        const btn = Array.from(document.querySelectorAll('.mode-btn')).find(b => b.innerText.includes('Deliv'));
-        if (btn) setOrderMode('Delivery', btn);
+      if (target.phone) document.getElementById('delivery-phone-input').value = target.phone;
+      
+      if (target.isBogoActive !== isBogoActive) {
+        toggleBogo();
       }
 
       heldOrders.splice(idx, 1);
@@ -635,7 +562,7 @@
     }
 
     function deleteHeldOrder(holdId) {
-      if (confirm('Delete this held order permanently?')) {
+      if (confirm('Delete this held order?')) {
         heldOrders = heldOrders.filter(h => h.hold_id !== holdId);
         saveState();
         renderHeldOrders();
@@ -661,8 +588,8 @@
           <div class="flex-1 pr-2">
             <div class="flex items-center space-x-1.5">
               <span class="font-mono font-bold text-amber-400 text-[11px]">${h.hold_id}</span>
-              <span class="px-1.5 py-0.5 rounded text-[9px] bg-[#222432] text-neutral-300 font-semibold">${h.mode}${h.table ? ' (' + h.table + ')' : ''}</span>
-              <span class="text-neutral-400 text-[9px]">${new Date(h.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+              <span class="px-1.5 py-0.5 rounded text-[9px] bg-[#222432] text-neutral-300 font-semibold">${h.mode}</span>
+              ${h.isBogoActive ? '<span class="px-1 py-0.2 rounded text-[8px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold">BOGO</span>' : ''}
             </div>
             <p class="text-[10px] text-neutral-300 line-clamp-1 mt-0.5">${summaryItems}</p>
             <p class="font-mono font-bold text-emerald-400 text-xs mt-1">₹${h.grand}</p>
@@ -690,12 +617,16 @@
         `;
       } else {
         entries.forEach(([key, it]) => {
+          const isEligibleBogo = ['1 Veg', '2 Veg', '3 Veg'].includes(it.category) && (it.variant === 'm' || it.variant === 'l');
           const row = document.createElement('div');
           row.className = 'bg-[#15161d] border border-[#262837] rounded p-1.5 flex items-center justify-between text-[11px]';
           row.innerHTML = `
             <div class="flex-1 pr-1 truncate">
-              <p class="font-bold text-white truncate text-[10px]">${it.name}</p>
-              <p class="text-[8px] text-neutral-400">${it.variant !== 'Std' ? it.variant + ' · ' : ''}₹${it.price}</p>
+              <div class="flex items-center space-x-1">
+                <p class="font-bold text-white truncate text-[10px]">${it.name.toUpperCase()}</p>
+                ${isEligibleBogo && isBogoActive ? '<span class="text-[7px] bg-emerald-500/20 text-emerald-400 px-1 py-0.2 rounded border border-emerald-500/30 font-mono">BOGO</span>' : ''}
+              </div>
+              <p class="text-[8px] text-neutral-400">${it.variant !== 'Std' ? '(' + it.variant + ') · ' : ''}₹${it.price}</p>
             </div>
             <div class="flex items-center space-x-1 flex-shrink-0">
               <button onclick="updateQty('${key}', -1)" class="w-4 h-4 rounded bg-[#20222d] text-white font-bold flex items-center justify-center text-[10px]">-</button>
@@ -714,13 +645,42 @@
 
     function recalcCart() {
       let sub = 0;
-      Object.values(cart).forEach(it => sub += it.price * it.qty);
-      const disc = Math.min(sub, Math.max(0, parseFloat(document.getElementById('cart-discount').value) || 0));
-      const grand = sub - disc;
+      let totalItemsCount = 0;
+      let bogoEligibleUnits = [];
+
+      Object.values(cart).forEach(it => {
+        sub += it.price * it.qty;
+        totalItemsCount += it.qty;
+        if (isBogoActive && ['1 Veg', '2 Veg', '3 Veg'].includes(it.category) && (it.variant === 'm' || it.variant === 'l')) {
+          for (let q = 0; q < it.qty; q++) {
+            bogoEligibleUnits.push(it.price);
+          }
+        }
+      });
+
+      bogoEligibleUnits.sort((a, b) => a - b);
+      let freePizzaCount = Math.floor(bogoEligibleUnits.length / 2);
+      let bogoDiscount = 0;
+      for (let i = 0; i < freePizzaCount; i++) {
+        bogoDiscount += bogoEligibleUnits[i];
+      }
+
+      const manualDisc = Math.max(0, parseFloat(document.getElementById('cart-discount').value) || 0);
+      const totalDisc = Math.min(sub, bogoDiscount + manualDisc);
+      const grand = Math.max(0, sub - totalDisc);
 
       document.getElementById('cart-subtotal').innerText = `₹${sub}`;
       document.getElementById('cart-grand').innerText = `₹${grand}`;
-      return { sub, disc, grand };
+
+      const bogoInfo = document.getElementById('bogo-applied-info');
+      if (isBogoActive && bogoDiscount > 0) {
+        bogoInfo.classList.remove('hidden');
+        document.getElementById('bogo-discount-amount').innerText = `-₹${bogoDiscount} (${freePizzaCount} Free)`;
+      } else {
+        bogoInfo.classList.add('hidden');
+      }
+
+      return { sub, disc: manualDisc, bogoDiscount, totalDisc, grand, totalItemsCount };
     }
 
     function setOrderMode(mode, btn) {
@@ -729,7 +689,7 @@
         b.className = 'mode-btn py-0.5 rounded text-[9px] font-semibold bg-[#20222d] text-neutral-300 truncate';
       });
 
-      if (mode === 'Dine-in') {
+      if (mode === 'Dine In') {
         btn.className = 'mode-btn py-0.5 rounded text-[9px] font-bold bg-blue-600 text-white truncate';
         document.getElementById('table-select-row').classList.remove('hidden');
         document.getElementById('delivery-phone-wrap').classList.add('hidden');
@@ -761,6 +721,7 @@
       btn.className = 'pay-btn py-1 rounded text-[9px] font-bold bg-amber-500 text-black';
     }
 
+    // DITTO PHOTO RECEIPT ENGINE
     function settleBillAndPrint() {
       const itemsPurchased = Object.values(cart);
       if (itemsPurchased.length === 0) return alert('Add items to order first!');
@@ -772,18 +733,23 @@
         return;
       }
 
-      const { sub, disc, grand } = recalcCart();
-      const invoiceNo = `DE-${Math.floor(1000 + Math.random() * 9000)}`;
-      const timestamp = new Date();
+      const { sub, disc, bogoDiscount, grand, totalItemsCount } = recalcCart();
+      const invoiceNo = `${Math.floor(1000 + Math.random() * 9000)}`;
+      const now = new Date();
+      
+      const pad = n => n.toString().padStart(2, '0');
+      const dateFormatted = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear().toString().slice(-2)}`;
+      const timeFormatted = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
 
       const record = {
         invoice_no: invoiceNo,
-        time: timestamp.toISOString(),
+        time: now.toISOString(),
         mode: currentOrderMode,
-        table: currentOrderMode === 'Dine-in' ? selectedTable : null,
+        table: currentOrderMode === 'Dine In' ? selectedTable : null,
         phone: currentOrderMode === 'Delivery' ? phone : null,
         items: itemsPurchased,
         subtotal: sub,
+        bogo_discount: bogoDiscount,
         discount: disc,
         grand_total: grand,
         payment_mode: selectedPayment
@@ -792,40 +758,213 @@
       orders.unshift(record);
       saveState();
 
-      // Thermal Receipt Rendering
-      document.getElementById('pr-invoice').innerText = invoiceNo;
-      document.getElementById('pr-time').innerText = timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      document.getElementById('pr-mode').innerText = `Type: ${currentOrderMode}${currentOrderMode === 'Dine-in' ? ' (' + selectedTable + ')' : ''}`;
-      
-      const prPhone = document.getElementById('pr-phone');
-      if (currentOrderMode === 'Delivery' && phone) {
-        prPhone.innerText = `Contact: ${phone}`;
-        prPhone.style.display = 'block';
-      } else {
-        prPhone.style.display = 'none';
-      }
-
-      const prItems = document.getElementById('pr-items');
-      prItems.innerHTML = '';
+      // Build items table identical to reference
+      let itemRows = '';
       itemsPurchased.forEach(it => {
-        const row = document.createElement('div');
-        row.style.display = 'flex';
-        row.style.justifyContent = 'space-between';
-        row.style.fontSize = '11px';
-        row.innerHTML = `<span>${it.name} ${it.variant !== 'Std' ? '(' + it.variant + ')' : ''} ×${it.qty}</span><span>₹${it.price * it.qty}</span>`;
-        prItems.appendChild(row);
+        const displayName = `${it.name.toUpperCase()} ${it.variant !== 'Std' ? '(' + it.variant + ')' : ''}`;
+        const unitPrice = parseFloat(it.price).toFixed(2);
+        const lineTotal = parseFloat(it.price * it.qty).toFixed(2);
+
+        itemRows += `
+          <tr style="vertical-align: top;">
+            <td style="padding: 2px 0; font-weight: 700; width: 44%; word-break: break-word;">${displayName}</td>
+            <td style="padding: 2px 0; text-align: center; width: 14%;">${it.qty}</td>
+            <td style="padding: 2px 0; text-align: right; width: 21%;">${unitPrice}</td>
+            <td style="padding: 2px 0; text-align: right; width: 21%;">${lineTotal}</td>
+          </tr>
+        `;
       });
 
-      document.getElementById('pr-sub').innerText = `₹${sub}`;
-      document.getElementById('pr-disc').innerText = `-₹${disc}`;
-      document.getElementById('pr-grand').innerText = `₹${grand}`;
-      document.getElementById('pr-pay').innerText = `(${selectedPayment})`;
+      if (bogoDiscount > 0) {
+        itemRows += `
+          <tr style="vertical-align: top; font-weight: 700;">
+            <td style="padding: 2px 0;">BOGO FREE PIZZA</td>
+            <td style="padding: 2px 0; text-align: center;">1</td>
+            <td style="padding: 2px 0; text-align: right;">-${parseFloat(bogoDiscount).toFixed(2)}</td>
+            <td style="padding: 2px 0; text-align: right;">-${parseFloat(bogoDiscount).toFixed(2)}</td>
+          </tr>
+        `;
+      }
 
-      window.print();
-      resetCartFields();
+      if (disc > 0) {
+        itemRows += `
+          <tr style="vertical-align: top; font-weight: 700;">
+            <td colspan="3" style="padding: 2px 0;">DISCOUNT</td>
+            <td style="padding: 2px 0; text-align: right;">-${parseFloat(disc).toFixed(2)}</td>
+          </tr>
+        `;
+      }
+
+      const receiptHTML = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Delicious Eatz</title>
+          <style>
+            @page {
+              margin: 0;
+              size: 72mm auto;
+            }
+            body {
+              font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+              color: #000;
+              margin: 0;
+              padding: 6px 10px;
+              width: 68mm;
+              font-size: 13.5px;
+              line-height: 1.25;
+            }
+            .center { text-align: center; }
+            .bold { font-weight: 800; }
+            .title {
+              font-size: 16px;
+              font-weight: 900;
+              letter-spacing: 0.2px;
+            }
+            .subtitle {
+              font-size: 11.5px;
+              line-height: 1.2;
+              margin-top: 2px;
+              font-weight: 500;
+            }
+            .solid-hr {
+              border: 0;
+              border-top: 1.5px solid #000;
+              margin: 5px 0;
+            }
+            .thick-hr {
+              border: 0;
+              border-top: 2.2px solid #000;
+              margin: 4px 0;
+            }
+            .name-row {
+              font-size: 13px;
+              font-weight: 700;
+              padding: 2px 0;
+            }
+            .meta-grid {
+              display: flex;
+              justify-content: space-between;
+              font-size: 12.5px;
+              line-height: 1.35;
+              padding: 1px 0;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              font-size: 12.5px;
+              margin-top: 2px;
+            }
+            th {
+              font-weight: 700;
+              padding: 3px 0;
+            }
+            .grand-box {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              padding: 3px 0;
+              font-size: 15.5px;
+              font-weight: 900;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="center">
+            <div class="title">Delicious Eatz</div>
+            <div class="subtitle">Vop Budhabarh Tehsil Hajipur Dist Hoshiarpur</div>
+            <div class="subtitle" style="font-weight: 600;">Ph: 7888950664, 8360084534</div>
+          </div>
+
+          <hr class="solid-hr" />
+
+          <div class="name-row">Name:</div>
+
+          <hr class="solid-hr" />
+
+          <div class="meta-grid">
+            <div>Date: ${dateFormatted}</div>
+            <div class="bold">${currentOrderMode === 'Dine In' ? 'Dine In: ' + selectedTable : currentOrderMode}</div>
+          </div>
+          <div class="meta-grid">
+            <div>${timeFormatted}</div>
+            <div></div>
+          </div>
+          <div class="meta-grid">
+            <div>Cashier: biller</div>
+            <div>Bill No.: ${invoiceNo}</div>
+          </div>
+
+          <hr class="thick-hr" />
+
+          <table>
+            <thead>
+              <tr>
+                <th style="text-align: left; width: 44%;">Item</th>
+                <th style="text-align: center; width: 14%;">Qty.</th>
+                <th style="text-align: right; width: 21%;">Price</th>
+                <th style="text-align: right; width: 21%;">Amount</th>
+              </tr>
+            </thead>
+          </table>
+
+          <hr class="thick-hr" />
+
+          <table>
+            <tbody>
+              ${itemRows}
+            </tbody>
+          </table>
+
+          <hr class="solid-hr" style="margin-top: 6px;" />
+
+          <div class="meta-grid bold" style="font-size: 13px;">
+            <div>Total Qty: ${totalItemsCount}</div>
+            <div style="text-align: right;">Sub Total &nbsp; ${parseFloat(sub).toFixed(2)}</div>
+          </div>
+
+          <hr class="thick-hr" />
+
+          <div class="grand-box">
+            <span style="font-size: 14.5px;">Grand Total</span>
+            <span>₹ ${parseFloat(grand).toFixed(2)}</span>
+          </div>
+
+          <hr class="thick-hr" />
+
+          <div class="center bold" style="font-size: 13.5px; padding: 4px 0 2px;">
+            Thanks
+          </div>
+        </body>
+        </html>
+      `;
+
+      let printFrame = document.getElementById('print-iframe');
+      if (!printFrame) {
+        printFrame = document.createElement('iframe');
+        printFrame.id = 'print-iframe';
+        printFrame.style.position = 'fixed';
+        printFrame.style.right = '0';
+        printFrame.style.bottom = '0';
+        printFrame.style.width = '0';
+        printFrame.style.height = '0';
+        printFrame.style.border = '0';
+        document.body.appendChild(printFrame);
+      }
+
+      const frameDoc = printFrame.contentWindow.document;
+      frameDoc.open();
+      frameDoc.write(receiptHTML);
+      frameDoc.close();
+
+      setTimeout(() => {
+        printFrame.contentWindow.focus();
+        printFrame.contentWindow.print();
+        resetCartFields();
+      }, 300);
     }
 
-    // ADD ITEM & MENU EDITOR
+    // MENU EDIT & ADD
     function toggleAddForm() {
       const card = document.getElementById('add-item-card');
       card.classList.toggle('hidden');
@@ -861,48 +1000,27 @@
       const category = document.getElementById('new-item-category').value;
       const type = document.getElementById('new-item-type').value;
 
-      if (!name) return alert('Please enter item name');
+      if (!name) return alert('Enter item name');
 
-      const newItem = {
-        id: Date.now(),
-        name: name,
-        category: category,
-        available: true
-      };
-
+      const newItem = { id: Date.now(), name, category, available: true };
       if (type === 'sizes') {
-        const reg = parseFloat(document.getElementById('new-item-price-reg').value) || 0;
-        const med = parseFloat(document.getElementById('new-item-price-med').value) || 0;
-        const lrg = parseFloat(document.getElementById('new-item-price-lrg').value) || 0;
-
-        if (reg <= 0) return alert('Please enter at least Regular price');
-        newItem.price_regular = reg;
-        newItem.price_medium = med;
-        newItem.price_large = lrg;
+        newItem.price_regular = parseFloat(document.getElementById('new-item-price-reg').value) || 0;
+        newItem.price_medium = parseFloat(document.getElementById('new-item-price-med').value) || 0;
+        newItem.price_large = parseFloat(document.getElementById('new-item-price-lrg').value) || 0;
       } else {
-        const price = parseFloat(document.getElementById('new-item-price').value) || 0;
-        if (price <= 0) return alert('Please enter item price');
-        newItem.price_regular = price;
+        newItem.price_regular = parseFloat(document.getElementById('new-item-price').value) || 0;
       }
 
       menu.unshift(newItem);
       saveState();
-
-      document.getElementById('new-item-name').value = '';
-      document.getElementById('new-item-price').value = '';
-      document.getElementById('new-item-price-reg').value = '';
-      document.getElementById('new-item-price-med').value = '';
-      document.getElementById('new-item-price-lrg').value = '';
       toggleAddForm();
-
       renderCategories();
       renderItems();
       renderMenuEditor();
-      alert(`"${name}" added successfully to ${category}!`);
     }
 
     function deleteItem(id) {
-      if (confirm('Delete this item from menu?')) {
+      if (confirm('Delete item?')) {
         menu = menu.filter(it => it.id !== id);
         saveState();
         renderCategories();
@@ -928,14 +1046,6 @@
             <div class="flex items-center space-x-1.5 mt-1">
               <span class="text-[9px] text-amber-400 font-bold">₹</span>
               <input type="number" value="${it.price_regular}" onchange="updatePrice(${it.id}, 'price_regular', this.value)" class="w-14 bg-[#20222d] border border-neutral-700 rounded px-1 py-0.5 text-white text-[10px] font-mono" />
-              ${it.price_medium ? `
-                <span class="text-[9px] text-neutral-400">M: ₹</span>
-                <input type="number" value="${it.price_medium}" onchange="updatePrice(${it.id}, 'price_medium', this.value)" class="w-12 bg-[#20222d] border border-neutral-700 rounded px-1 py-0.5 text-white text-[10px] font-mono" />
-              ` : ''}
-              ${it.price_large ? `
-                <span class="text-[9px] text-neutral-400">L: ₹</span>
-                <input type="number" value="${it.price_large}" onchange="updatePrice(${it.id}, 'price_large', this.value)" class="w-12 bg-[#20222d] border border-neutral-700 rounded px-1 py-0.5 text-white text-[10px] font-mono" />
-              ` : ''}
             </div>
           </div>
           <button onclick="toggleItemStatus(${it.id})" class="px-2 py-1 rounded text-[10px] font-bold ${it.available ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}">
@@ -966,12 +1076,8 @@
     }
 
     function switchView(view) {
-      ['register', 'held', 'menu', 'orders'].forEach(v => {
-        document.getElementById(`view-${v}`).classList.add('hidden');
-      });
-
+      ['register', 'held', 'menu', 'orders'].forEach(v => document.getElementById(`view-${v}`).classList.add('hidden'));
       document.getElementById(`view-${view}`).classList.remove('hidden');
-
       const btnBack = document.getElementById('btn-back-pos');
       if (view === 'register') {
         btnBack.classList.add('hidden');
@@ -988,11 +1094,6 @@
       container.innerHTML = '';
       document.getElementById('order-count-badge').innerText = `${orders.length} Bills`;
 
-      if (orders.length === 0) {
-        container.innerHTML = '<p class="text-neutral-500 text-xs py-8 text-center">No settled bills yet.</p>';
-        return;
-      }
-
       orders.forEach(o => {
         const card = document.createElement('div');
         card.className = 'bg-[#1a1b24] border border-[#2a2d3d] p-2.5 rounded-lg flex justify-between items-center text-xs';
@@ -1000,11 +1101,11 @@
           <div>
             <div class="flex items-center space-x-1.5">
               <span class="font-mono font-bold text-white text-[11px]">${o.invoice_no}</span>
-              <span class="px-1.5 py-0.5 rounded text-[9px] bg-amber-500/10 text-amber-400 font-semibold">${o.mode}${o.table ? ' (' + o.table + ')' : ''}</span>
+              <span class="px-1.5 py-0.5 rounded text-[9px] bg-amber-500/10 text-amber-400 font-semibold">${o.mode}</span>
               <span class="px-1.5 py-0.5 rounded text-[9px] bg-blue-500/10 text-blue-400">${o.payment_mode}</span>
+              ${o.bogo_discount > 0 ? '<span class="px-1 py-0.2 rounded text-[8px] bg-emerald-500/20 text-emerald-400 font-bold">BOGO</span>' : ''}
             </div>
             <p class="text-neutral-400 text-[9px] mt-0.5">${new Date(o.time).toLocaleString()}</p>
-            ${o.phone ? `<p class="text-emerald-400 text-[10px] font-mono mt-0.5 font-bold"><i class="fa-solid fa-phone mr-1"></i>${o.phone}</p>` : ''}
           </div>
           <p class="text-sm font-black font-mono text-emerald-400">₹${o.grand_total}</p>
         `;
