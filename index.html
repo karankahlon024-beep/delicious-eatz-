@@ -8,43 +8,25 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
   <style>
     @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
-    
-    * {
-      box-sizing: border-box;
-      user-select: none;
-      -webkit-user-select: none;
-    }
-    body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background-color: #0f172a;
-      color: #0f172a;
-      overflow: hidden;
-    }
-    .font-mono {
-      font-family: 'JetBrains Mono', monospace;
-    }
+    * { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: #0f172a; overflow: hidden; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    
-    /* Hardware POS tactile active states */
-    .pos-btn:active {
-      transform: translateY(1px);
-    }
+    .pos-btn:active { transform: translateY(1px); }
   </style>
 </head>
 <body class="h-screen w-screen flex flex-col bg-[#0f172a]">
 
-  <!-- INDUSTRIAL TOP CONTROL BAR -->
   <header class="bg-[#090d16] border-b border-[#1e293b] px-3 py-1.5 flex items-center justify-between text-white flex-shrink-0 z-30">
     <div class="flex items-center space-x-2">
       <div class="bg-white text-black px-2 py-0.5 rounded font-black text-xs tracking-wider flex items-center">
         <i class="fa-solid fa-bolt mr-1 text-[10px]"></i> POS
       </div>
       <span class="font-extrabold text-sm tracking-tight text-white">DELICIOUS EATZ</span>
-      <span class="text-[10px] text-neutral-400 bg-[#1e293b] px-2 py-0.5 rounded font-mono">STATION-01</span>
+      <span class="text-[10px] text-neutral-400 bg-[#1e293b] px-2 py-0.5 rounded font-mono">CLOUD SYNCED</span>
     </div>
 
-    <!-- Right Controls -->
     <div class="flex items-center space-x-2">
       <button onclick="switchView('tables')" id="nav-btn-tables" class="px-3 py-1 bg-white text-black font-extrabold text-xs rounded shadow-sm flex items-center">
         <i class="fa-solid fa-table-cells mr-1.5 text-[11px]"></i> Tables
@@ -61,9 +43,7 @@
     </div>
   </header>
 
-  <!-- ================= VIEW 1: HARDWARE TABLE BOARD ================= -->
   <main id="view-tables" class="flex-1 flex flex-col p-3 bg-[#0b1120] overflow-y-auto">
-    <!-- Top Action Ribbon -->
     <div class="bg-[#131d31] border border-[#1e293b] rounded-xl p-2.5 flex items-center justify-between mb-3 shadow-lg">
       <div class="flex items-center space-x-2">
         <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
@@ -80,19 +60,11 @@
       </div>
     </div>
 
-    <!-- Table Grid (Large Tactile Industrial Cards) -->
-    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3" id="table-cards-container">
-      <!-- Generated Dynamically -->
-    </div>
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3" id="table-cards-container"></div>
   </main>
 
-  <!-- ================= VIEW 2: HIGH-DENSITY TERMINAL REGISTER ================= -->
   <main id="view-register" class="flex-1 flex flex-row overflow-hidden hidden bg-white">
-    
-    <!-- LEFT PANEL: CATEGORIES & TOUCH TILES -->
     <section class="w-[62%] flex flex-col overflow-hidden bg-[#f8fafc] border-r border-[#cbd5e1]">
-      
-      <!-- Top Search & Quick Bar -->
       <div class="p-2 border-b border-[#cbd5e1] bg-white flex items-center space-x-2 flex-shrink-0">
         <button onclick="switchView('tables')" class="px-3 py-1.5 bg-[#0f172a] hover:bg-black text-white rounded-lg text-xs font-black flex items-center">
           <i class="fa-solid fa-arrow-left mr-1.5"></i> TABLES
@@ -103,7 +75,6 @@
         </div>
       </div>
 
-      <!-- Categories Ribbon with Scroll Arrows -->
       <div class="flex items-center bg-[#e2e8f0] border-b border-[#cbd5e1] p-1 flex-shrink-0">
         <button onclick="scrollCategories(-140)" class="w-6 h-7 bg-white hover:bg-neutral-200 border border-[#cbd5e1] rounded flex items-center justify-center text-xs font-black mr-1 flex-shrink-0">
           <i class="fa-solid fa-chevron-left"></i>
@@ -114,16 +85,11 @@
         </button>
       </div>
 
-      <!-- Food Menu Items Tiles -->
       <div id="items-grid" class="flex-1 overflow-y-auto p-2 grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 content-start no-scrollbar"></div>
     </section>
 
-    <!-- RIGHT PANEL: CHECKOUT, TICKET & TENDER -->
     <section class="w-[38%] flex flex-col overflow-hidden bg-white">
-      
-      <!-- Top Order Info & Status -->
       <div class="p-2 bg-[#f8fafc] border-b border-[#cbd5e1] space-y-1.5 flex-shrink-0 shadow-sm">
-        
         <div class="flex items-center justify-between">
           <div class="grid grid-cols-3 gap-1 flex-1 mr-2">
             <button onclick="setOrderMode('Dine In', this)" class="mode-btn py-1 rounded text-[10px] font-black uppercase tracking-wider bg-black text-white">Dine In</button>
@@ -140,7 +106,6 @@
           </div>
         </div>
 
-        <!-- Totals Strip -->
         <div class="bg-white p-2 rounded-lg border border-[#cbd5e1] flex flex-col space-y-1">
           <div class="flex items-center justify-between text-xs">
             <span class="text-neutral-500 font-bold">Subtotal: <strong id="cart-subtotal" class="text-black font-mono">₹0</strong></span>
@@ -159,69 +124,45 @@
           </div>
         </div>
 
-        <!-- Quick Cash / Payment Selector -->
         <div class="grid grid-cols-3 gap-1">
           <button onclick="setPayment('Cash', this)" class="pay-btn py-1.5 rounded text-[10px] font-black uppercase bg-amber-400 text-black border border-amber-500 shadow-xs">Cash</button>
           <button onclick="setPayment('UPI', this)" class="pay-btn py-1.5 rounded text-[10px] font-bold uppercase bg-white border border-[#cbd5e1] text-neutral-700">UPI</button>
           <button onclick="setPayment('Card', this)" class="pay-btn py-1.5 rounded text-[10px] font-bold uppercase bg-white border border-[#cbd5e1] text-neutral-700">Card</button>
         </div>
 
-        <!-- Primary Touch Action Pad -->
         <div class="grid grid-cols-5 gap-1 pt-0.5">
-          <button onclick="printOnlyKOT()" class="pos-btn py-2 rounded-lg bg-[#334155] hover:bg-[#1e293b] text-white text-[11px] font-black uppercase tracking-tight shadow">
-            KOT
-          </button>
-          <button id="btn-bogo-toggle" onclick="toggleBogo()" class="pos-btn py-2 rounded-lg bg-white text-neutral-800 border border-[#cbd5e1] text-[11px] font-black uppercase tracking-tight">
-            BOGO
-          </button>
-          <button onclick="holdCurrentCart()" class="pos-btn py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-black text-[11px] font-black uppercase tracking-tight">
-            HOLD
-          </button>
-          <button onclick="clearCart()" class="pos-btn py-2 rounded-lg bg-[#e2e8f0] hover:bg-[#cbd5e1] text-neutral-800 text-[11px] font-black uppercase tracking-tight">
-            CLEAR
-          </button>
-          <button onclick="settleBillAndPrint()" class="pos-btn py-2 rounded-lg bg-black hover:bg-neutral-900 text-white text-[11px] font-black uppercase tracking-wider shadow-lg">
-            SETTLE
-          </button>
+          <button onclick="printOnlyKOT()" class="pos-btn py-2 rounded-lg bg-[#334155] hover:bg-[#1e293b] text-white text-[11px] font-black uppercase tracking-tight shadow">KOT</button>
+          <button id="btn-bogo-toggle" onclick="toggleBogo()" class="pos-btn py-2 rounded-lg bg-white text-neutral-800 border border-[#cbd5e1] text-[11px] font-black uppercase tracking-tight">BOGO</button>
+          <button onclick="holdCurrentCart()" class="pos-btn py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-black text-[11px] font-black uppercase tracking-tight">HOLD</button>
+          <button onclick="clearCart()" class="pos-btn py-2 rounded-lg bg-[#e2e8f0] hover:bg-[#cbd5e1] text-neutral-800 text-[11px] font-black uppercase tracking-tight">CLEAR</button>
+          <button onclick="settleBillAndPrint()" class="pos-btn py-2 rounded-lg bg-black hover:bg-neutral-900 text-white text-[11px] font-black uppercase tracking-wider shadow-lg">SETTLE</button>
         </div>
       </div>
 
-      <!-- Ticket Items List -->
       <div class="flex-1 overflow-y-auto p-2 space-y-1.5 no-scrollbar bg-white" id="cart-items-container"></div>
     </section>
   </main>
 
-  <!-- ================= VIEW 3: DEDICATED SALES REPORT ================= -->
   <main id="view-sales" class="flex-1 flex flex-col p-3 bg-[#0b1120] overflow-y-auto hidden">
     <div class="bg-white rounded-xl shadow-xl overflow-hidden flex flex-col flex-1 border border-neutral-300">
-      
-      <!-- Top Title & Filter Bar -->
       <div class="p-3 bg-[#0f172a] text-white flex items-center justify-between">
         <div>
-          <h2 class="text-sm font-black uppercase tracking-wider">Sales Analytics & Invoices</h2>
+          <h2 class="text-sm font-black uppercase tracking-wider">Cloud Sales Analytics & Invoices</h2>
           <p id="sales-report-date-tag" class="text-[11px] text-neutral-400 font-mono">Today</p>
         </div>
 
         <div class="flex items-center space-x-2">
-          <button id="btn-sales-yesterday" onclick="filterSales('yesterday')" class="px-3 py-1.5 bg-[#1e293b] hover:bg-[#334155] border border-neutral-700 rounded-lg text-xs font-bold text-white">
-            Yesterday Sales
-          </button>
-          <button id="btn-sales-today" onclick="filterSales('today')" class="px-3 py-1.5 bg-white text-black rounded-lg text-xs font-black shadow">
-            Today Sales
-          </button>
-          <button onclick="switchView('tables')" class="px-3 py-1.5 bg-neutral-700 text-white rounded-lg text-xs font-bold">
-            Close
-          </button>
+          <button id="btn-sales-yesterday" onclick="filterSales('yesterday')" class="px-3 py-1.5 bg-[#1e293b] hover:bg-[#334155] border border-neutral-700 rounded-lg text-xs font-bold text-white">Yesterday Sales</button>
+          <button id="btn-sales-today" onclick="filterSales('today')" class="px-3 py-1.5 bg-white text-black rounded-lg text-xs font-black shadow">Today Sales</button>
+          <button onclick="switchView('tables')" class="px-3 py-1.5 bg-neutral-700 text-white rounded-lg text-xs font-bold">Close</button>
         </div>
       </div>
 
-      <!-- KPI Summary Header -->
       <div class="bg-[#f8fafc] border-b border-[#cbd5e1] p-3 flex items-center justify-between">
         <span class="text-sm font-bold text-neutral-600">Net Revenue: <strong id="sales-total-amount" class="text-xl text-black font-mono font-black ml-1">₹0.00</strong></span>
         <span class="text-xs font-bold text-neutral-500">Invoices Count: <strong id="sales-total-bills" class="font-mono text-black text-sm ml-1">0</strong></span>
       </div>
 
-      <!-- Invoices Table -->
       <div class="flex-1 overflow-y-auto no-scrollbar">
         <table class="w-full text-left text-xs border-collapse">
           <thead class="bg-[#f1f5f9] border-b border-[#cbd5e1] text-neutral-700 font-extrabold sticky top-0">
@@ -240,7 +181,6 @@
     </div>
   </main>
 
-  <!-- ================= VIEW 4: HELD TICKETS ================= -->
   <main id="view-held" class="flex-1 overflow-y-auto p-3 bg-[#0b1120] hidden">
     <div class="max-w-xl mx-auto space-y-3">
       <div class="flex justify-between items-center bg-white p-3 rounded-xl shadow-md border border-neutral-300">
@@ -251,18 +191,13 @@
     </div>
   </main>
 
-  <!-- ================= VIEW 5: MENU MANAGER ================= -->
   <main id="view-menu" class="flex-1 overflow-y-auto p-3 bg-[#0b1120] hidden">
     <div class="max-w-xl mx-auto space-y-3">
       <div class="flex justify-between items-center bg-white p-3 rounded-xl shadow-md border border-neutral-300">
         <h2 class="text-xs font-black uppercase text-neutral-900 tracking-wider"><i class="fa-solid fa-sliders text-neutral-700 mr-2"></i> Menu Editor</h2>
         <div class="flex space-x-2">
-          <button onclick="toggleAddForm()" class="px-3 py-1 bg-black text-white text-xs font-black rounded-lg">
-            + Add Item
-          </button>
-          <button onclick="resetMenuToOriginal()" class="px-3 py-1 bg-[#e2e8f0] text-black text-xs font-bold rounded-lg">
-            Reset Defaults
-          </button>
+          <button onclick="toggleAddForm()" class="px-3 py-1 bg-black text-white text-xs font-black rounded-lg">+ Add Item</button>
+          <button onclick="resetMenuToOriginal()" class="px-3 py-1 bg-[#e2e8f0] text-black text-xs font-bold rounded-lg">Reset Defaults</button>
         </div>
       </div>
 
@@ -315,7 +250,6 @@
     </div>
   </main>
 
-  <!-- SIZE PICKER MODAL -->
   <div id="size-modal" class="fixed inset-0 bg-black/75 flex items-center justify-center p-3 z-50 hidden">
     <div class="bg-white border border-[#cbd5e1] w-full max-w-xs rounded-2xl p-4 shadow-2xl">
       <div class="flex justify-between items-center mb-3">
@@ -327,6 +261,9 @@
   </div>
 
   <script>
+    // SHEETDB CLOUD SYNC ENDPOINT
+    const SHEETDB_API = 'https://sheetdb.io/api/v1/mbu5t23na13vg';
+
     const DEFAULT_MENU = [
       { id: 101, name: 'Onion Pizza', category: '1. Pizza Mania', price_regular: 70, available: true },
       { id: 102, name: 'Capsicum Pizza', category: '1. Pizza Mania', price_regular: 80, available: true },
@@ -431,9 +368,9 @@
 
     const DEFAULT_CATEGORIES = ['1. Pizza Mania', '2. Special Veg Pizza', '1 Veg', '2 Veg', '3 Veg', 'Burger', 'Sandwich', 'Pasta', 'Wraps', 'Veg Sides', 'Soup & Salad', 'Shakes', 'Beverages', 'Meals'];
 
-    let menu = JSON.parse(localStorage.getItem('de_menu_v20')) || DEFAULT_MENU;
-    let orders = JSON.parse(localStorage.getItem('de_petpooja_orders_v20')) || [];
-    let heldOrders = JSON.parse(localStorage.getItem('de_held_orders_v20')) || [];
+    let menu = JSON.parse(localStorage.getItem('de_menu_v21')) || DEFAULT_MENU;
+    let orders = JSON.parse(localStorage.getItem('de_petpooja_orders_v21')) || [];
+    let heldOrders = JSON.parse(localStorage.getItem('de_held_orders_v21')) || [];
     let cart = {};
     let activeCategory = 'All';
     let currentOrderMode = 'Dine In';
@@ -444,9 +381,9 @@
     let activeResumedHoldId = null;
 
     function saveState() {
-      localStorage.setItem('de_menu_v20', JSON.stringify(menu));
-      localStorage.setItem('de_petpooja_orders_v20', JSON.stringify(orders));
-      localStorage.setItem('de_held_orders_v20', JSON.stringify(heldOrders));
+      localStorage.setItem('de_menu_v21', JSON.stringify(menu));
+      localStorage.setItem('de_petpooja_orders_v21', JSON.stringify(orders));
+      localStorage.setItem('de_held_orders_v21', JSON.stringify(heldOrders));
       updateHeldBadge();
       renderTableCards();
     }
@@ -498,37 +435,26 @@
     function renderTableCards() {
       const container = document.getElementById('table-cards-container');
       container.innerHTML = '';
-
       const tableList = ['1', '2', '3', '4', '5', '6', '7', '8'];
 
       tableList.forEach(t => {
-        // Check if any held order belongs to this table
         const runningHeld = heldOrders.find(h => h.mode === 'Dine In' && h.table === t);
         const isOccupied = !!runningHeld;
 
         const card = document.createElement('button');
         card.onclick = () => openTableRegister(t, runningHeld ? runningHeld.hold_id : null);
         card.className = `pos-btn p-3 rounded-2xl border-2 flex flex-col justify-between text-left h-28 transition shadow-md ${
-          isOccupied 
-            ? 'bg-amber-500/10 border-amber-500 hover:bg-amber-500/20' 
-            : 'bg-[#131d31] border-[#1e293b] hover:border-white hover:bg-[#1a263f]'
+          isOccupied ? 'bg-amber-500/10 border-amber-500 hover:bg-amber-500/20' : 'bg-[#131d31] border-[#1e293b] hover:border-white hover:bg-[#1a263f]'
         }`;
 
         card.innerHTML = `
           <div class="flex justify-between items-start w-full">
             <span class="text-2xl font-black ${isOccupied ? 'text-amber-400 font-mono' : 'text-white'}">${t}</span>
-            <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
-              isOccupied 
-                ? 'bg-amber-500 text-black font-bold' 
-                : 'bg-[#1e293b] text-neutral-400'
-            }">${isOccupied ? 'RUNNING' : 'VACANT'}</span>
+            <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${isOccupied ? 'bg-amber-500 text-black font-bold' : 'bg-[#1e293b] text-neutral-400'}">${isOccupied ? 'RUNNING' : 'VACANT'}</span>
           </div>
-
           <div class="w-full">
             <p class="text-[10px] font-bold text-neutral-400">TABLE ${t}</p>
-            <p class="font-mono text-sm font-black ${isOccupied ? 'text-amber-400' : 'text-neutral-500'}">
-              ${isOccupied ? '₹' + runningHeld.grand : 'READY'}
-            </p>
+            <p class="font-mono text-sm font-black ${isOccupied ? 'text-amber-400' : 'text-neutral-500'}">${isOccupied ? '₹' + runningHeld.grand : 'READY'}</p>
           </div>
         `;
         container.appendChild(card);
@@ -543,9 +469,7 @@
         const btn = document.createElement('button');
         btn.innerText = cat;
         btn.className = `pos-btn px-3 py-1.5 rounded-lg font-black whitespace-nowrap text-xs transition flex-shrink-0 ${
-          cat === activeCategory 
-            ? 'bg-black text-white shadow' 
-            : 'bg-white text-neutral-800 hover:bg-neutral-200 border border-[#cbd5e1]'
+          cat === activeCategory ? 'bg-black text-white shadow' : 'bg-white text-neutral-800 hover:bg-neutral-200 border border-[#cbd5e1]'
         }`;
         btn.onclick = () => {
           activeCategory = cat;
@@ -871,7 +795,6 @@
       if (btn) setOrderMode(mode, btn);
     }
 
-    // SALES REPORT ENGINE (LOCAL CALENDAR MATCHING)
     function filterSales(timeFrame) {
       activeSalesFilter = timeFrame;
       const btnToday = document.getElementById('btn-sales-today');
@@ -940,7 +863,26 @@
       });
     }
 
-    // PRINTING ENGINES
+    // SYNC ORDER TO GOOGLE SHEET VIA SHEETDB
+    function syncToCloud(record) {
+      const payload = {
+        data: {
+          Invoice: record.invoice_no,
+          Time: new Date(record.time).toLocaleString(),
+          Mode: record.mode + (record.table ? ' T' + record.table : ''),
+          Payment: record.payment_mode || 'Cash',
+          Discount: (Number(record.discount) || 0) + (Number(record.bogo_discount) || 0),
+          Total: Number(record.grand_total) || 0
+        }
+      };
+
+      fetch(SHEETDB_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }).catch(err => console.error('Cloud Sync Error:', err));
+    }
+
     function generateKOTHTML() {
       const itemsInCart = Object.values(cart);
       let totalUnits = 0;
@@ -1191,6 +1133,7 @@
       };
 
       orders.unshift(record);
+      syncToCloud(record);
 
       if (activeResumedHoldId) {
         heldOrders = heldOrders.filter(h => h.hold_id !== activeResumedHoldId);
@@ -1328,7 +1271,6 @@
 
       document.getElementById(`view-${view}`).classList.remove('hidden');
 
-      // Update Nav Buttons
       ['tables', 'sales', 'held', 'menu'].forEach(v => {
         const btn = document.getElementById(`nav-btn-${v}`);
         if (btn) {
@@ -1348,7 +1290,6 @@
       if (view === 'menu') renderMenuEditor();
     }
 
-    // Startup Initialization
     renderTableCards();
     renderCategories();
     renderItems();
