@@ -24,7 +24,7 @@
         <i class="fa-solid fa-bolt mr-1 text-[10px]"></i> POS
       </div>
       <span class="font-extrabold text-sm tracking-tight text-white">DELICIOUS EATZ</span>
-      <span class="text-[10px] text-neutral-400 bg-[#1e293b] px-2 py-0.5 rounded font-mono">FULLY SYNCED</span>
+      <span class="text-[10px] text-neutral-400 bg-[#1e293b] px-2 py-0.5 rounded font-mono">LIVE TERMINAL</span>
     </div>
 
     <div class="flex items-center space-x-2">
@@ -147,7 +147,7 @@
     <div class="bg-white rounded-xl shadow-xl overflow-hidden flex flex-col flex-1 border border-neutral-300">
       <div class="p-3 bg-[#0f172a] text-white flex items-center justify-between">
         <div>
-          <h2 class="text-sm font-black uppercase tracking-wider">Cloud Sales Analytics & Invoices</h2>
+          <h2 class="text-sm font-black uppercase tracking-wider">Sales Analytics & Invoices</h2>
           <p id="sales-report-date-tag" class="text-[11px] text-neutral-400 font-mono">Today</p>
         </div>
 
@@ -367,9 +367,9 @@
 
     const DEFAULT_CATEGORIES = ['1. Pizza Mania', '2. Special Veg Pizza', '1 Veg', '2 Veg', '3 Veg', 'Burger', 'Sandwich', 'Pasta', 'Wraps', 'Veg Sides', 'Soup & Salad', 'Shakes', 'Beverages', 'Meals'];
 
-    let menu = JSON.parse(localStorage.getItem('de_menu_v22')) || DEFAULT_MENU;
-    let orders = JSON.parse(localStorage.getItem('de_petpooja_orders_v22')) || [];
-    let heldOrders = JSON.parse(localStorage.getItem('de_held_orders_v22')) || [];
+    let menu = JSON.parse(localStorage.getItem('de_menu_v23')) || DEFAULT_MENU;
+    let orders = JSON.parse(localStorage.getItem('de_petpooja_orders_v23')) || [];
+    let heldOrders = JSON.parse(localStorage.getItem('de_held_orders_v23')) || [];
     let cart = {};
     let activeCategory = 'All';
     let currentOrderMode = 'Dine In';
@@ -380,9 +380,9 @@
     let activeResumedHoldId = null;
 
     function saveState() {
-      localStorage.setItem('de_menu_v22', JSON.stringify(menu));
-      localStorage.setItem('de_petpooja_orders_v22', JSON.stringify(orders));
-      localStorage.setItem('de_held_orders_v22', JSON.stringify(heldOrders));
+      localStorage.setItem('de_menu_v23', JSON.stringify(menu));
+      localStorage.setItem('de_petpooja_orders_v23', JSON.stringify(orders));
+      localStorage.setItem('de_held_orders_v23', JSON.stringify(heldOrders));
       updateHeldBadge();
       renderTableCards();
     }
@@ -862,7 +862,7 @@
       });
     }
 
-    // CLOUD SYNC & FETCH
+    // CLOUD SYNC & FETCH (HYBRID LOCAL + SHEETDB)
     function syncToCloud(record) {
       const payload = {
         data: {
@@ -886,17 +886,27 @@
       fetch(SHEETDB_API)
         .then(res => res.json())
         .then(data => {
-          if (Array.isArray(data)) {
-            orders = data.map(row => ({
-              invoice_no: row.Invoice,
-              time: new Date(row.Time).toISOString(),
+          if (Array.isArray(data) && data.length > 0) {
+            const cloudOrders = data.map(row => ({
+              invoice_no: row.Invoice || '0000',
+              time: row.Time ? new Date(row.Time).toISOString() : new Date().toISOString(),
               mode: row.Mode ? row.Mode.split(' ')[0] : 'Dine In',
               table: row.Mode && row.Mode.includes('T') ? row.Mode.split('T')[1] : null,
-              payment_mode: row.Payment,
+              payment_mode: row.Payment || 'Cash',
               discount: Number(row.Discount) || 0,
               bogo_discount: 0,
               grand_total: Number(row.Total) || 0
             })).reverse();
+
+            // Merge cloud orders with local orders without duplicates
+            const existingInvoices = new Set(orders.map(o => o.invoice_no));
+            cloudOrders.forEach(co => {
+              if (!existingInvoices.has(co.invoice_no)) {
+                orders.push(co);
+              }
+            });
+
+            saveState();
             renderSalesReport();
           }
         })
