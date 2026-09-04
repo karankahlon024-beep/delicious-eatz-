@@ -434,9 +434,9 @@
 
     const DEFAULT_CATEGORIES = ['1. Pizza Mania', '2. Special Veg Pizza', '1 Veg', '2 Veg', '3 Veg', 'Burger', 'Sandwich', 'Pasta', 'Wraps', 'Veg Sides', 'Soup & Salad', 'Shakes', 'Beverages', 'Meals'];
 
-    let menu = JSON.parse(localStorage.getItem('de_menu_v17')) || DEFAULT_MENU;
-    let orders = JSON.parse(localStorage.getItem('de_petpooja_orders_v17')) || [];
-    let heldOrders = JSON.parse(localStorage.getItem('de_held_orders_v17')) || [];
+    let menu = JSON.parse(localStorage.getItem('de_menu_v18')) || DEFAULT_MENU;
+    let orders = JSON.parse(localStorage.getItem('de_petpooja_orders_v18')) || [];
+    let heldOrders = JSON.parse(localStorage.getItem('de_held_orders_v18')) || [];
     let cart = {};
     let activeCategory = 'All';
     let currentOrderMode = 'Dine In';
@@ -447,9 +447,9 @@
     let activeResumedHoldId = null;
 
     function saveState() {
-      localStorage.setItem('de_menu_v17', JSON.stringify(menu));
-      localStorage.setItem('de_petpooja_orders_v17', JSON.stringify(orders));
-      localStorage.setItem('de_held_orders_v17', JSON.stringify(heldOrders));
+      localStorage.setItem('de_menu_v18', JSON.stringify(menu));
+      localStorage.setItem('de_petpooja_orders_v18', JSON.stringify(orders));
+      localStorage.setItem('de_held_orders_v18', JSON.stringify(heldOrders));
       updateHeldBadge();
     }
 
@@ -910,7 +910,7 @@
       });
     }
 
-    // PRINT ENGINES (EXACT PHOTO REPLICA)
+    // PRINT ENGINES
     function generateKOTHTML() {
       const itemsInCart = Object.values(cart);
       let totalUnits = 0;
@@ -980,7 +980,7 @@
       `;
     }
 
-    function generateBillHTML(invoiceNo, now) {
+    function generateBillHTML(invoiceNo, now, customerPhone) {
       const itemsPurchased = Object.values(cart);
       const { sub, disc, bogoDiscount, grand, totalItemsCount } = recalcCart();
       const pad = n => n.toString().padStart(2, '0');
@@ -1038,6 +1038,7 @@
             .solid-hr { border: 0; border-top: 1.5px solid #000; margin: 5px 0; }
             .thick-hr { border: 0; border-top: 2.2px solid #000; margin: 4px 0; }
             .name-row { font-size: 13px; font-weight: 700; padding: 2px 0; }
+            .phone-row { font-size: 13px; font-weight: 800; padding: 2px 0; }
             .meta-grid { display: flex; justify-content: space-between; font-size: 12.5px; line-height: 1.35; padding: 1px 0; }
             table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 2px; }
             th { font-weight: 700; padding: 3px 0; }
@@ -1052,6 +1053,7 @@
           </div>
           <hr class="solid-hr" />
           <div class="name-row">Name:</div>
+          ${currentOrderMode === 'Delivery' && customerPhone ? `<div class="phone-row">Contact: ${customerPhone}</div>` : ''}
           <hr class="solid-hr" />
           <div class="meta-grid">
             <div>Date: ${dateFormatted}</div>
@@ -1167,7 +1169,7 @@
 
       saveState();
 
-      const billHTML = generateBillHTML(invoiceNo, now);
+      const billHTML = generateBillHTML(invoiceNo, now, phone);
       const kotHTML = generateKOTHTML();
 
       printHTML(billHTML, () => {
