@@ -370,9 +370,9 @@
 
     const DEFAULT_CATEGORIES = ['1. Pizza Mania', '2. Special Veg Pizza', '1 Veg', '2 Veg', '3 Veg', 'Burger', 'Sandwich', 'Pasta', 'Wraps', 'Veg Sides', 'Soup & Salad', 'Shakes', 'Beverages', 'Meals'];
 
-    let menu = JSON.parse(localStorage.getItem('de_menu_v28')) || DEFAULT_MENU;
-    let orders = JSON.parse(localStorage.getItem('de_petpooja_orders_v28')) || [];
-    let heldOrders = JSON.parse(localStorage.getItem('de_held_orders_v28')) || [];
+    let menu = JSON.parse(localStorage.getItem('de_menu_v29')) || DEFAULT_MENU;
+    let orders = JSON.parse(localStorage.getItem('de_petpooja_orders_v29')) || [];
+    let heldOrders = JSON.parse(localStorage.getItem('de_held_orders_v29')) || [];
     let cart = {};
     let activeCategory = 'All';
     let currentOrderMode = 'Dine In';
@@ -383,9 +383,9 @@
     let activeResumedHoldId = null;
 
     function saveState() {
-      localStorage.setItem('de_menu_v28', JSON.stringify(menu));
-      localStorage.setItem('de_petpooja_orders_v28', JSON.stringify(orders));
-      localStorage.setItem('de_held_orders_v28', JSON.stringify(heldOrders));
+      localStorage.setItem('de_menu_v29', JSON.stringify(menu));
+      localStorage.setItem('de_petpooja_orders_v29', JSON.stringify(orders));
+      localStorage.setItem('de_held_orders_v29', JSON.stringify(heldOrders));
       updateHeldBadge();
       renderTableCards();
     }
@@ -884,7 +884,7 @@
       });
     }
 
-    // CLOUD SYNC & AUTO-FETCH ON BOOT
+    // CLOUD SYNC & ROBUST AUTO-FETCH
     function syncToCloud(record) {
       const payload = {
         data: {
@@ -909,16 +909,31 @@
         .then(res => res.json())
         .then(data => {
           if (Array.isArray(data) && data.length > 0) {
-            const cloudOrders = data.map(row => ({
-              invoice_no: row.Invoice || '0000',
-              time: row.Time ? new Date(row.Time).toISOString() : new Date().toISOString(),
-              mode: row.Mode ? row.Mode.split(' ')[0] : 'Dine In',
-              table: row.Mode && row.Mode.includes('T') ? row.Mode.split('T')[1] : null,
-              payment_mode: row.Payment || 'Cash',
-              discount: Number(row.Discount) || 0,
-              bogo_discount: 0,
-              grand_total: Number(row.Total) || 0
-            })).reverse();
+            const cloudOrders = data.map(row => {
+              let parsedTime = new Date();
+              if (row.Time) {
+                const parts = row.Time.split(', ');
+                if (parts.length === 2) {
+                  const dateParts = parts[0].split('/');
+                  if (dateParts.length === 3) {
+                    parsedTime = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]} ${parts[1]}`);
+                  }
+                } else {
+                  parsedTime = new Date(row.Time);
+                }
+              }
+
+              return {
+                invoice_no: row.Invoice ? row.Invoice.toString() : '0000',
+                time: isNaN(parsedTime.getTime()) ? new Date().toISOString() : parsedTime.toISOString(),
+                mode: row.Mode ? row.Mode.split(' T')[0] : 'Dine In',
+                table: row.Mode && row.Mode.includes('T') ? row.Mode.split('T')[1] : null,
+                payment_mode: row.Payment || 'Cash',
+                discount: Number(row.Discount) || 0,
+                bogo_discount: 0,
+                grand_total: Number(row.Total) || 0
+              };
+            }).reverse();
 
             const existingInvoices = new Set(orders.map(o => o.invoice_no));
             cloudOrders.forEach(co => {
@@ -1410,7 +1425,6 @@
       if (view === 'menu') renderMenuEditor();
     }
 
-    // Automatically pull cloud records right on app launch
     fetchCloudSales();
     renderTableCards();
     renderCategories();
