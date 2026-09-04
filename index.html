@@ -24,7 +24,7 @@
         <i class="fa-solid fa-bolt mr-1 text-[10px]"></i> POS
       </div>
       <span class="font-extrabold text-sm tracking-tight text-white">EATZ</span>
-      <span class="text-[10px] text-neutral-400 bg-[#1e293b] px-2 py-0.5 rounded font-mono">LIVE TERMINAL</span>
+      <span class="text-[10px] text-neutral-400 bg-[#1e293b] px-2 py-0.5 rounded font-mono">MONTHLY LEDGER</span>
     </div>
 
     <div class="flex items-center space-x-2">
@@ -148,14 +148,15 @@
     <div class="bg-white rounded-xl shadow-xl overflow-hidden flex flex-col flex-1 border border-neutral-300">
       <div class="p-3 bg-[#0f172a] text-white flex items-center justify-between">
         <div>
-          <h2 class="text-sm font-black uppercase tracking-wider">Sales Analytics & Invoices</h2>
+          <h2 class="text-sm font-black uppercase tracking-wider">Sales Ledger & Reports</h2>
           <p id="sales-report-date-tag" class="text-[11px] text-neutral-400 font-mono">Today</p>
         </div>
 
-        <div class="flex items-center space-x-2">
-          <button id="btn-sales-yesterday" onclick="filterSales('yesterday')" class="px-3 py-1.5 bg-[#1e293b] hover:bg-[#334155] border border-neutral-700 rounded-lg text-xs font-bold text-white">Yesterday Sales</button>
-          <button id="btn-sales-today" onclick="filterSales('today')" class="px-3 py-1.5 bg-white text-black rounded-lg text-xs font-black shadow">Today Sales</button>
-          <button onclick="switchView('tables')" class="px-3 py-1.5 bg-neutral-700 text-white rounded-lg text-xs font-bold">Close</button>
+        <div class="flex items-center space-x-1.5">
+          <button id="btn-sales-month" onclick="filterSales('month')" class="px-2.5 py-1.5 bg-[#1e293b] hover:bg-[#334155] border border-neutral-700 rounded-lg text-xs font-bold text-white">Full Month</button>
+          <button id="btn-sales-yesterday" onclick="filterSales('yesterday')" class="px-2.5 py-1.5 bg-[#1e293b] hover:bg-[#334155] border border-neutral-700 rounded-lg text-xs font-bold text-white">Yesterday</button>
+          <button id="btn-sales-today" onclick="filterSales('today')" class="px-2.5 py-1.5 bg-white text-black rounded-lg text-xs font-black shadow">Today</button>
+          <button onclick="switchView('tables')" class="px-2.5 py-1.5 bg-neutral-700 text-white rounded-lg text-xs font-bold">Close</button>
         </div>
       </div>
 
@@ -262,6 +263,7 @@
   </div>
 
   <script>
+    const OWNER_WHATSAPP_NUMBER = '917888950664';
     const SHEETDB_API = 'https://sheetdb.io/api/v1/mbu5t23na13vg';
 
     const DEFAULT_MENU = [
@@ -368,9 +370,9 @@
 
     const DEFAULT_CATEGORIES = ['1. Pizza Mania', '2. Special Veg Pizza', '1 Veg', '2 Veg', '3 Veg', 'Burger', 'Sandwich', 'Pasta', 'Wraps', 'Veg Sides', 'Soup & Salad', 'Shakes', 'Beverages', 'Meals'];
 
-    let menu = JSON.parse(localStorage.getItem('de_menu_v24')) || DEFAULT_MENU;
-    let orders = JSON.parse(localStorage.getItem('de_petpooja_orders_v24')) || [];
-    let heldOrders = JSON.parse(localStorage.getItem('de_held_orders_v24')) || [];
+    let menu = JSON.parse(localStorage.getItem('de_menu_v26')) || DEFAULT_MENU;
+    let orders = JSON.parse(localStorage.getItem('de_petpooja_orders_v26')) || [];
+    let heldOrders = JSON.parse(localStorage.getItem('de_held_orders_v26')) || [];
     let cart = {};
     let activeCategory = 'All';
     let currentOrderMode = 'Dine In';
@@ -381,9 +383,9 @@
     let activeResumedHoldId = null;
 
     function saveState() {
-      localStorage.setItem('de_menu_v24', JSON.stringify(menu));
-      localStorage.setItem('de_petpooja_orders_v24', JSON.stringify(orders));
-      localStorage.setItem('de_held_orders_v24', JSON.stringify(heldOrders));
+      localStorage.setItem('de_menu_v26', JSON.stringify(menu));
+      localStorage.setItem('de_petpooja_orders_v26', JSON.stringify(orders));
+      localStorage.setItem('de_held_orders_v26', JSON.stringify(heldOrders));
       updateHeldBadge();
       renderTableCards();
     }
@@ -799,15 +801,21 @@
       activeSalesFilter = timeFrame;
       const btnToday = document.getElementById('btn-sales-today');
       const btnYest = document.getElementById('btn-sales-yesterday');
+      const btnMonth = document.getElementById('btn-sales-month');
+
+      [btnToday, btnYest, btnMonth].forEach(b => {
+        b.className = 'px-2.5 py-1.5 bg-[#1e293b] hover:bg-[#334155] border border-neutral-700 rounded-lg text-xs font-bold text-white';
+      });
 
       if (timeFrame === 'today') {
-        btnToday.className = 'px-3 py-1.5 bg-white text-black rounded-lg text-xs font-black shadow';
-        btnYest.className = 'px-3 py-1.5 bg-[#1e293b] hover:bg-[#334155] border border-neutral-700 rounded-lg text-xs font-bold text-white';
+        btnToday.className = 'px-2.5 py-1.5 bg-white text-black rounded-lg text-xs font-black shadow';
         document.getElementById('sales-report-date-tag').innerText = 'Sales Today';
-      } else {
-        btnYest.className = 'px-3 py-1.5 bg-white text-black rounded-lg text-xs font-black shadow';
-        btnToday.className = 'px-3 py-1.5 bg-[#1e293b] hover:bg-[#334155] border border-neutral-700 rounded-lg text-xs font-bold text-white';
+      } else if (timeFrame === 'yesterday') {
+        btnYest.className = 'px-2.5 py-1.5 bg-white text-black rounded-lg text-xs font-black shadow';
         document.getElementById('sales-report-date-tag').innerText = 'Sales Yesterday';
+      } else if (timeFrame === 'month') {
+        btnMonth.className = 'px-2.5 py-1.5 bg-white text-black rounded-lg text-xs font-black shadow';
+        document.getElementById('sales-report-date-tag').innerText = 'Full Month Ledger';
       }
 
       renderSalesReport();
@@ -818,19 +826,32 @@
       tbody.innerHTML = '';
 
       const now = new Date();
-      const targetDate = new Date();
-      if (activeSalesFilter === 'yesterday') {
-        targetDate.setDate(now.getDate() - 1);
-      }
-
       const pad = n => n.toString().padStart(2, '0');
-      const targetLocalStr = `${targetDate.getFullYear()}-${pad(targetDate.getMonth() + 1)}-${pad(targetDate.getDate())}`;
 
-      const filtered = orders.filter(o => {
-        const d = new Date(o.time);
-        const orderLocalStr = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-        return orderLocalStr === targetLocalStr;
-      });
+      let filtered = orders;
+
+      if (activeSalesFilter === 'today') {
+        const todayStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+        filtered = orders.filter(o => {
+          const d = new Date(o.time);
+          return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}` === todayStr;
+        });
+      } else if (activeSalesFilter === 'yesterday') {
+        const yest = new Date();
+        yest.setDate(now.getDate() - 1);
+        const yestStr = `${yest.getFullYear()}-${pad(yest.getMonth() + 1)}-${pad(yest.getDate())}`;
+        filtered = orders.filter(o => {
+          const d = new Date(o.time);
+          return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}` === yestStr;
+        });
+      } else if (activeSalesFilter === 'month') {
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth();
+        filtered = orders.filter(o => {
+          const d = new Date(o.time);
+          return d.getFullYear() === currentYear && d.getMonth() === currentMonth;
+        });
+      }
 
       let totalSales = 0;
       filtered.forEach(o => totalSales += Number(o.grand_total) || 0);
@@ -839,7 +860,7 @@
       document.getElementById('sales-total-bills').innerText = filtered.length;
 
       if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-12 text-neutral-400 font-bold text-xs">No settled sales recorded for this day.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-12 text-neutral-400 font-bold text-xs">No records found for this period.</td></tr>`;
         return;
       }
 
@@ -911,6 +932,26 @@
           }
         })
         .catch(err => console.error('Cloud Fetch Error:', err));
+    }
+
+    // WHATSAPP BACKUP
+    function sendWhatsAppBill(record) {
+      const dateStr = new Date(record.time).toLocaleString();
+      let itemsText = record.items.map(i => `• ${i.name} (${i.variant}) x${i.qty} - ₹${i.price * i.qty}`).join('\n');
+      
+      const message = `*🍕 DELICIOUS EATZ BILL*` +
+                      `\n-------------------` +
+                      `\n*Bill #:* ${record.invoice_no}` +
+                      `\n*Time:* ${dateStr}` +
+                      `\n*Type:* ${record.mode}${record.table ? ' (Table ' + record.table + ')' : ''}` +
+                      `\n*Payment:* ${record.payment_mode}` +
+                      `\n-------------------` +
+                      `\n${itemsText}` +
+                      `\n-------------------` +
+                      `\n*Grand Total:* ₹${record.grand_total}`;
+
+      const encodedUrl = `https://wa.me/${OWNER_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+      window.open(encodedUrl, '_blank');
     }
 
     function generateKOTHTML() {
@@ -1133,7 +1174,6 @@
       printHTML(generateKOTHTML(), null);
     }
 
-    // SAVE BILL ONLY (NO PRINTING)
     function saveBillOnly() {
       const itemsPurchased = Object.values(cart);
       if (itemsPurchased.length === 0) return alert('Add items to order first!');
@@ -1165,6 +1205,7 @@
 
       orders.unshift(record);
       syncToCloud(record);
+      sendWhatsAppBill(record);
 
       if (activeResumedHoldId) {
         heldOrders = heldOrders.filter(h => h.hold_id !== activeResumedHoldId);
@@ -1207,6 +1248,7 @@
 
       orders.unshift(record);
       syncToCloud(record);
+      sendWhatsAppBill(record);
 
       if (activeResumedHoldId) {
         heldOrders = heldOrders.filter(h => h.hold_id !== activeResumedHoldId);
