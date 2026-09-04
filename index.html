@@ -24,7 +24,7 @@
         <i class="fa-solid fa-bolt mr-1 text-[10px]"></i> POS
       </div>
       <span class="font-extrabold text-sm tracking-tight text-white">DELICIOUS EATZ</span>
-      <span class="text-[10px] text-neutral-400 bg-[#1e293b] px-2 py-0.5 rounded font-mono">CLOUD SYNCED</span>
+      <span class="text-[10px] text-neutral-400 bg-[#1e293b] px-2 py-0.5 rounded font-mono">FULLY SYNCED</span>
     </div>
 
     <div class="flex items-center space-x-2">
@@ -261,7 +261,6 @@
   </div>
 
   <script>
-    // SHEETDB CLOUD SYNC ENDPOINT
     const SHEETDB_API = 'https://sheetdb.io/api/v1/mbu5t23na13vg';
 
     const DEFAULT_MENU = [
@@ -368,9 +367,9 @@
 
     const DEFAULT_CATEGORIES = ['1. Pizza Mania', '2. Special Veg Pizza', '1 Veg', '2 Veg', '3 Veg', 'Burger', 'Sandwich', 'Pasta', 'Wraps', 'Veg Sides', 'Soup & Salad', 'Shakes', 'Beverages', 'Meals'];
 
-    let menu = JSON.parse(localStorage.getItem('de_menu_v21')) || DEFAULT_MENU;
-    let orders = JSON.parse(localStorage.getItem('de_petpooja_orders_v21')) || [];
-    let heldOrders = JSON.parse(localStorage.getItem('de_held_orders_v21')) || [];
+    let menu = JSON.parse(localStorage.getItem('de_menu_v22')) || DEFAULT_MENU;
+    let orders = JSON.parse(localStorage.getItem('de_petpooja_orders_v22')) || [];
+    let heldOrders = JSON.parse(localStorage.getItem('de_held_orders_v22')) || [];
     let cart = {};
     let activeCategory = 'All';
     let currentOrderMode = 'Dine In';
@@ -381,9 +380,9 @@
     let activeResumedHoldId = null;
 
     function saveState() {
-      localStorage.setItem('de_menu_v21', JSON.stringify(menu));
-      localStorage.setItem('de_petpooja_orders_v21', JSON.stringify(orders));
-      localStorage.setItem('de_held_orders_v21', JSON.stringify(heldOrders));
+      localStorage.setItem('de_menu_v22', JSON.stringify(menu));
+      localStorage.setItem('de_petpooja_orders_v22', JSON.stringify(orders));
+      localStorage.setItem('de_held_orders_v22', JSON.stringify(heldOrders));
       updateHeldBadge();
       renderTableCards();
     }
@@ -863,7 +862,7 @@
       });
     }
 
-    // SYNC ORDER TO GOOGLE SHEET VIA SHEETDB
+    // CLOUD SYNC & FETCH
     function syncToCloud(record) {
       const payload = {
         data: {
@@ -881,6 +880,27 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       }).catch(err => console.error('Cloud Sync Error:', err));
+    }
+
+    function fetchCloudSales() {
+      fetch(SHEETDB_API)
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) {
+            orders = data.map(row => ({
+              invoice_no: row.Invoice,
+              time: new Date(row.Time).toISOString(),
+              mode: row.Mode ? row.Mode.split(' ')[0] : 'Dine In',
+              table: row.Mode && row.Mode.includes('T') ? row.Mode.split('T')[1] : null,
+              payment_mode: row.Payment,
+              discount: Number(row.Discount) || 0,
+              bogo_discount: 0,
+              grand_total: Number(row.Total) || 0
+            })).reverse();
+            renderSalesReport();
+          }
+        })
+        .catch(err => console.error('Cloud Fetch Error:', err));
     }
 
     function generateKOTHTML() {
@@ -1285,7 +1305,10 @@
       });
 
       if (view === 'tables') renderTableCards();
-      if (view === 'sales') filterSales('today');
+      if (view === 'sales') {
+        fetchCloudSales();
+        filterSales('today');
+      }
       if (view === 'held') renderHeldOrders();
       if (view === 'menu') renderMenuEditor();
     }
