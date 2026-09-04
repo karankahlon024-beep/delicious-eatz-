@@ -24,21 +24,30 @@
     .brand-blue { background-color: #1976d2; }
 
     @media print {
+      @page {
+        size: landscape;
+        margin: 4mm;
+      }
       body * { visibility: hidden !important; }
       #printable-receipt, #printable-receipt * { visibility: visible !important; }
       #printable-receipt {
+        display: block !important;
         position: absolute;
         left: 0;
         top: 0;
         width: 100% !important;
+        max-width: 140mm;
         margin: 0 !important;
         padding: 4mm !important;
         box-shadow: none !important;
         background: #fff !important;
         color: #000 !important;
       }
-      .format-58mm { width: 58mm !important; font-size: 10px !important; }
-      .format-80mm { width: 80mm !important; font-size: 12px !important; }
+      .receipt-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8mm;
+      }
     }
   </style>
 </head>
@@ -90,10 +99,10 @@
       <div id="items-grid" class="flex-1 overflow-y-auto p-1.5 grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1.5 content-start no-scrollbar"></div>
     </section>
 
-    <!-- RIGHT PANEL: BILL / TICKET (ALL ACTIONS PLACED AT THE TOP) -->
+    <!-- RIGHT PANEL: BILL / TICKET (ALL ACTIONS ON TOP) -->
     <section class="w-[42%] sm:w-[40%] bg-[#1a1b23] flex flex-col overflow-hidden flex-shrink-0">
       
-      <!-- TOP ACTION BLOCK: SAFE IN WORKING MONITOR AREA -->
+      <!-- TOP ACTION BLOCK: VISIBLE IN UPPER SCREEN -->
       <div class="p-1.5 bg-[#14151b] border-b border-[#2a2d3d] text-xs flex-shrink-0 space-y-1.5 shadow-md">
         
         <!-- Type & Table Row -->
@@ -143,7 +152,7 @@
           <button onclick="setPayment('Card', this)" class="pay-btn py-1 rounded text-[9px] font-semibold bg-[#252835] text-neutral-300">Card</button>
         </div>
 
-        <!-- Action Buttons: Hold, Clear, Settle (Right at the top!) -->
+        <!-- Action Buttons: Hold, Clear, Settle -->
         <div class="grid grid-cols-3 gap-1">
           <button onclick="holdCurrentCart()" class="py-1.5 rounded bg-amber-600 hover:bg-amber-500 text-black text-[10px] font-bold tracking-wide">
             <i class="fa-solid fa-pause mr-0.5"></i> Hold
@@ -157,7 +166,7 @@
         </div>
       </div>
 
-      <!-- Ticket Items List (Scrolls downward) -->
+      <!-- Ticket Items List -->
       <div class="flex-1 overflow-y-auto p-1.5 space-y-1 no-scrollbar" id="cart-items-container"></div>
     </section>
   </main>
@@ -176,8 +185,6 @@
   <!-- 3. EDIT MENU VIEW -->
   <main id="view-menu" class="flex-1 overflow-y-auto p-3 bg-[#121319] hidden pb-16">
     <div class="max-w-xl mx-auto space-y-3">
-      
-      <!-- Top Action Controls -->
       <div class="flex justify-between items-center">
         <h2 class="text-xs font-bold text-white"><i class="fa-solid fa-pen-to-square text-amber-400 mr-1.5"></i> Menu Manager</h2>
         <div class="flex space-x-1.5">
@@ -190,10 +197,8 @@
         </div>
       </div>
 
-      <!-- Add New Item Card -->
       <div id="add-item-card" class="bg-[#1b1c26] border border-emerald-500/40 p-2.5 rounded-xl hidden space-y-2">
         <h3 class="text-xs font-bold text-emerald-400"><i class="fa-solid fa-utensils mr-1"></i> Add Custom Food Item</h3>
-        
         <div class="space-y-1.5">
           <div>
             <label class="text-[9px] text-neutral-400 block mb-0.5">Item Name</label>
@@ -257,46 +262,39 @@
     </div>
   </main>
 
-  <!-- THERMAL RECEIPT -->
+  <!-- THERMAL RECEIPT (DESIGNED FOR HORIZONTAL / TOP PREVIEW) -->
   <div id="printable-receipt" class="hidden">
-    <div class="format-58mm font-mono text-xs">
-      <div style="text-align: center; border-bottom: 1px dashed #000; padding-bottom: 6px;">
-        <p style="font-size: 15px; font-weight: 900; margin: 0;">DELICIOUS EATZ</p>
-        <p style="margin: 2px 0 0; font-size: 10px;">Near HDFC Bank, Mansar Road, Budhabarh</p>
-        <p style="margin: 2px 0 0; font-size: 10px;">Ph: 83600-84534, 78889-50664</p>
-      </div>
-
-      <div style="padding: 4px 0; border-bottom: 1px dashed #000; font-size: 11px;">
-        <div style="display: flex; justify-content: space-between;">
-          <span id="pr-invoice">DE-1000</span>
-          <span id="pr-time">12:00</span>
+    <div class="font-mono text-xs" style="width: 100%; border: 1px dashed #000; padding: 8px;">
+      <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #000; padding-bottom: 4px;">
+        <div>
+          <span style="font-size: 14px; font-weight: 900;">DELICIOUS EATZ</span>
+          <div style="font-size: 9px;">Near HDFC Bank, Mansar Road, Budhabarh</div>
+          <div style="font-size: 9px;">Ph: 83600-84534, 78889-50664</div>
         </div>
-        <div id="pr-mode" style="margin-top: 2px;">Type: Dine-in (T1)</div>
-        <div id="pr-phone" style="display: none; margin-top: 2px; font-weight: bold;">Contact: -</div>
-      </div>
-
-      <div id="pr-items" style="padding: 6px 0; border-bottom: 1px dashed #000;"></div>
-
-      <div style="padding: 4px 0; border-bottom: 1px dashed #000; font-size: 11px;">
-        <div style="display: flex; justify-content: space-between;">
-          <span>Subtotal:</span><span id="pr-sub">₹0</span>
-        </div>
-        <div style="display: flex; justify-content: space-between;">
-          <span>Discount:</span><span id="pr-disc">₹0</span>
+        <div style="text-align: right; font-size: 10px;">
+          <div id="pr-invoice" style="font-weight: bold;">DE-1000</div>
+          <div id="pr-time">12:00</div>
+          <div id="pr-mode">Type: Dine-in</div>
+          <div id="pr-phone" style="display: none; font-weight: bold;"></div>
         </div>
       </div>
 
-      <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 14px; padding: 6px 0; border-bottom: 1px dashed #000;">
-        <span>NET AMOUNT:</span>
-        <span id="pr-grand">₹0</span>
+      <div id="pr-items" style="padding: 4px 0; border-bottom: 1px dashed #000; font-size: 11px;"></div>
+
+      <div style="display: flex; justify-content: space-between; padding-top: 4px; font-size: 11px;">
+        <div>
+          <span>Subtotal: <b id="pr-sub">₹0</b></span> |
+          <span>Disc: <b id="pr-disc">₹0</b></span>
+        </div>
+        <div>
+          <span style="font-size: 13px; font-weight: 900;">NET: <span id="pr-grand" style="font-size: 14px;">₹0</span></span>
+          <span id="pr-pay" style="font-size: 10px; margin-left: 8px;">(Cash)</span>
+        </div>
       </div>
 
-      <div style="font-size: 10px; padding-top: 4px; display: flex; justify-content: space-between;">
-        <span>Payment Mode:</span>
-        <span id="pr-pay">Cash</span>
+      <div style="text-align: center; font-size: 9px; margin-top: 4px; border-top: 1px dashed #000; padding-top: 2px;">
+        *** Thank you! Visit Again ***
       </div>
-
-      <p style="text-align: center; font-size: 10px; margin-top: 8px;">*** Thank you! Visit Again ***</p>
     </div>
   </div>
 
@@ -416,9 +414,9 @@
 
     const DEFAULT_CATEGORIES = ['1. Pizza Mania', '2. Special Veg Pizza', '1 Veg', '2 Veg', '3 Veg', 'Burger', 'Sandwich', 'Pasta', 'Wraps', 'Veg Sides', 'Soup & Salad', 'Shakes', 'Beverages', 'Meals'];
 
-    let menu = JSON.parse(localStorage.getItem('de_menu_v7')) || DEFAULT_MENU;
-    let orders = JSON.parse(localStorage.getItem('de_petpooja_orders_v7')) || [];
-    let heldOrders = JSON.parse(localStorage.getItem('de_held_orders_v7')) || [];
+    let menu = JSON.parse(localStorage.getItem('de_menu_v8')) || DEFAULT_MENU;
+    let orders = JSON.parse(localStorage.getItem('de_petpooja_orders_v8')) || [];
+    let heldOrders = JSON.parse(localStorage.getItem('de_held_orders_v8')) || [];
     let cart = {};
     let activeCategory = 'All';
     let currentOrderMode = 'Dine-in';
@@ -426,9 +424,9 @@
     let selectedPayment = 'Cash';
 
     function saveState() {
-      localStorage.setItem('de_menu_v7', JSON.stringify(menu));
-      localStorage.setItem('de_petpooja_orders_v7', JSON.stringify(orders));
-      localStorage.setItem('de_held_orders_v7', JSON.stringify(heldOrders));
+      localStorage.setItem('de_menu_v8', JSON.stringify(menu));
+      localStorage.setItem('de_petpooja_orders_v8', JSON.stringify(orders));
+      localStorage.setItem('de_held_orders_v8', JSON.stringify(heldOrders));
       updateHeldBadge();
     }
 
@@ -464,7 +462,6 @@
     function renderCategories() {
       const bar = document.getElementById('category-bar');
       bar.innerHTML = '';
-      
       const allCats = ['All', ...getUniqueCategories()];
       allCats.forEach(cat => {
         const btn = document.createElement('button');
@@ -579,9 +576,7 @@
 
     function holdCurrentCart() {
       const itemsInCart = Object.values(cart);
-      if (itemsInCart.length === 0) {
-        return alert('Cart is empty. Add items before putting on hold.');
-      }
+      if (itemsInCart.length === 0) return alert('Cart is empty. Add items before putting on hold.');
 
       const { sub, disc, grand } = recalcCart();
       const phone = document.getElementById('delivery-phone-input').value.trim();
@@ -608,9 +603,7 @@
       if (idx === -1) return;
 
       if (Object.keys(cart).length > 0) {
-        if (!confirm('Current cart has items. Overwrite with resumed order?')) {
-          return;
-        }
+        if (!confirm('Current cart has items. Overwrite with resumed order?')) return;
       }
 
       const target = heldOrders[idx];
@@ -637,7 +630,6 @@
 
       heldOrders.splice(idx, 1);
       saveState();
-
       switchView('register');
       renderCart();
     }
@@ -676,12 +668,8 @@
             <p class="font-mono font-bold text-emerald-400 text-xs mt-1">₹${h.grand}</p>
           </div>
           <div class="flex items-center space-x-1.5">
-            <button onclick="resumeHeldOrder('${h.hold_id}')" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-400 text-black text-[10px] font-bold rounded">
-              Resume
-            </button>
-            <button onclick="deleteHeldOrder('${h.hold_id}')" class="px-2 py-1 bg-neutral-800 hover:bg-red-500/20 text-neutral-400 hover:text-red-400 text-[10px] rounded border border-neutral-700">
-              <i class="fa-solid fa-trash"></i>
-            </button>
+            <button onclick="resumeHeldOrder('${h.hold_id}')" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-400 text-black text-[10px] font-bold rounded">Resume</button>
+            <button onclick="deleteHeldOrder('${h.hold_id}')" class="px-2 py-1 bg-neutral-800 hover:bg-red-500/20 text-neutral-400 hover:text-red-400 text-[10px] rounded border border-neutral-700"><i class="fa-solid fa-trash"></i></button>
           </div>
         `;
         container.appendChild(card);
@@ -695,8 +683,8 @@
 
       if (entries.length === 0) {
         container.innerHTML = `
-          <div class="h-28 flex flex-col items-center justify-center text-neutral-600 text-[11px]">
-            <i class="fa-solid fa-receipt text-xl mb-1"></i>
+          <div class="h-24 flex flex-col items-center justify-center text-neutral-600 text-[11px]">
+            <i class="fa-solid fa-receipt text-lg mb-1"></i>
             <span>No items in order</span>
           </div>
         `;
@@ -804,7 +792,7 @@
       orders.unshift(record);
       saveState();
 
-      // Thermal Receipt
+      // Thermal Receipt Rendering
       document.getElementById('pr-invoice').innerText = invoiceNo;
       document.getElementById('pr-time').innerText = timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       document.getElementById('pr-mode').innerText = `Type: ${currentOrderMode}${currentOrderMode === 'Dine-in' ? ' (' + selectedTable + ')' : ''}`;
@@ -831,7 +819,7 @@
       document.getElementById('pr-sub').innerText = `₹${sub}`;
       document.getElementById('pr-disc').innerText = `-₹${disc}`;
       document.getElementById('pr-grand').innerText = `₹${grand}`;
-      document.getElementById('pr-pay').innerText = `${selectedPayment} (₹${grand})`;
+      document.getElementById('pr-pay').innerText = `(${selectedPayment})`;
 
       window.print();
       resetCartFields();
@@ -1024,7 +1012,6 @@
       });
     }
 
-    // Startup
     renderCategories();
     renderItems();
     renderCart();
