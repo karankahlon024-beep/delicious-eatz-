@@ -3,329 +3,326 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Delicious Eatz POS</title>
+  <title>Delicious Eatz - POS Terminal</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: #f4f5f7;
-      color: #111827;
-      -webkit-tap-highlight-color: transparent;
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+    
+    * {
+      box-sizing: border-box;
       user-select: none;
+      -webkit-user-select: none;
+    }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #0f172a;
+      color: #0f172a;
+      overflow: hidden;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
     }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    /* Hardware POS tactile active states */
+    .pos-btn:active {
+      transform: translateY(1px);
+    }
   </style>
 </head>
-<body class="h-screen w-screen overflow-hidden flex flex-col bg-[#eef0f3]">
+<body class="h-screen w-screen flex flex-col bg-[#0f172a]">
 
-  <!-- TOP HEADER (BLACK THEME) -->
-  <header class="bg-[#111827] text-white px-2.5 py-1.5 flex items-center justify-between text-xs z-30 flex-shrink-0 shadow-sm border-b border-black">
+  <!-- INDUSTRIAL TOP CONTROL BAR -->
+  <header class="bg-[#090d16] border-b border-[#1e293b] px-3 py-1.5 flex items-center justify-between text-white flex-shrink-0 z-30">
     <div class="flex items-center space-x-2">
-      <button onclick="switchView('tables')" class="bg-black hover:bg-neutral-800 text-white font-extrabold px-2.5 py-1 rounded text-[11px] tracking-wider border border-neutral-700">
-        <i class="fa-solid fa-layer-group mr-1 text-[10px]"></i> TABLES
-      </button>
-      <button onclick="startDirectOrder()" class="bg-neutral-800 hover:bg-neutral-700 text-white px-2.5 py-1 rounded text-[10px] font-bold border border-neutral-700">
-        + New Order
-      </button>
-      <span class="text-[12px] font-extrabold tracking-wide text-neutral-200 hidden sm:inline ml-1">
-        DELICIOUS EATZ
-      </span>
-      <span class="text-neutral-400 text-[10px] hidden md:inline">| Budhabarh</span>
+      <div class="bg-white text-black px-2 py-0.5 rounded font-black text-xs tracking-wider flex items-center">
+        <i class="fa-solid fa-bolt mr-1 text-[10px]"></i> POS
+      </div>
+      <span class="font-extrabold text-sm tracking-tight text-white">DELICIOUS EATZ</span>
+      <span class="text-[10px] text-neutral-400 bg-[#1e293b] px-2 py-0.5 rounded font-mono">STATION-01</span>
     </div>
 
-    <!-- Right Utilities -->
-    <div class="flex items-center space-x-1.5 text-[10px]">
-      <button onclick="switchView('sales')" class="bg-white hover:bg-neutral-100 text-black font-extrabold px-2.5 py-1 rounded shadow-sm flex items-center">
-        <i class="fa-solid fa-chart-pie mr-1"></i> Sales Report
+    <!-- Right Controls -->
+    <div class="flex items-center space-x-2">
+      <button onclick="switchView('tables')" id="nav-btn-tables" class="px-3 py-1 bg-white text-black font-extrabold text-xs rounded shadow-sm flex items-center">
+        <i class="fa-solid fa-table-cells mr-1.5 text-[11px]"></i> Tables
       </button>
-      <button onclick="switchView('held')" class="bg-neutral-800 hover:bg-neutral-700 text-amber-300 border border-neutral-700 font-bold px-2 py-1 rounded">
-        Held (<span id="held-count-badge">0</span>)
+      <button onclick="switchView('sales')" id="nav-btn-sales" class="px-3 py-1 bg-[#1e293b] hover:bg-[#334155] text-white font-bold text-xs rounded border border-[#334155] flex items-center">
+        <i class="fa-solid fa-chart-line mr-1.5 text-[11px]"></i> Sales Report
       </button>
-      <button onclick="switchView('menu')" class="bg-neutral-800 hover:bg-neutral-700 text-neutral-200 border border-neutral-700 font-semibold px-2 py-1 rounded">
-        Menu Manager
+      <button onclick="switchView('held')" id="nav-btn-held" class="px-2.5 py-1 bg-[#1e293b] hover:bg-[#334155] text-amber-400 font-bold text-xs rounded border border-[#334155] flex items-center">
+        <i class="fa-solid fa-pause mr-1 text-[10px]"></i> Held (<span id="held-count-badge">0</span>)
+      </button>
+      <button onclick="switchView('menu')" id="nav-btn-menu" class="px-2.5 py-1 bg-[#1e293b] hover:bg-[#334155] text-neutral-300 font-bold text-xs rounded border border-[#334155]">
+        <i class="fa-solid fa-sliders text-[11px]"></i>
       </button>
     </div>
   </header>
 
-  <!-- 1. TABLE LAYOUT (MAIN FACE) -->
-  <main id="view-tables" class="flex-1 flex flex-col p-2 bg-[#eef0f3] overflow-y-auto">
-    <div class="bg-white border border-neutral-300 rounded p-1.5 flex items-center justify-between shadow-sm mb-2">
+  <!-- ================= VIEW 1: HARDWARE TABLE BOARD ================= -->
+  <main id="view-tables" class="flex-1 flex flex-col p-3 bg-[#0b1120] overflow-y-auto">
+    <!-- Top Action Ribbon -->
+    <div class="bg-[#131d31] border border-[#1e293b] rounded-xl p-2.5 flex items-center justify-between mb-3 shadow-lg">
       <div class="flex items-center space-x-2">
-        <span class="font-extrabold text-xs text-neutral-900 tracking-wide uppercase">Table Layout</span>
-        <span class="text-[10px] bg-neutral-100 text-neutral-600 px-1.5 py-0.5 rounded border border-neutral-200 font-semibold">Dine In</span>
+        <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
+        <span class="text-xs font-black text-white uppercase tracking-wider">Floor Plan & Orders</span>
       </div>
 
-      <div class="flex items-center space-x-1.5">
-        <button onclick="setModeAndOpen('Delivery')" class="bg-black hover:bg-neutral-800 text-white font-bold text-[11px] px-3 py-1 rounded shadow-sm">
-          <i class="fa-solid fa-motorcycle mr-1"></i> Delivery
+      <div class="flex items-center space-x-2">
+        <button onclick="setModeAndOpen('Delivery')" class="pos-btn px-4 py-2 bg-black hover:bg-neutral-900 border border-[#334155] text-amber-400 font-extrabold text-xs rounded-lg shadow flex items-center">
+          <i class="fa-solid fa-motorcycle mr-1.5 text-sm"></i> NEW DELIVERY
         </button>
-        <button onclick="setModeAndOpen('Takeaway')" class="bg-black hover:bg-neutral-800 text-white font-bold text-[11px] px-3 py-1 rounded shadow-sm">
-          <i class="fa-solid fa-bag-shopping mr-1"></i> Pick Up
+        <button onclick="setModeAndOpen('Takeaway')" class="pos-btn px-4 py-2 bg-black hover:bg-neutral-900 border border-[#334155] text-white font-extrabold text-xs rounded-lg shadow flex items-center">
+          <i class="fa-solid fa-bag-shopping mr-1.5 text-sm"></i> TAKEAWAY / PICKUP
         </button>
       </div>
     </div>
 
-    <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
-      <button onclick="openTableRegister('1')" class="h-20 bg-white hover:bg-neutral-50 border-2 border-neutral-400 hover:border-black rounded-lg flex flex-col items-center justify-center p-1 shadow-sm transition">
-        <span class="text-lg font-black text-neutral-900">1</span>
-        <span class="text-[9px] text-neutral-500 font-bold uppercase mt-0.5">Table 1</span>
-      </button>
-      <button onclick="openTableRegister('2')" class="h-20 bg-white hover:bg-neutral-50 border-2 border-neutral-400 hover:border-black rounded-lg flex flex-col items-center justify-center p-1 shadow-sm transition">
-        <span class="text-lg font-black text-neutral-900">2</span>
-        <span class="text-[9px] text-neutral-500 font-bold uppercase mt-0.5">Table 2</span>
-      </button>
-      <button onclick="openTableRegister('3')" class="h-20 bg-white hover:bg-neutral-50 border-2 border-neutral-400 hover:border-black rounded-lg flex flex-col items-center justify-center p-1 shadow-sm transition">
-        <span class="text-lg font-black text-neutral-900">3</span>
-        <span class="text-[9px] text-neutral-500 font-bold uppercase mt-0.5">Table 3</span>
-      </button>
-      <button onclick="openTableRegister('4')" class="h-20 bg-white hover:bg-neutral-50 border-2 border-neutral-400 hover:border-black rounded-lg flex flex-col items-center justify-center p-1 shadow-sm transition">
-        <span class="text-lg font-black text-neutral-900">4</span>
-        <span class="text-[9px] text-neutral-500 font-bold uppercase mt-0.5">Table 4</span>
-      </button>
-      <button onclick="openTableRegister('5')" class="h-20 bg-white hover:bg-neutral-50 border-2 border-neutral-400 hover:border-black rounded-lg flex flex-col items-center justify-center p-1 shadow-sm transition">
-        <span class="text-lg font-black text-neutral-900">5</span>
-        <span class="text-[9px] text-neutral-500 font-bold uppercase mt-0.5">Table 5</span>
-      </button>
+    <!-- Table Grid (Large Tactile Industrial Cards) -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3" id="table-cards-container">
+      <!-- Generated Dynamically -->
     </div>
   </main>
 
-  <!-- 2. REGISTER / BILLING -->
+  <!-- ================= VIEW 2: HIGH-DENSITY TERMINAL REGISTER ================= -->
   <main id="view-register" class="flex-1 flex flex-row overflow-hidden hidden bg-white">
-    <!-- LEFT: MENU ITEMS -->
-    <section class="w-[58%] sm:w-[60%] flex flex-col overflow-hidden bg-[#fafbfc] border-r border-neutral-300">
-      <div class="p-1.5 border-b border-neutral-300 bg-white flex items-center space-x-1.5 flex-shrink-0">
-        <button onclick="switchView('tables')" class="px-2 py-1 bg-neutral-100 hover:bg-neutral-200 border border-neutral-300 rounded text-[10px] font-extrabold text-neutral-800">
-          <i class="fa-solid fa-arrow-left mr-0.5"></i> Tables
+    
+    <!-- LEFT PANEL: CATEGORIES & TOUCH TILES -->
+    <section class="w-[62%] flex flex-col overflow-hidden bg-[#f8fafc] border-r border-[#cbd5e1]">
+      
+      <!-- Top Search & Quick Bar -->
+      <div class="p-2 border-b border-[#cbd5e1] bg-white flex items-center space-x-2 flex-shrink-0">
+        <button onclick="switchView('tables')" class="px-3 py-1.5 bg-[#0f172a] hover:bg-black text-white rounded-lg text-xs font-black flex items-center">
+          <i class="fa-solid fa-arrow-left mr-1.5"></i> TABLES
         </button>
         <div class="relative flex-1">
-          <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2 text-[10px] text-neutral-400"></i>
-          <input id="item-search" type="text" placeholder="Search menu..." oninput="renderItems()" class="w-full pl-7 pr-2 py-1 bg-white border border-neutral-300 rounded text-[11px] text-black focus:outline-none focus:border-black" />
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-neutral-400"></i>
+          <input id="item-search" type="text" placeholder="Search menu..." oninput="renderItems()" class="w-full pl-8 pr-3 py-1.5 bg-[#f1f5f9] border border-[#cbd5e1] rounded-lg text-xs font-bold text-black focus:outline-none focus:border-black" />
         </div>
       </div>
 
-      <!-- Scrollable Category Ribbon -->
-      <div class="relative flex items-center bg-neutral-100 border-b border-neutral-300 px-1 py-1 flex-shrink-0">
-        <button onclick="scrollCategories(-120)" class="w-5 h-6 bg-white hover:bg-neutral-200 border border-neutral-300 rounded flex items-center justify-center text-[10px] text-neutral-800 font-bold mr-1 flex-shrink-0 shadow-xs">
+      <!-- Categories Ribbon with Scroll Arrows -->
+      <div class="flex items-center bg-[#e2e8f0] border-b border-[#cbd5e1] p-1 flex-shrink-0">
+        <button onclick="scrollCategories(-140)" class="w-6 h-7 bg-white hover:bg-neutral-200 border border-[#cbd5e1] rounded flex items-center justify-center text-xs font-black mr-1 flex-shrink-0">
           <i class="fa-solid fa-chevron-left"></i>
         </button>
-        <div id="category-bar" onwheel="handleCatWheel(event)" class="flex-1 flex items-center space-x-1 overflow-x-auto no-scrollbar scroll-smooth"></div>
-        <button onclick="scrollCategories(120)" class="w-5 h-6 bg-white hover:bg-neutral-200 border border-neutral-300 rounded flex items-center justify-center text-[10px] text-neutral-800 font-bold ml-1 flex-shrink-0 shadow-xs">
+        <div id="category-bar" onwheel="handleCatWheel(event)" class="flex-1 flex items-center space-x-1.5 overflow-x-auto no-scrollbar scroll-smooth"></div>
+        <button onclick="scrollCategories(140)" class="w-6 h-7 bg-white hover:bg-neutral-200 border border-[#cbd5e1] rounded flex items-center justify-center text-xs font-black ml-1 flex-shrink-0">
           <i class="fa-solid fa-chevron-right"></i>
         </button>
       </div>
 
-      <!-- Items Grid -->
-      <div id="items-grid" class="flex-1 overflow-y-auto p-1.5 grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-1.5 content-start no-scrollbar"></div>
+      <!-- Food Menu Items Tiles -->
+      <div id="items-grid" class="flex-1 overflow-y-auto p-2 grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 content-start no-scrollbar"></div>
     </section>
 
-    <!-- RIGHT: CART & CONTROLS -->
-    <section class="w-[42%] sm:w-[40%] bg-white flex flex-col overflow-hidden flex-shrink-0 border-l border-neutral-200">
-      <div class="p-1.5 bg-neutral-50 border-b border-neutral-300 text-xs flex-shrink-0 space-y-1.5 shadow-sm">
+    <!-- RIGHT PANEL: CHECKOUT, TICKET & TENDER -->
+    <section class="w-[38%] flex flex-col overflow-hidden bg-white">
+      
+      <!-- Top Order Info & Status -->
+      <div class="p-2 bg-[#f8fafc] border-b border-[#cbd5e1] space-y-1.5 flex-shrink-0 shadow-sm">
         
         <div class="flex items-center justify-between">
           <div class="grid grid-cols-3 gap-1 flex-1 mr-2">
-            <button onclick="setOrderMode('Dine In', this)" class="mode-btn py-0.5 rounded text-[9px] font-extrabold bg-black text-white truncate">Dine In</button>
-            <button onclick="setOrderMode('Takeaway', this)" class="mode-btn py-0.5 rounded text-[9px] font-bold bg-white border border-neutral-300 text-neutral-700 truncate">Pick Up</button>
-            <button onclick="setOrderMode('Delivery', this)" class="mode-btn py-0.5 rounded text-[9px] font-bold bg-white border border-neutral-300 text-neutral-700 truncate">Delivery</button>
+            <button onclick="setOrderMode('Dine In', this)" class="mode-btn py-1 rounded text-[10px] font-black uppercase tracking-wider bg-black text-white">Dine In</button>
+            <button onclick="setOrderMode('Takeaway', this)" class="mode-btn py-1 rounded text-[10px] font-bold uppercase tracking-wider bg-white border border-[#cbd5e1] text-neutral-700">Pickup</button>
+            <button onclick="setOrderMode('Delivery', this)" class="mode-btn py-1 rounded text-[10px] font-bold uppercase tracking-wider bg-white border border-[#cbd5e1] text-neutral-700">Delivery</button>
           </div>
-          <span id="current-invoice-tag" class="font-mono text-neutral-800 text-[10px] font-black">#TBL-1</span>
-        </div>
-
-        <div id="table-select-row" class="flex items-center space-x-1 overflow-x-auto no-scrollbar">
-          <button onclick="setTable('1', this)" class="table-chip px-1.5 py-0.5 rounded bg-black text-white border border-black text-[9px] font-black">T1</button>
-          <button onclick="setTable('2', this)" class="table-chip px-1.5 py-0.5 rounded bg-white text-neutral-700 border border-neutral-300 text-[9px]">T2</button>
-          <button onclick="setTable('3', this)" class="table-chip px-1.5 py-0.5 rounded bg-white text-neutral-700 border border-neutral-300 text-[9px]">T3</button>
-          <button onclick="setTable('4', this)" class="table-chip px-1.5 py-0.5 rounded bg-white text-neutral-700 border border-neutral-300 text-[9px]">T4</button>
-          <button onclick="setTable('5', this)" class="table-chip px-1.5 py-0.5 rounded bg-white text-neutral-700 border border-neutral-300 text-[9px]">T5</button>
+          <span id="current-invoice-tag" class="font-mono text-black text-xs font-black bg-[#e2e8f0] px-2 py-0.5 rounded">#TBL-1</span>
         </div>
 
         <div id="delivery-phone-wrap" class="hidden">
-          <div class="flex items-center bg-white border border-amber-500 rounded px-1.5 py-0.5">
-            <i class="fa-solid fa-phone text-amber-600 text-[9px] mr-1"></i>
-            <input id="delivery-phone-input" type="tel" placeholder="Customer Phone #..." class="w-full bg-transparent text-[10px] text-black placeholder-neutral-400 focus:outline-none font-mono" />
+          <div class="flex items-center bg-white border-2 border-amber-500 rounded-lg px-2 py-1">
+            <i class="fa-solid fa-phone text-amber-600 text-xs mr-2"></i>
+            <input id="delivery-phone-input" type="tel" placeholder="Customer Contact Number..." class="w-full bg-transparent text-xs font-bold font-mono text-black placeholder-neutral-400 focus:outline-none" />
           </div>
         </div>
 
-        <!-- Totals Line -->
-        <div class="bg-white p-1.5 rounded border border-neutral-300 flex flex-col space-y-0.5 text-[10px]">
-          <div class="flex items-center justify-between">
-            <span class="text-neutral-600">Sub: <strong id="cart-subtotal" class="text-black font-mono">₹0</strong></span>
+        <!-- Totals Strip -->
+        <div class="bg-white p-2 rounded-lg border border-[#cbd5e1] flex flex-col space-y-1">
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-neutral-500 font-bold">Subtotal: <strong id="cart-subtotal" class="text-black font-mono">₹0</strong></span>
             <div class="flex items-center space-x-1">
-              <span class="text-neutral-600">Disc:</span>
-              <input id="cart-discount" type="number" value="0" min="0" oninput="recalcCart()" class="w-10 bg-neutral-50 border border-neutral-300 rounded px-1 text-right text-black font-mono font-bold text-[9px]" />
+              <span class="text-neutral-500 font-bold">Disc:</span>
+              <input id="cart-discount" type="number" value="0" min="0" oninput="recalcCart()" class="w-12 bg-[#f1f5f9] border border-[#cbd5e1] rounded px-1.5 py-0.5 text-right font-mono font-bold text-xs" />
             </div>
-            <div class="text-right">
-              <span class="text-[9px] text-neutral-500">Net:</span>
-              <span id="cart-grand" class="text-black font-mono font-black text-sm ml-1">₹0</span>
+            <div>
+              <span class="text-[10px] font-bold text-neutral-400">NET:</span>
+              <span id="cart-grand" class="text-black font-mono font-black text-base ml-1">₹0</span>
             </div>
           </div>
-          <div id="bogo-applied-info" class="hidden text-emerald-700 text-[9px] font-bold flex justify-between border-t border-neutral-200 pt-0.5">
-            <span><i class="fa-solid fa-tag mr-0.5"></i> BOGO Free Item:</span>
+          <div id="bogo-applied-info" class="hidden text-emerald-700 text-[10px] font-black flex justify-between border-t border-neutral-200 pt-1">
+            <span><i class="fa-solid fa-gift mr-1"></i> BOGO Applied:</span>
             <span id="bogo-discount-amount" class="font-mono">-₹0</span>
           </div>
         </div>
 
-        <!-- Payment Modes -->
+        <!-- Quick Cash / Payment Selector -->
         <div class="grid grid-cols-3 gap-1">
-          <button onclick="setPayment('Cash', this)" class="pay-btn py-1 rounded text-[9px] font-black bg-amber-400 text-black border border-amber-500">Cash</button>
-          <button onclick="setPayment('UPI', this)" class="pay-btn py-1 rounded text-[9px] font-bold bg-white border border-neutral-300 text-neutral-700">UPI</button>
-          <button onclick="setPayment('Card', this)" class="pay-btn py-1 rounded text-[9px] font-bold bg-white border border-neutral-300 text-neutral-700">Card</button>
+          <button onclick="setPayment('Cash', this)" class="pay-btn py-1.5 rounded text-[10px] font-black uppercase bg-amber-400 text-black border border-amber-500 shadow-xs">Cash</button>
+          <button onclick="setPayment('UPI', this)" class="pay-btn py-1.5 rounded text-[10px] font-bold uppercase bg-white border border-[#cbd5e1] text-neutral-700">UPI</button>
+          <button onclick="setPayment('Card', this)" class="pay-btn py-1.5 rounded text-[10px] font-bold uppercase bg-white border border-[#cbd5e1] text-neutral-700">Card</button>
         </div>
 
-        <!-- Actions -->
-        <div class="grid grid-cols-5 gap-1">
-          <button onclick="printOnlyKOT()" class="py-1.5 rounded bg-neutral-800 hover:bg-neutral-900 text-white text-[10px] font-extrabold tracking-tight shadow-sm">
+        <!-- Primary Touch Action Pad -->
+        <div class="grid grid-cols-5 gap-1 pt-0.5">
+          <button onclick="printOnlyKOT()" class="pos-btn py-2 rounded-lg bg-[#334155] hover:bg-[#1e293b] text-white text-[11px] font-black uppercase tracking-tight shadow">
             KOT
           </button>
-          <button id="btn-bogo-toggle" onclick="toggleBogo()" class="py-1.5 rounded bg-white text-neutral-800 hover:bg-neutral-100 border border-neutral-300 text-[10px] font-extrabold tracking-tight">
+          <button id="btn-bogo-toggle" onclick="toggleBogo()" class="pos-btn py-2 rounded-lg bg-white text-neutral-800 border border-[#cbd5e1] text-[11px] font-black uppercase tracking-tight">
             BOGO
           </button>
-          <button onclick="holdCurrentCart()" class="py-1.5 rounded bg-amber-500 hover:bg-amber-600 text-black text-[10px] font-black tracking-tight">
-            Hold
+          <button onclick="holdCurrentCart()" class="pos-btn py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-black text-[11px] font-black uppercase tracking-tight">
+            HOLD
           </button>
-          <button onclick="clearCart()" class="py-1.5 rounded bg-neutral-200 hover:bg-neutral-300 text-neutral-800 text-[10px] font-bold tracking-tight">
-            Clear
+          <button onclick="clearCart()" class="pos-btn py-2 rounded-lg bg-[#e2e8f0] hover:bg-[#cbd5e1] text-neutral-800 text-[11px] font-black uppercase tracking-tight">
+            CLEAR
           </button>
-          <button onclick="settleBillAndPrint()" class="py-1.5 rounded bg-black hover:bg-neutral-800 text-white text-[10px] font-black tracking-tight shadow-md">
-            Settle
+          <button onclick="settleBillAndPrint()" class="pos-btn py-2 rounded-lg bg-black hover:bg-neutral-900 text-white text-[11px] font-black uppercase tracking-wider shadow-lg">
+            SETTLE
           </button>
         </div>
       </div>
 
-      <div class="flex-1 overflow-y-auto p-1.5 space-y-1 no-scrollbar bg-white" id="cart-items-container"></div>
+      <!-- Ticket Items List -->
+      <div class="flex-1 overflow-y-auto p-2 space-y-1.5 no-scrollbar bg-white" id="cart-items-container"></div>
     </section>
   </main>
 
-  <!-- 3. SALES REPORT -->
-  <main id="view-sales" class="flex-1 flex flex-col p-2 bg-[#eef0f3] overflow-y-auto hidden">
-    <div class="bg-white border border-neutral-300 rounded-t p-2 shadow-sm flex flex-col space-y-2">
-      <div class="flex items-center justify-between">
+  <!-- ================= VIEW 3: DEDICATED SALES REPORT ================= -->
+  <main id="view-sales" class="flex-1 flex flex-col p-3 bg-[#0b1120] overflow-y-auto hidden">
+    <div class="bg-white rounded-xl shadow-xl overflow-hidden flex flex-col flex-1 border border-neutral-300">
+      
+      <!-- Top Title & Filter Bar -->
+      <div class="p-3 bg-[#0f172a] text-white flex items-center justify-between">
         <div>
-          <h2 class="text-xs font-black uppercase text-neutral-900">Sales Summary</h2>
-          <p id="sales-report-date-tag" class="text-[10px] text-neutral-500">Sales Report : Today</p>
+          <h2 class="text-sm font-black uppercase tracking-wider">Sales Analytics & Invoices</h2>
+          <p id="sales-report-date-tag" class="text-[11px] text-neutral-400 font-mono">Today</p>
         </div>
-        <div class="flex items-center space-x-1.5">
-          <button id="btn-sales-yesterday" onclick="filterSales('yesterday')" class="px-3 py-1 bg-neutral-100 hover:bg-neutral-200 border border-neutral-300 rounded text-[10px] font-bold text-neutral-700">
+
+        <div class="flex items-center space-x-2">
+          <button id="btn-sales-yesterday" onclick="filterSales('yesterday')" class="px-3 py-1.5 bg-[#1e293b] hover:bg-[#334155] border border-neutral-700 rounded-lg text-xs font-bold text-white">
             Yesterday Sales
           </button>
-          <button id="btn-sales-today" onclick="filterSales('today')" class="px-3 py-1 bg-black text-white rounded text-[10px] font-bold shadow-sm">
+          <button id="btn-sales-today" onclick="filterSales('today')" class="px-3 py-1.5 bg-white text-black rounded-lg text-xs font-black shadow">
             Today Sales
           </button>
-          <button onclick="switchView('tables')" class="px-2.5 py-1 bg-neutral-200 text-neutral-700 rounded text-[10px] font-bold">
+          <button onclick="switchView('tables')" class="px-3 py-1.5 bg-neutral-700 text-white rounded-lg text-xs font-bold">
             Close
           </button>
         </div>
       </div>
 
-      <div class="bg-neutral-50 border border-neutral-300 rounded p-1.5 flex items-center justify-between text-xs">
-        <span class="font-bold text-neutral-800">Total Net Sales: <strong id="sales-total-amount" class="text-base text-black font-mono font-black">₹0.00</strong></span>
-        <span class="font-semibold text-neutral-600 text-[11px]">Total Bills: <strong id="sales-total-bills" class="font-mono text-black font-bold">0</strong></span>
+      <!-- KPI Summary Header -->
+      <div class="bg-[#f8fafc] border-b border-[#cbd5e1] p-3 flex items-center justify-between">
+        <span class="text-sm font-bold text-neutral-600">Net Revenue: <strong id="sales-total-amount" class="text-xl text-black font-mono font-black ml-1">₹0.00</strong></span>
+        <span class="text-xs font-bold text-neutral-500">Invoices Count: <strong id="sales-total-bills" class="font-mono text-black text-sm ml-1">0</strong></span>
       </div>
-    </div>
 
-    <div class="bg-white border-x border-b border-neutral-300 rounded-b flex-1 overflow-y-auto no-scrollbar shadow-sm">
-      <table class="w-full text-left text-[11px] border-collapse">
-        <thead class="bg-neutral-100 border-b border-neutral-300 text-neutral-700 font-extrabold sticky top-0">
-          <tr>
-            <th class="p-2 border-r border-neutral-200">Order No.</th>
-            <th class="p-2 border-r border-neutral-200">Date & Time</th>
-            <th class="p-2 border-r border-neutral-200">Payment</th>
-            <th class="p-2 border-r border-neutral-200">Order Type</th>
-            <th class="p-2 border-r border-neutral-200 text-right">Discount (₹)</th>
-            <th class="p-2 text-right">Amount (₹)</th>
-          </tr>
-        </thead>
-        <tbody id="sales-table-body"></tbody>
-      </table>
+      <!-- Invoices Table -->
+      <div class="flex-1 overflow-y-auto no-scrollbar">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead class="bg-[#f1f5f9] border-b border-[#cbd5e1] text-neutral-700 font-extrabold sticky top-0">
+            <tr>
+              <th class="p-2.5 border-r border-[#cbd5e1]">Bill #</th>
+              <th class="p-2.5 border-r border-[#cbd5e1]">Timestamp</th>
+              <th class="p-2.5 border-r border-[#cbd5e1]">Tender</th>
+              <th class="p-2.5 border-r border-[#cbd5e1]">Type</th>
+              <th class="p-2.5 border-r border-[#cbd5e1] text-right">Discount</th>
+              <th class="p-2.5 text-right">Net Amount</th>
+            </tr>
+          </thead>
+          <tbody id="sales-table-body"></tbody>
+        </table>
+      </div>
     </div>
   </main>
 
-  <!-- 4. HELD ORDERS -->
-  <main id="view-held" class="flex-1 overflow-y-auto p-3 bg-[#eef0f3] hidden pb-16">
+  <!-- ================= VIEW 4: HELD TICKETS ================= -->
+  <main id="view-held" class="flex-1 overflow-y-auto p-3 bg-[#0b1120] hidden">
     <div class="max-w-xl mx-auto space-y-3">
-      <div class="flex justify-between items-center bg-white p-2 rounded border border-neutral-300">
-        <h2 class="text-xs font-black text-neutral-900 uppercase"><i class="fa-solid fa-pause text-amber-500 mr-1.5"></i> Held Orders</h2>
-        <span id="held-total-badge" class="px-2 py-0.5 rounded bg-neutral-100 border border-neutral-300 text-[10px] text-neutral-800 font-mono font-bold">0 Held</span>
+      <div class="flex justify-between items-center bg-white p-3 rounded-xl shadow-md border border-neutral-300">
+        <h2 class="text-xs font-black uppercase text-neutral-900 tracking-wider"><i class="fa-solid fa-pause text-amber-500 mr-2"></i> Held Tickets Queue</h2>
+        <span id="held-total-badge" class="px-2.5 py-1 rounded bg-[#f1f5f9] border border-[#cbd5e1] text-xs text-neutral-800 font-mono font-black">0 Held</span>
       </div>
-      <div id="held-orders-list" class="space-y-1.5"></div>
+      <div id="held-orders-list" class="space-y-2"></div>
     </div>
   </main>
 
-  <!-- 5. EDIT MENU -->
-  <main id="view-menu" class="flex-1 overflow-y-auto p-3 bg-[#eef0f3] hidden pb-16">
+  <!-- ================= VIEW 5: MENU MANAGER ================= -->
+  <main id="view-menu" class="flex-1 overflow-y-auto p-3 bg-[#0b1120] hidden">
     <div class="max-w-xl mx-auto space-y-3">
-      <div class="flex justify-between items-center bg-white p-2 rounded border border-neutral-300">
-        <h2 class="text-xs font-black text-neutral-900 uppercase"><i class="fa-solid fa-pen-to-square mr-1.5"></i> Menu Manager</h2>
-        <div class="flex space-x-1.5">
-          <button onclick="toggleAddForm()" class="px-2 py-1 rounded bg-black hover:bg-neutral-800 text-[10px] text-white font-bold">
-            + Add New
+      <div class="flex justify-between items-center bg-white p-3 rounded-xl shadow-md border border-neutral-300">
+        <h2 class="text-xs font-black uppercase text-neutral-900 tracking-wider"><i class="fa-solid fa-sliders text-neutral-700 mr-2"></i> Menu Editor</h2>
+        <div class="flex space-x-2">
+          <button onclick="toggleAddForm()" class="px-3 py-1 bg-black text-white text-xs font-black rounded-lg">
+            + Add Item
           </button>
-          <button onclick="resetMenuToOriginal()" class="px-2 py-1 rounded bg-neutral-200 text-[10px] text-neutral-800 font-bold">
+          <button onclick="resetMenuToOriginal()" class="px-3 py-1 bg-[#e2e8f0] text-black text-xs font-bold rounded-lg">
             Reset Defaults
           </button>
         </div>
       </div>
 
-      <div id="add-item-card" class="bg-white border border-neutral-300 p-2.5 rounded-lg hidden space-y-2 shadow-sm">
-        <h3 class="text-xs font-black text-neutral-900">Add Item</h3>
-        <div class="space-y-1.5">
+      <div id="add-item-card" class="bg-white border border-[#cbd5e1] p-3 rounded-xl hidden space-y-2 shadow-lg">
+        <h3 class="text-xs font-black text-black uppercase">Create New Item</h3>
+        <div class="space-y-2">
           <div>
-            <label class="text-[9px] text-neutral-500 block mb-0.5">Item Name</label>
-            <input id="new-item-name" type="text" class="w-full bg-neutral-50 border border-neutral-300 rounded p-1.5 text-xs text-black focus:outline-none font-bold" />
+            <label class="text-[10px] font-bold text-neutral-500 block mb-0.5">Item Name</label>
+            <input id="new-item-name" type="text" class="w-full bg-[#f8fafc] border border-[#cbd5e1] rounded p-2 text-xs font-bold text-black focus:outline-none" />
           </div>
           <div class="grid grid-cols-2 gap-2">
             <div>
-              <label class="text-[9px] text-neutral-500 block mb-0.5">Category</label>
-              <select id="new-item-category" class="w-full bg-neutral-50 border border-neutral-300 rounded p-1.5 text-[11px] text-black font-semibold"></select>
+              <label class="text-[10px] font-bold text-neutral-500 block mb-0.5">Category</label>
+              <select id="new-item-category" class="w-full bg-[#f8fafc] border border-[#cbd5e1] rounded p-2 text-xs font-bold text-black"></select>
             </div>
             <div>
-              <label class="text-[9px] text-neutral-500 block mb-0.5">Pricing Type</label>
-              <select id="new-item-type" onchange="toggleSizeInputs(this.value)" class="w-full bg-neutral-50 border border-neutral-300 rounded p-1.5 text-[11px] text-black">
+              <label class="text-[10px] font-bold text-neutral-500 block mb-0.5">Pricing Type</label>
+              <select id="new-item-type" onchange="toggleSizeInputs(this.value)" class="w-full bg-[#f8fafc] border border-[#cbd5e1] rounded p-2 text-xs font-bold text-black">
                 <option value="single">Single Price</option>
                 <option value="sizes">Sizes (R/M/L)</option>
               </select>
             </div>
           </div>
           <div id="new-single-price-wrap">
-            <label class="text-[9px] text-neutral-500 block mb-0.5">Price (₹)</label>
-            <input id="new-item-price" type="number" class="w-full bg-neutral-50 border border-neutral-300 rounded p-1.5 text-xs text-black font-mono font-bold" />
+            <label class="text-[10px] font-bold text-neutral-500 block mb-0.5">Price (₹)</label>
+            <input id="new-item-price" type="number" class="w-full bg-[#f8fafc] border border-[#cbd5e1] rounded p-2 text-xs font-bold text-black font-mono" />
           </div>
-          <div id="new-sizes-price-wrap" class="hidden grid grid-cols-3 gap-1.5">
+          <div id="new-sizes-price-wrap" class="hidden grid grid-cols-3 gap-2">
             <div>
-              <label class="text-[9px] text-neutral-500 block mb-0.5">Regular</label>
-              <input id="new-item-price-reg" type="number" class="w-full bg-neutral-50 border border-neutral-300 rounded p-1 text-xs text-black font-mono font-bold" />
+              <label class="text-[10px] font-bold text-neutral-500 block mb-0.5">Regular</label>
+              <input id="new-item-price-reg" type="number" class="w-full bg-[#f8fafc] border border-[#cbd5e1] rounded p-1.5 text-xs font-bold text-black font-mono" />
             </div>
             <div>
-              <label class="text-[9px] text-neutral-500 block mb-0.5">Medium</label>
-              <input id="new-item-price-med" type="number" class="w-full bg-neutral-50 border border-neutral-300 rounded p-1 text-xs text-black font-mono font-bold" />
+              <label class="text-[10px] font-bold text-neutral-500 block mb-0.5">Medium</label>
+              <input id="new-item-price-med" type="number" class="w-full bg-[#f8fafc] border border-[#cbd5e1] rounded p-1.5 text-xs font-bold text-black font-mono" />
             </div>
             <div>
-              <label class="text-[9px] text-neutral-500 block mb-0.5">Large</label>
-              <input id="new-item-price-lrg" type="number" class="w-full bg-neutral-50 border border-neutral-300 rounded p-1 text-xs text-black font-mono font-bold" />
+              <label class="text-[10px] font-bold text-neutral-500 block mb-0.5">Large</label>
+              <input id="new-item-price-lrg" type="number" class="w-full bg-[#f8fafc] border border-[#cbd5e1] rounded p-1.5 text-xs font-bold text-black font-mono" />
             </div>
           </div>
-          <div class="flex justify-end space-x-1.5 pt-1">
-            <button onclick="toggleAddForm()" class="px-2.5 py-1 bg-neutral-200 rounded text-[10px] text-neutral-700 font-bold">Cancel</button>
-            <button onclick="saveNewItem()" class="px-3 py-1 bg-black rounded text-[10px] text-white font-extrabold">Save</button>
+          <div class="flex justify-end space-x-2 pt-2">
+            <button onclick="toggleAddForm()" class="px-3 py-1.5 bg-[#e2e8f0] rounded text-xs font-bold">Cancel</button>
+            <button onclick="saveNewItem()" class="px-4 py-1.5 bg-black rounded text-xs text-white font-black">Save Item</button>
           </div>
         </div>
       </div>
 
-      <div id="menu-editor-list" class="space-y-1.5"></div>
+      <div id="menu-editor-list" class="space-y-2"></div>
     </div>
   </main>
 
-  <!-- SIZE MODAL -->
-  <div id="size-modal" class="fixed inset-0 bg-black/60 flex items-center justify-center p-3 z-50 hidden">
-    <div class="bg-white border border-neutral-300 w-full max-w-xs rounded-xl p-3 shadow-2xl">
-      <div class="flex justify-between items-center mb-2">
-        <h4 id="size-modal-title" class="text-xs font-black text-neutral-900">Select Size</h4>
-        <button onclick="closeSizeModal()" class="text-neutral-400 hover:text-black"><i class="fa-solid fa-xmark"></i></button>
+  <!-- SIZE PICKER MODAL -->
+  <div id="size-modal" class="fixed inset-0 bg-black/75 flex items-center justify-center p-3 z-50 hidden">
+    <div class="bg-white border border-[#cbd5e1] w-full max-w-xs rounded-2xl p-4 shadow-2xl">
+      <div class="flex justify-between items-center mb-3">
+        <h4 id="size-modal-title" class="text-sm font-black text-black">Select Portion</h4>
+        <button onclick="closeSizeModal()" class="text-neutral-400 hover:text-black text-sm"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <div id="size-modal-options" class="space-y-1.5"></div>
+      <div id="size-modal-options" class="space-y-2"></div>
     </div>
   </div>
 
@@ -434,9 +431,9 @@
 
     const DEFAULT_CATEGORIES = ['1. Pizza Mania', '2. Special Veg Pizza', '1 Veg', '2 Veg', '3 Veg', 'Burger', 'Sandwich', 'Pasta', 'Wraps', 'Veg Sides', 'Soup & Salad', 'Shakes', 'Beverages', 'Meals'];
 
-    let menu = JSON.parse(localStorage.getItem('de_menu_v18')) || DEFAULT_MENU;
-    let orders = JSON.parse(localStorage.getItem('de_petpooja_orders_v18')) || [];
-    let heldOrders = JSON.parse(localStorage.getItem('de_held_orders_v18')) || [];
+    let menu = JSON.parse(localStorage.getItem('de_menu_v20')) || DEFAULT_MENU;
+    let orders = JSON.parse(localStorage.getItem('de_petpooja_orders_v20')) || [];
+    let heldOrders = JSON.parse(localStorage.getItem('de_held_orders_v20')) || [];
     let cart = {};
     let activeCategory = 'All';
     let currentOrderMode = 'Dine In';
@@ -447,10 +444,11 @@
     let activeResumedHoldId = null;
 
     function saveState() {
-      localStorage.setItem('de_menu_v18', JSON.stringify(menu));
-      localStorage.setItem('de_petpooja_orders_v18', JSON.stringify(orders));
-      localStorage.setItem('de_held_orders_v18', JSON.stringify(heldOrders));
+      localStorage.setItem('de_menu_v20', JSON.stringify(menu));
+      localStorage.setItem('de_petpooja_orders_v20', JSON.stringify(orders));
+      localStorage.setItem('de_held_orders_v20', JSON.stringify(heldOrders));
       updateHeldBadge();
+      renderTableCards();
     }
 
     function updateHeldBadge() {
@@ -472,10 +470,10 @@
       isBogoActive = !isBogoActive;
       const btn = document.getElementById('btn-bogo-toggle');
       if (isBogoActive) {
-        btn.classList.remove('bg-white', 'text-neutral-800', 'border-neutral-300');
+        btn.classList.remove('bg-white', 'text-neutral-800', 'border-[#cbd5e1]');
         btn.classList.add('bg-black', 'text-white', 'border-black');
       } else {
-        btn.classList.add('bg-white', 'text-neutral-800', 'border-neutral-300');
+        btn.classList.add('bg-white', 'text-neutral-800', 'border-[#cbd5e1]');
         btn.classList.remove('bg-black', 'text-white', 'border-black');
       }
       recalcCart();
@@ -497,6 +495,46 @@
       return Array.from(cats);
     }
 
+    function renderTableCards() {
+      const container = document.getElementById('table-cards-container');
+      container.innerHTML = '';
+
+      const tableList = ['1', '2', '3', '4', '5', '6', '7', '8'];
+
+      tableList.forEach(t => {
+        // Check if any held order belongs to this table
+        const runningHeld = heldOrders.find(h => h.mode === 'Dine In' && h.table === t);
+        const isOccupied = !!runningHeld;
+
+        const card = document.createElement('button');
+        card.onclick = () => openTableRegister(t, runningHeld ? runningHeld.hold_id : null);
+        card.className = `pos-btn p-3 rounded-2xl border-2 flex flex-col justify-between text-left h-28 transition shadow-md ${
+          isOccupied 
+            ? 'bg-amber-500/10 border-amber-500 hover:bg-amber-500/20' 
+            : 'bg-[#131d31] border-[#1e293b] hover:border-white hover:bg-[#1a263f]'
+        }`;
+
+        card.innerHTML = `
+          <div class="flex justify-between items-start w-full">
+            <span class="text-2xl font-black ${isOccupied ? 'text-amber-400 font-mono' : 'text-white'}">${t}</span>
+            <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
+              isOccupied 
+                ? 'bg-amber-500 text-black font-bold' 
+                : 'bg-[#1e293b] text-neutral-400'
+            }">${isOccupied ? 'RUNNING' : 'VACANT'}</span>
+          </div>
+
+          <div class="w-full">
+            <p class="text-[10px] font-bold text-neutral-400">TABLE ${t}</p>
+            <p class="font-mono text-sm font-black ${isOccupied ? 'text-amber-400' : 'text-neutral-500'}">
+              ${isOccupied ? '₹' + runningHeld.grand : 'READY'}
+            </p>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
     function renderCategories() {
       const bar = document.getElementById('category-bar');
       bar.innerHTML = '';
@@ -504,8 +542,10 @@
       allCats.forEach(cat => {
         const btn = document.createElement('button');
         btn.innerText = cat;
-        btn.className = `px-2.5 py-1 rounded font-bold whitespace-nowrap text-[10.5px] transition flex-shrink-0 ${
-          cat === activeCategory ? 'bg-black text-white shadow-sm' : 'bg-white text-neutral-700 hover:bg-neutral-200 border border-neutral-300'
+        btn.className = `pos-btn px-3 py-1.5 rounded-lg font-black whitespace-nowrap text-xs transition flex-shrink-0 ${
+          cat === activeCategory 
+            ? 'bg-black text-white shadow' 
+            : 'bg-white text-neutral-800 hover:bg-neutral-200 border border-[#cbd5e1]'
         }`;
         btn.onclick = () => {
           activeCategory = cat;
@@ -530,17 +570,17 @@
       items.forEach(it => {
         const hasSizes = it.price_medium !== undefined && it.price_medium !== null && it.price_medium > 0;
         const btn = document.createElement('button');
-        btn.className = `bg-white hover:bg-neutral-50 border border-neutral-300 active:border-black rounded p-1.5 flex flex-col justify-between text-left h-20 transition shadow-xs ${!it.available ? 'opacity-40' : ''}`;
+        btn.className = `pos-btn bg-white hover:bg-[#f1f5f9] border border-[#cbd5e1] active:border-black rounded-xl p-2.5 flex flex-col justify-between text-left h-24 transition shadow-xs ${!it.available ? 'opacity-40' : ''}`;
         btn.onclick = () => handleItemSelect(it);
 
         btn.innerHTML = `
           <div>
-            <span class="text-[7.5px] font-bold text-neutral-400 block uppercase tracking-tight">${it.category}</span>
-            <p class="text-[12px] font-black text-neutral-900 line-clamp-2 leading-tight mt-0.5">${it.name}</p>
+            <span class="text-[8px] font-black text-neutral-400 block uppercase tracking-wider">${it.category}</span>
+            <p class="text-[12.5px] font-black text-neutral-900 line-clamp-2 leading-tight mt-0.5">${it.name}</p>
           </div>
           <div class="flex justify-between items-center w-full mt-1">
-            <span class="font-mono text-[13px] font-black text-neutral-900">₹${it.price_regular}</span>
-            ${hasSizes ? '<span class="text-[7.5px] px-1 py-0.2 rounded bg-neutral-100 text-black border border-neutral-300 font-extrabold">Sizes</span>' : ''}
+            <span class="font-mono text-sm font-black text-black">₹${it.price_regular}</span>
+            ${hasSizes ? '<span class="text-[8px] px-1.5 py-0.5 rounded bg-neutral-100 text-black border border-neutral-300 font-extrabold">SIZES</span>' : ''}
           </div>
         `;
         grid.appendChild(btn);
@@ -553,14 +593,14 @@
         document.getElementById('size-modal-title').innerText = item.name;
         const container = document.getElementById('size-modal-options');
         container.innerHTML = `
-          <button onclick="addToCart(${item.id}, 'r', ${item.price_regular})" class="w-full py-2 bg-neutral-100 hover:bg-neutral-200 border border-neutral-300 rounded flex justify-between px-2.5 text-xs font-black text-neutral-900">
-            <span>Regular (r)</span><span class="font-mono">₹${item.price_regular}</span>
+          <button onclick="addToCart(${item.id}, 'r', ${item.price_regular})" class="pos-btn w-full py-2.5 bg-[#f1f5f9] hover:bg-[#e2e8f0] border border-[#cbd5e1] rounded-xl flex justify-between px-3 text-xs font-black text-black">
+            <span>Regular (r)</span><span class="font-mono font-black">₹${item.price_regular}</span>
           </button>
-          <button onclick="addToCart(${item.id}, 'm', ${item.price_medium})" class="w-full py-2 bg-neutral-100 hover:bg-neutral-200 border border-neutral-300 rounded flex justify-between px-2.5 text-xs font-black text-neutral-900">
-            <span>Medium (m)</span><span class="font-mono">₹${item.price_medium}</span>
+          <button onclick="addToCart(${item.id}, 'm', ${item.price_medium})" class="pos-btn w-full py-2.5 bg-[#f1f5f9] hover:bg-[#e2e8f0] border border-[#cbd5e1] rounded-xl flex justify-between px-3 text-xs font-black text-black">
+            <span>Medium (m)</span><span class="font-mono font-black">₹${item.price_medium}</span>
           </button>
-          <button onclick="addToCart(${item.id}, 'l', ${item.price_large})" class="w-full py-2 bg-neutral-100 hover:bg-neutral-200 border border-neutral-300 rounded flex justify-between px-2.5 text-xs font-black text-neutral-900">
-            <span>Large (l)</span><span class="font-mono">₹${item.price_large}</span>
+          <button onclick="addToCart(${item.id}, 'l', ${item.price_large})" class="pos-btn w-full py-2.5 bg-[#f1f5f9] hover:bg-[#e2e8f0] border border-[#cbd5e1] rounded-xl flex justify-between px-3 text-xs font-black text-black">
+            <span>Large (l)</span><span class="font-mono font-black">₹${item.price_large}</span>
           </button>
         `;
         document.getElementById('size-modal').classList.remove('hidden');
@@ -636,7 +676,6 @@
       saveState();
       resetCartFields();
       switchView('tables');
-      alert(`Order #${heldEntry.hold_id} placed on HOLD.`);
     }
 
     function resumeHeldOrder(holdId) {
@@ -653,6 +692,8 @@
       }
 
       activeResumedHoldId = holdId;
+      selectedTable = target.table || '1';
+      currentOrderMode = target.mode || 'Dine In';
 
       saveState();
       switchView('register');
@@ -673,28 +714,28 @@
       document.getElementById('held-total-badge').innerText = `${heldOrders.length} Held`;
 
       if (heldOrders.length === 0) {
-        container.innerHTML = '<p class="text-neutral-500 text-xs py-8 text-center bg-white rounded border border-neutral-300">No orders currently on hold.</p>';
+        container.innerHTML = '<p class="text-neutral-400 text-xs py-10 text-center bg-white rounded-xl border border-neutral-300">No orders currently on hold.</p>';
         return;
       }
 
       heldOrders.forEach(h => {
         const card = document.createElement('div');
-        card.className = 'bg-white border border-neutral-300 p-2.5 rounded flex justify-between items-center text-xs shadow-sm';
+        card.className = 'bg-white border border-[#cbd5e1] p-3 rounded-xl flex justify-between items-center shadow-sm';
         const summaryItems = Object.values(h.cart).map(i => `${i.name} (x${i.qty})`).join(', ');
 
         card.innerHTML = `
-          <div class="flex-1 pr-2">
-            <div class="flex items-center space-x-1.5">
-              <span class="font-mono font-bold text-black text-[11px]">${h.hold_id}</span>
-              <span class="px-1.5 py-0.5 rounded text-[9px] bg-neutral-100 border border-neutral-200 text-neutral-800 font-bold">${h.mode}</span>
-              ${h.isBogoActive ? '<span class="px-1 py-0.2 rounded text-[8px] bg-neutral-100 text-black border border-neutral-300 font-black">BOGO</span>' : ''}
+          <div class="flex-1 pr-3">
+            <div class="flex items-center space-x-2">
+              <span class="font-mono font-bold text-black text-xs">${h.hold_id}</span>
+              <span class="px-2 py-0.5 rounded text-[10px] bg-[#f1f5f9] border border-[#cbd5e1] text-black font-extrabold uppercase">${h.mode}${h.table ? ' T' + h.table : ''}</span>
+              ${h.isBogoActive ? '<span class="px-1.5 py-0.5 rounded text-[9px] bg-black text-white font-black">BOGO</span>' : ''}
             </div>
-            <p class="text-[10px] text-neutral-600 line-clamp-1 mt-0.5">${summaryItems}</p>
-            <p class="font-mono font-bold text-neutral-900 text-xs mt-1">₹${h.grand}</p>
+            <p class="text-[11px] text-neutral-600 line-clamp-1 mt-1 font-semibold">${summaryItems}</p>
+            <p class="font-mono font-black text-black text-sm mt-1">₹${h.grand}</p>
           </div>
-          <div class="flex items-center space-x-1.5">
-            <button onclick="resumeHeldOrder('${h.hold_id}')" class="px-2.5 py-1 bg-black hover:bg-neutral-800 text-white text-[10px] font-bold rounded">Resume</button>
-            <button onclick="deleteHeldOrder('${h.hold_id}')" class="px-2 py-1 bg-neutral-100 hover:bg-neutral-200 text-neutral-600 text-[10px] rounded border border-neutral-300"><i class="fa-solid fa-trash"></i></button>
+          <div class="flex items-center space-x-2">
+            <button onclick="resumeHeldOrder('${h.hold_id}')" class="pos-btn px-3 py-1.5 bg-black hover:bg-neutral-800 text-white text-xs font-black rounded-lg">Resume</button>
+            <button onclick="deleteHeldOrder('${h.hold_id}')" class="pos-btn px-2.5 py-1.5 bg-[#f1f5f9] hover:bg-[#e2e8f0] text-neutral-600 text-xs rounded-lg border border-[#cbd5e1]"><i class="fa-solid fa-trash"></i></button>
           </div>
         `;
         container.appendChild(card);
@@ -708,30 +749,30 @@
 
       if (entries.length === 0) {
         container.innerHTML = `
-          <div class="h-28 flex flex-col items-center justify-center text-neutral-400 text-[11px]">
-            <i class="fa-solid fa-receipt text-xl mb-1"></i>
-            <span>No items added</span>
+          <div class="h-36 flex flex-col items-center justify-center text-neutral-400 text-xs">
+            <i class="fa-solid fa-receipt text-2xl mb-2 text-neutral-300"></i>
+            <span class="font-bold">No Items in Current Ticket</span>
           </div>
         `;
       } else {
         entries.forEach(([key, it]) => {
           const isEligibleBogo = ['1 Veg', '2 Veg', '3 Veg'].includes(it.category) && (it.variant === 'm' || it.variant === 'l');
           const row = document.createElement('div');
-          row.className = 'bg-white border border-neutral-200 rounded p-1.5 flex items-center justify-between text-[11px] shadow-xs';
+          row.className = 'bg-[#f8fafc] border border-[#e2e8f0] rounded-lg p-2 flex items-center justify-between text-xs shadow-xs';
           row.innerHTML = `
             <div class="flex-1 pr-1 truncate">
-              <div class="flex items-center space-x-1">
-                <p class="font-bold text-neutral-900 truncate text-[10.5px]">${it.name.toUpperCase()}</p>
-                ${isEligibleBogo && isBogoActive ? '<span class="text-[7px] bg-neutral-100 text-black px-1 py-0.2 rounded border border-neutral-300 font-mono font-bold">BOGO</span>' : ''}
+              <div class="flex items-center space-x-1.5">
+                <p class="font-black text-neutral-900 truncate text-[11px]">${it.name.toUpperCase()}</p>
+                ${isEligibleBogo && isBogoActive ? '<span class="text-[8px] bg-black text-white px-1.5 py-0.2 rounded font-mono font-black">BOGO</span>' : ''}
               </div>
-              <p class="text-[8.5px] text-neutral-500">${it.variant !== 'Std' ? '(' + it.variant + ') · ' : ''}₹${it.price}</p>
+              <p class="text-[9px] font-bold text-neutral-400">${it.variant !== 'Std' ? '(' + it.variant + ') · ' : ''}₹${it.price}</p>
             </div>
-            <div class="flex items-center space-x-1 flex-shrink-0">
-              <button onclick="updateQty('${key}', -1)" class="w-4 h-4 rounded bg-neutral-200 text-black font-bold flex items-center justify-center text-[10px]">-</button>
-              <span class="w-3 text-center font-mono font-bold text-black text-[10px]">${it.qty}</span>
-              <button onclick="updateQty('${key}', 1)" class="w-4 h-4 rounded bg-neutral-200 text-black font-bold flex items-center justify-center text-[10px]">+</button>
-              <span class="w-9 text-right font-mono font-bold text-neutral-900 text-[10px]">₹${it.price * it.qty}</span>
-              <button onclick="removeItem('${key}')" class="text-neutral-400 hover:text-black pl-0.5 text-[9px]"><i class="fa-solid fa-xmark"></i></button>
+            <div class="flex items-center space-x-1.5 flex-shrink-0">
+              <button onclick="updateQty('${key}', -1)" class="w-5 h-5 rounded bg-[#e2e8f0] text-black font-black flex items-center justify-center text-xs">-</button>
+              <span class="w-4 text-center font-mono font-black text-black text-xs">${it.qty}</span>
+              <button onclick="updateQty('${key}', 1)" class="w-5 h-5 rounded bg-[#e2e8f0] text-black font-black flex items-center justify-center text-xs">+</button>
+              <span class="w-12 text-right font-mono font-black text-black text-xs">₹${it.price * it.qty}</span>
+              <button onclick="removeItem('${key}')" class="text-neutral-400 hover:text-black pl-1 text-xs"><i class="fa-solid fa-xmark"></i></button>
             </div>
           `;
           container.appendChild(row);
@@ -784,61 +825,50 @@
     function setOrderMode(mode, btn) {
       currentOrderMode = mode;
       document.querySelectorAll('.mode-btn').forEach(b => {
-        b.className = 'mode-btn py-0.5 rounded text-[9px] font-bold bg-white border border-neutral-300 text-neutral-700 truncate';
+        b.className = 'mode-btn py-1 rounded text-[10px] font-bold uppercase tracking-wider bg-white border border-[#cbd5e1] text-neutral-700';
       });
 
-      if (mode === 'Dine In') {
-        btn.className = 'mode-btn py-0.5 rounded text-[9px] font-black bg-black text-white truncate';
-        document.getElementById('table-select-row').classList.remove('hidden');
-        document.getElementById('delivery-phone-wrap').classList.add('hidden');
-      } else if (mode === 'Takeaway') {
-        btn.className = 'mode-btn py-0.5 rounded text-[9px] font-black bg-black text-white truncate';
-        document.getElementById('table-select-row').classList.add('hidden');
-        document.getElementById('delivery-phone-wrap').classList.add('hidden');
-      } else if (mode === 'Delivery') {
-        btn.className = 'mode-btn py-0.5 rounded text-[9px] font-black bg-black text-white truncate';
-        document.getElementById('table-select-row').classList.add('hidden');
+      btn.className = 'mode-btn py-1 rounded text-[10px] font-black uppercase tracking-wider bg-black text-white';
+
+      if (mode === 'Delivery') {
         document.getElementById('delivery-phone-wrap').classList.remove('hidden');
         document.getElementById('delivery-phone-input').focus();
+      } else {
+        document.getElementById('delivery-phone-wrap').classList.add('hidden');
       }
-    }
-
-    function setTable(table, btn) {
-      selectedTable = table;
-      document.querySelectorAll('.table-chip').forEach(c => {
-        c.className = 'table-chip px-1.5 py-0.5 rounded bg-white text-neutral-700 border border-neutral-300 text-[9px]';
-      });
-      btn.className = 'table-chip px-1.5 py-0.5 rounded bg-black text-white border border-black text-[9px] font-black';
-      document.getElementById('current-invoice-tag').innerText = `#TBL-${table}`;
     }
 
     function setPayment(mode, btn) {
       selectedPayment = mode;
       document.querySelectorAll('.pay-btn').forEach(b => {
-        b.className = 'pay-btn py-1 rounded text-[9px] font-bold bg-white border border-neutral-300 text-neutral-700';
+        b.className = 'pay-btn py-1.5 rounded text-[10px] font-bold uppercase bg-white border border-[#cbd5e1] text-neutral-700';
       });
-      btn.className = 'pay-btn py-1 rounded text-[9px] font-black bg-amber-400 text-black border border-amber-500';
+      btn.className = 'pay-btn py-1.5 rounded text-[10px] font-black uppercase bg-amber-400 text-black border border-amber-500 shadow-xs';
     }
 
-    function openTableRegister(tbl) {
+    function openTableRegister(tbl, holdId = null) {
       selectedTable = tbl;
       currentOrderMode = 'Dine In';
-      switchView('register');
-      const tBtn = Array.from(document.querySelectorAll('.table-chip')).find(b => b.innerText === `T${tbl}`);
-      if (tBtn) setTable(tbl, tBtn);
-      const mBtn = Array.from(document.querySelectorAll('.mode-btn')).find(b => b.innerText.includes('Dine'));
+      document.getElementById('current-invoice-tag').innerText = `#TBL-${tbl}`;
+      
+      if (holdId) {
+        resumeHeldOrder(holdId);
+      } else {
+        resetCartFields();
+        switchView('register');
+      }
+
+      const mBtn = Array.from(document.querySelectorAll('.mode-btn')).find(b => b.innerText.includes('DINE'));
       if (mBtn) setOrderMode('Dine In', mBtn);
     }
 
     function setModeAndOpen(mode) {
+      resetCartFields();
       currentOrderMode = mode;
+      document.getElementById('current-invoice-tag').innerText = mode === 'Delivery' ? '#DELIVERY' : '#PICKUP';
       switchView('register');
-      const btn = Array.from(document.querySelectorAll('.mode-btn')).find(b => b.innerText.includes(mode === 'Takeaway' ? 'Pick' : 'Deliv'));
+      const btn = Array.from(document.querySelectorAll('.mode-btn')).find(b => b.innerText.includes(mode === 'Takeaway' ? 'PICKUP' : 'DELIVERY'));
       if (btn) setOrderMode(mode, btn);
-    }
-
-    function startDirectOrder() {
-      openTableRegister('1');
     }
 
     // SALES REPORT ENGINE (LOCAL CALENDAR MATCHING)
@@ -848,13 +878,13 @@
       const btnYest = document.getElementById('btn-sales-yesterday');
 
       if (timeFrame === 'today') {
-        btnToday.className = 'px-3 py-1 bg-black text-white rounded text-[10px] font-bold shadow-sm';
-        btnYest.className = 'px-3 py-1 bg-neutral-100 hover:bg-neutral-200 border border-neutral-300 rounded text-[10px] font-bold text-neutral-700';
-        document.getElementById('sales-report-date-tag').innerText = 'Sales Report : Today';
+        btnToday.className = 'px-3 py-1.5 bg-white text-black rounded-lg text-xs font-black shadow';
+        btnYest.className = 'px-3 py-1.5 bg-[#1e293b] hover:bg-[#334155] border border-neutral-700 rounded-lg text-xs font-bold text-white';
+        document.getElementById('sales-report-date-tag').innerText = 'Sales Today';
       } else {
-        btnYest.className = 'px-3 py-1 bg-black text-white rounded text-[10px] font-bold shadow-sm';
-        btnToday.className = 'px-3 py-1 bg-neutral-100 hover:bg-neutral-200 border border-neutral-300 rounded text-[10px] font-bold text-neutral-700';
-        document.getElementById('sales-report-date-tag').innerText = 'Sales Report : Yesterday';
+        btnYest.className = 'px-3 py-1.5 bg-white text-black rounded-lg text-xs font-black shadow';
+        btnToday.className = 'px-3 py-1.5 bg-[#1e293b] hover:bg-[#334155] border border-neutral-700 rounded-lg text-xs font-bold text-white';
+        document.getElementById('sales-report-date-tag').innerText = 'Sales Yesterday';
       }
 
       renderSalesReport();
@@ -886,7 +916,7 @@
       document.getElementById('sales-total-bills').innerText = filtered.length;
 
       if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-neutral-400 text-xs">No settled sales recorded for this period.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-12 text-neutral-400 font-bold text-xs">No settled sales recorded for this day.</td></tr>`;
         return;
       }
 
@@ -897,20 +927,20 @@
         const discountVal = (Number(o.discount) || 0) + (Number(o.bogo_discount) || 0);
 
         const tr = document.createElement('tr');
-        tr.className = 'border-b border-neutral-200 hover:bg-neutral-50';
+        tr.className = 'border-b border-[#cbd5e1] hover:bg-[#f8fafc] font-semibold';
         tr.innerHTML = `
-          <td class="p-2 font-mono font-bold text-neutral-900 border-r border-neutral-200">${o.invoice_no}</td>
-          <td class="p-2 text-neutral-600 border-r border-neutral-200">${dateStr} ${timeStr}</td>
-          <td class="p-2 border-r border-neutral-200"><span class="px-1.5 py-0.5 rounded text-[9px] bg-neutral-100 border border-neutral-300 font-bold">${o.payment_mode || 'Cash'}</span></td>
-          <td class="p-2 border-r border-neutral-200 font-medium">${o.mode}${o.table ? ' (T' + o.table + ')' : ''}</td>
-          <td class="p-2 border-r border-neutral-200 text-right font-mono text-neutral-500">${discountVal.toFixed(2)}</td>
-          <td class="p-2 text-right font-mono font-black text-neutral-900">₹${Number(o.grand_total).toFixed(2)}</td>
+          <td class="p-2.5 font-mono font-bold text-black border-r border-[#cbd5e1]">${o.invoice_no}</td>
+          <td class="p-2.5 text-neutral-600 border-r border-[#cbd5e1] font-mono">${dateStr} ${timeStr}</td>
+          <td class="p-2.5 border-r border-[#cbd5e1]"><span class="px-2 py-0.5 rounded text-[10px] bg-[#f1f5f9] border border-[#cbd5e1] font-black">${o.payment_mode || 'Cash'}</span></td>
+          <td class="p-2.5 border-r border-[#cbd5e1] uppercase font-bold">${o.mode}${o.table ? ' (T' + o.table + ')' : ''}</td>
+          <td class="p-2.5 border-r border-[#cbd5e1] text-right font-mono text-neutral-500">${discountVal.toFixed(2)}</td>
+          <td class="p-2.5 text-right font-mono font-black text-black">₹${Number(o.grand_total).toFixed(2)}</td>
         `;
         tbody.appendChild(tr);
       });
     }
 
-    // PRINT ENGINES
+    // PRINTING ENGINES
     function generateKOTHTML() {
       const itemsInCart = Object.values(cart);
       let totalUnits = 0;
@@ -1251,21 +1281,21 @@
 
       menu.forEach(it => {
         const card = document.createElement('div');
-        card.className = 'bg-white border border-neutral-300 p-2 rounded flex items-center justify-between text-xs shadow-xs';
+        card.className = 'bg-white border border-[#cbd5e1] p-2.5 rounded-xl flex items-center justify-between shadow-xs';
         card.innerHTML = `
           <div class="flex-1 pr-2">
             <div class="flex items-center space-x-2">
-              <p class="font-black text-neutral-900 text-[12px]">${it.name}</p>
-              <button onclick="deleteItem(${it.id})" class="text-neutral-400 hover:text-black text-[10px]"><i class="fa-solid fa-trash"></i></button>
+              <p class="font-black text-black text-xs">${it.name}</p>
+              <button onclick="deleteItem(${it.id})" class="text-neutral-400 hover:text-black text-xs"><i class="fa-solid fa-trash"></i></button>
             </div>
-            <p class="text-[9px] text-neutral-500 font-bold uppercase">${it.category}</p>
+            <p class="text-[9px] font-bold text-neutral-400 uppercase">${it.category}</p>
             <div class="flex items-center space-x-1.5 mt-1">
-              <span class="text-[10px] text-black font-black">₹</span>
-              <input type="number" value="${it.price_regular}" onchange="updatePrice(${it.id}, 'price_regular', this.value)" class="w-14 bg-neutral-50 border border-neutral-300 rounded px-1 py-0.5 text-black text-[11px] font-mono font-bold" />
+              <span class="text-xs text-black font-black">₹</span>
+              <input type="number" value="${it.price_regular}" onchange="updatePrice(${it.id}, 'price_regular', this.value)" class="w-16 bg-[#f1f5f9] border border-[#cbd5e1] rounded px-1.5 py-0.5 text-black text-xs font-mono font-bold" />
             </div>
           </div>
-          <button onclick="toggleItemStatus(${it.id})" class="px-2 py-1 rounded text-[10px] font-bold ${it.available ? 'bg-neutral-100 text-black border border-neutral-300' : 'bg-neutral-200 text-neutral-400 border border-neutral-300'}">
-            ${it.available ? 'Active' : 'Disabled'}
+          <button onclick="toggleItemStatus(${it.id})" class="px-2.5 py-1 rounded text-xs font-black ${it.available ? 'bg-black text-white' : 'bg-[#e2e8f0] text-neutral-400'}">
+            ${it.available ? 'ACTIVE' : 'OFF'}
           </button>
         `;
         container.appendChild(card);
@@ -1298,11 +1328,28 @@
 
       document.getElementById(`view-${view}`).classList.remove('hidden');
 
+      // Update Nav Buttons
+      ['tables', 'sales', 'held', 'menu'].forEach(v => {
+        const btn = document.getElementById(`nav-btn-${v}`);
+        if (btn) {
+          if (v === view) {
+            btn.classList.add('bg-white', 'text-black');
+            btn.classList.remove('bg-[#1e293b]', 'text-white', 'text-neutral-300');
+          } else {
+            btn.classList.remove('bg-white', 'text-black');
+            btn.classList.add('bg-[#1e293b]');
+          }
+        }
+      });
+
+      if (view === 'tables') renderTableCards();
       if (view === 'sales') filterSales('today');
       if (view === 'held') renderHeldOrders();
       if (view === 'menu') renderMenuEditor();
     }
 
+    // Startup Initialization
+    renderTableCards();
     renderCategories();
     renderItems();
     renderCart();
