@@ -23,7 +23,7 @@
       <div class="bg-white text-black px-2 py-0.5 rounded font-black text-xs tracking-wider flex items-center">
         <i class="fa-solid fa-bolt mr-1 text-[10px]"></i> POS
       </div>
-      <span class="font-extrabold text-sm tracking-tight text-white">DELICIOUS EATZ</span>
+      <span class="font-extrabold text-sm tracking-tight text-white">EATZ</span>
       <span class="text-[10px] text-neutral-400 bg-[#1e293b] px-2 py-0.5 rounded font-mono">LIVE TERMINAL</span>
     </div>
 
@@ -130,12 +130,13 @@
           <button onclick="setPayment('Card', this)" class="pay-btn py-1.5 rounded text-[10px] font-bold uppercase bg-white border border-[#cbd5e1] text-neutral-700">Card</button>
         </div>
 
-        <div class="grid grid-cols-5 gap-1 pt-0.5">
-          <button onclick="printOnlyKOT()" class="pos-btn py-2 rounded-lg bg-[#334155] hover:bg-[#1e293b] text-white text-[11px] font-black uppercase tracking-tight shadow">KOT</button>
-          <button id="btn-bogo-toggle" onclick="toggleBogo()" class="pos-btn py-2 rounded-lg bg-white text-neutral-800 border border-[#cbd5e1] text-[11px] font-black uppercase tracking-tight">BOGO</button>
-          <button onclick="holdCurrentCart()" class="pos-btn py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-black text-[11px] font-black uppercase tracking-tight">HOLD</button>
-          <button onclick="clearCart()" class="pos-btn py-2 rounded-lg bg-[#e2e8f0] hover:bg-[#cbd5e1] text-neutral-800 text-[11px] font-black uppercase tracking-tight">CLEAR</button>
-          <button onclick="settleBillAndPrint()" class="pos-btn py-2 rounded-lg bg-black hover:bg-neutral-900 text-white text-[11px] font-black uppercase tracking-wider shadow-lg">SETTLE</button>
+        <div class="grid grid-cols-6 gap-1 pt-0.5">
+          <button onclick="printOnlyKOT()" class="pos-btn py-2 rounded-lg bg-[#334155] hover:bg-[#1e293b] text-white text-[10px] font-black uppercase tracking-tight shadow">KOT</button>
+          <button id="btn-bogo-toggle" onclick="toggleBogo()" class="pos-btn py-2 rounded-lg bg-white text-neutral-800 border border-[#cbd5e1] text-[10px] font-black uppercase tracking-tight">BOGO</button>
+          <button onclick="saveBillOnly()" class="pos-btn py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-black uppercase tracking-tight shadow">SAVE</button>
+          <button onclick="holdCurrentCart()" class="pos-btn py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-black text-[10px] font-black uppercase tracking-tight">HOLD</button>
+          <button onclick="clearCart()" class="pos-btn py-2 rounded-lg bg-[#e2e8f0] hover:bg-[#cbd5e1] text-neutral-800 text-[10px] font-black uppercase tracking-tight">CLR</button>
+          <button onclick="settleBillAndPrint()" class="pos-btn py-2 rounded-lg bg-black hover:bg-neutral-900 text-white text-[10px] font-black uppercase tracking-wider shadow-lg">SETTLE</button>
         </div>
       </div>
 
@@ -367,9 +368,9 @@
 
     const DEFAULT_CATEGORIES = ['1. Pizza Mania', '2. Special Veg Pizza', '1 Veg', '2 Veg', '3 Veg', 'Burger', 'Sandwich', 'Pasta', 'Wraps', 'Veg Sides', 'Soup & Salad', 'Shakes', 'Beverages', 'Meals'];
 
-    let menu = JSON.parse(localStorage.getItem('de_menu_v23')) || DEFAULT_MENU;
-    let orders = JSON.parse(localStorage.getItem('de_petpooja_orders_v23')) || [];
-    let heldOrders = JSON.parse(localStorage.getItem('de_held_orders_v23')) || [];
+    let menu = JSON.parse(localStorage.getItem('de_menu_v24')) || DEFAULT_MENU;
+    let orders = JSON.parse(localStorage.getItem('de_petpooja_orders_v24')) || [];
+    let heldOrders = JSON.parse(localStorage.getItem('de_held_orders_v24')) || [];
     let cart = {};
     let activeCategory = 'All';
     let currentOrderMode = 'Dine In';
@@ -380,9 +381,9 @@
     let activeResumedHoldId = null;
 
     function saveState() {
-      localStorage.setItem('de_menu_v23', JSON.stringify(menu));
-      localStorage.setItem('de_petpooja_orders_v23', JSON.stringify(orders));
-      localStorage.setItem('de_held_orders_v23', JSON.stringify(heldOrders));
+      localStorage.setItem('de_menu_v24', JSON.stringify(menu));
+      localStorage.setItem('de_petpooja_orders_v24', JSON.stringify(orders));
+      localStorage.setItem('de_held_orders_v24', JSON.stringify(heldOrders));
       updateHeldBadge();
       renderTableCards();
     }
@@ -862,7 +863,7 @@
       });
     }
 
-    // CLOUD SYNC & FETCH (HYBRID LOCAL + SHEETDB)
+    // CLOUD SYNC & FETCH
     function syncToCloud(record) {
       const payload = {
         data: {
@@ -898,7 +899,6 @@
               grand_total: Number(row.Total) || 0
             })).reverse();
 
-            // Merge cloud orders with local orders without duplicates
             const existingInvoices = new Set(orders.map(o => o.invoice_no));
             cloudOrders.forEach(co => {
               if (!existingInvoices.has(co.invoice_no)) {
@@ -1131,6 +1131,49 @@
     function printOnlyKOT() {
       if (Object.keys(cart).length === 0) return alert('No items in cart for KOT!');
       printHTML(generateKOTHTML(), null);
+    }
+
+    // SAVE BILL ONLY (NO PRINTING)
+    function saveBillOnly() {
+      const itemsPurchased = Object.values(cart);
+      if (itemsPurchased.length === 0) return alert('Add items to order first!');
+
+      const phone = document.getElementById('delivery-phone-input').value.trim();
+      if (currentOrderMode === 'Delivery' && !phone) {
+        alert('Please enter customer contact number for Delivery!');
+        document.getElementById('delivery-phone-input').focus();
+        return;
+      }
+
+      const { sub, disc, bogoDiscount, grand } = recalcCart();
+      const invoiceNo = `${Math.floor(1000 + Math.random() * 9000)}`;
+      const now = new Date();
+
+      const record = {
+        invoice_no: invoiceNo,
+        time: now.toISOString(),
+        mode: currentOrderMode,
+        table: currentOrderMode === 'Dine In' ? selectedTable : null,
+        phone: currentOrderMode === 'Delivery' ? phone : null,
+        items: itemsPurchased,
+        subtotal: sub,
+        bogo_discount: bogoDiscount,
+        discount: disc,
+        grand_total: grand,
+        payment_mode: selectedPayment
+      };
+
+      orders.unshift(record);
+      syncToCloud(record);
+
+      if (activeResumedHoldId) {
+        heldOrders = heldOrders.filter(h => h.hold_id !== activeResumedHoldId);
+        activeResumedHoldId = null;
+      }
+
+      saveState();
+      resetCartFields();
+      switchView('tables');
     }
 
     function settleBillAndPrint() {
