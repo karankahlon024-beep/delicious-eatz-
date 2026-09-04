@@ -105,7 +105,6 @@
               <span id="cart-grand" class="text-emerald-400 font-mono font-black text-sm ml-1">₹0</span>
             </div>
           </div>
-          <!-- BOGO line -->
           <div id="bogo-applied-info" class="hidden text-emerald-400 text-[9px] font-bold flex justify-between border-t border-neutral-700/60 pt-0.5">
             <span><i class="fa-solid fa-tag mr-0.5"></i> BOGO Free Item:</span>
             <span id="bogo-discount-amount" class="font-mono">-₹0</span>
@@ -119,8 +118,11 @@
           <button onclick="setPayment('Card', this)" class="pay-btn py-1 rounded text-[9px] font-semibold bg-[#252835] text-neutral-300">Card</button>
         </div>
 
-        <!-- Action Row -->
-        <div class="grid grid-cols-4 gap-1">
+        <!-- Action Row: KOT Button added alongside BOGO, Hold, Clear, Settle -->
+        <div class="grid grid-cols-5 gap-1">
+          <button onclick="printKOT()" class="py-1.5 rounded bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold tracking-tight shadow">
+            <i class="fa-solid fa-utensils mr-0.5"></i> KOT
+          </button>
           <button id="btn-bogo-toggle" onclick="toggleBogo()" class="py-1.5 rounded bg-[#20222d] text-neutral-300 hover:bg-[#2a2d3c] border border-neutral-700 text-[10px] font-bold tracking-tight">
             <i class="fa-solid fa-gift mr-0.5 text-amber-400"></i> BOGO
           </button>
@@ -343,9 +345,9 @@
 
     const DEFAULT_CATEGORIES = ['1. Pizza Mania', '2. Special Veg Pizza', '1 Veg', '2 Veg', '3 Veg', 'Burger', 'Sandwich', 'Pasta', 'Wraps', 'Veg Sides', 'Soup & Salad', 'Shakes', 'Beverages', 'Meals'];
 
-    let menu = JSON.parse(localStorage.getItem('de_menu_v12')) || DEFAULT_MENU;
-    let orders = JSON.parse(localStorage.getItem('de_petpooja_orders_v12')) || [];
-    let heldOrders = JSON.parse(localStorage.getItem('de_held_orders_v12')) || [];
+    let menu = JSON.parse(localStorage.getItem('de_menu_v13')) || DEFAULT_MENU;
+    let orders = JSON.parse(localStorage.getItem('de_petpooja_orders_v13')) || [];
+    let heldOrders = JSON.parse(localStorage.getItem('de_held_orders_v13')) || [];
     let cart = {};
     let activeCategory = 'All';
     let currentOrderMode = 'Dine In';
@@ -354,9 +356,9 @@
     let isBogoActive = false;
 
     function saveState() {
-      localStorage.setItem('de_menu_v12', JSON.stringify(menu));
-      localStorage.setItem('de_petpooja_orders_v12', JSON.stringify(orders));
-      localStorage.setItem('de_held_orders_v12', JSON.stringify(heldOrders));
+      localStorage.setItem('de_menu_v13', JSON.stringify(menu));
+      localStorage.setItem('de_petpooja_orders_v13', JSON.stringify(orders));
+      localStorage.setItem('de_held_orders_v13', JSON.stringify(heldOrders));
       updateHeldBadge();
     }
 
@@ -721,7 +723,134 @@
       btn.className = 'pay-btn py-1 rounded text-[9px] font-bold bg-amber-500 text-black';
     }
 
-    // DITTO PHOTO RECEIPT ENGINE
+    // 1. KITCHEN ORDER TICKET (KOT) PRINT ENGINE
+    function printKOT() {
+      const itemsInCart = Object.values(cart);
+      if (itemsInCart.length === 0) return alert('No items in cart for KOT!');
+
+      let totalUnits = 0;
+      let rowsHTML = '';
+      let index = 1;
+
+      itemsInCart.forEach(it => {
+        totalUnits += it.qty;
+        const displayName = `${it.name.toUpperCase()} ${it.variant !== 'Std' ? '(' + it.variant.toUpperCase() + ')' : ''}`;
+        rowsHTML += `
+          <tr style="border-top: 1px dotted #000;">
+            <td style="padding: 5px 2px; vertical-align: top; width: 10%; font-size: 14px; font-weight: 800;">${index++}</td>
+            <td style="padding: 5px 4px; vertical-align: top; width: 62%; font-size: 13.5px; font-weight: 800; word-break: break-word;">${displayName}</td>
+            <td style="padding: 5px 2px; vertical-align: top; text-align: center; width: 14%; font-size: 13px; font-weight: 800;">QTY</td>
+            <td style="padding: 5px 2px; vertical-align: top; text-align: right; width: 14%; font-size: 15px; font-weight: 900;">${it.qty}</td>
+          </tr>
+        `;
+      });
+
+      let orderTypeLabel = 'DINE IN';
+      if (currentOrderMode === 'Dine In') {
+        orderTypeLabel = `DINE IN (TABLE ${selectedTable})`;
+      } else if (currentOrderMode === 'Takeaway') {
+        orderTypeLabel = 'PICKUP / TAKEAWAY';
+      } else if (currentOrderMode === 'Delivery') {
+        orderTypeLabel = 'DELIVERY';
+      }
+
+      const kotHTML = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>KOT</title>
+          <style>
+            @page { margin: 0; size: 72mm auto; }
+            body {
+              font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+              color: #000;
+              margin: 0;
+              padding: 6px 10px;
+              width: 68mm;
+              font-size: 13px;
+              line-height: 1.25;
+            }
+            .center { text-align: center; }
+            .bold { font-weight: 800; }
+            .header-title {
+              font-size: 18px;
+              font-weight: 900;
+              letter-spacing: 1px;
+            }
+            .type-banner {
+              font-size: 13px;
+              font-weight: 900;
+              margin-top: 2px;
+              padding: 2px 0;
+              border-bottom: 2px solid #000;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-top: 4px;
+            }
+            th {
+              font-size: 14px;
+              font-weight: 900;
+              padding: 4px 2px;
+              border-bottom: 2px solid #000;
+            }
+            .total-box-container {
+              display: flex;
+              justify-content: flex-end;
+              margin-top: 8px;
+            }
+            .total-box {
+              border: 1.5px solid #000;
+              padding: 3px 8px;
+              display: flex;
+              justify-content: space-between;
+              width: 62%;
+              font-size: 14px;
+              font-weight: 900;
+            }
+            .user-tag {
+              text-align: right;
+              font-size: 12px;
+              font-weight: 700;
+              margin-top: 4px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="center header-title">KOT</div>
+          <div class="center type-banner">${orderTypeLabel}</div>
+
+          <table>
+            <thead>
+              <tr>
+                <th style="text-align: left; width: 10%;">#</th>
+                <th style="text-align: left; width: 62%;">Product</th>
+                <th style="text-align: center; width: 14%;">Uom</th>
+                <th style="text-align: right; width: 14%;">Qty</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHTML}
+            </tbody>
+          </table>
+
+          <div class="total-box-container">
+            <div class="total-box">
+              <span>Total :</span>
+              <span>${totalUnits}</span>
+            </div>
+          </div>
+
+          <div class="user-tag">User: ADMIN</div>
+        </body>
+        </html>
+      `;
+
+      executeFramePrint(kotHTML);
+    }
+
+    // 2. CUSTOMER BILL PRINT ENGINE
     function settleBillAndPrint() {
       const itemsPurchased = Object.values(cart);
       if (itemsPurchased.length === 0) return alert('Add items to order first!');
@@ -758,7 +887,6 @@
       orders.unshift(record);
       saveState();
 
-      // Build items table identical to reference
       let itemRows = '';
       itemsPurchased.forEach(it => {
         const displayName = `${it.name.toUpperCase()} ${it.variant !== 'Std' ? '(' + it.variant + ')' : ''}`;
@@ -801,10 +929,7 @@
         <head>
           <title>Delicious Eatz</title>
           <style>
-            @page {
-              margin: 0;
-              size: 72mm auto;
-            }
+            @page { margin: 0; size: 72mm auto; }
             body {
               font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
               color: #000;
@@ -816,57 +941,15 @@
             }
             .center { text-align: center; }
             .bold { font-weight: 800; }
-            .title {
-              font-size: 16px;
-              font-weight: 900;
-              letter-spacing: 0.2px;
-            }
-            .subtitle {
-              font-size: 11.5px;
-              line-height: 1.2;
-              margin-top: 2px;
-              font-weight: 500;
-            }
-            .solid-hr {
-              border: 0;
-              border-top: 1.5px solid #000;
-              margin: 5px 0;
-            }
-            .thick-hr {
-              border: 0;
-              border-top: 2.2px solid #000;
-              margin: 4px 0;
-            }
-            .name-row {
-              font-size: 13px;
-              font-weight: 700;
-              padding: 2px 0;
-            }
-            .meta-grid {
-              display: flex;
-              justify-content: space-between;
-              font-size: 12.5px;
-              line-height: 1.35;
-              padding: 1px 0;
-            }
-            table {
-              width: 100%;
-              border-collapse: collapse;
-              font-size: 12.5px;
-              margin-top: 2px;
-            }
-            th {
-              font-weight: 700;
-              padding: 3px 0;
-            }
-            .grand-box {
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
-              padding: 3px 0;
-              font-size: 15.5px;
-              font-weight: 900;
-            }
+            .title { font-size: 16px; font-weight: 900; letter-spacing: 0.2px; }
+            .subtitle { font-size: 11.5px; line-height: 1.2; margin-top: 2px; font-weight: 500; }
+            .solid-hr { border: 0; border-top: 1.5px solid #000; margin: 5px 0; }
+            .thick-hr { border: 0; border-top: 2.2px solid #000; margin: 4px 0; }
+            .name-row { font-size: 13px; font-weight: 700; padding: 2px 0; }
+            .meta-grid { display: flex; justify-content: space-between; font-size: 12.5px; line-height: 1.35; padding: 1px 0; }
+            table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 2px; }
+            th { font-weight: 700; padding: 3px 0; }
+            .grand-box { display: flex; justify-content: space-between; align-items: center; padding: 3px 0; font-size: 15.5px; font-weight: 900; }
           </style>
         </head>
         <body>
@@ -877,9 +960,7 @@
           </div>
 
           <hr class="solid-hr" />
-
           <div class="name-row">Name:</div>
-
           <hr class="solid-hr" />
 
           <div class="meta-grid">
@@ -911,9 +992,7 @@
           <hr class="thick-hr" />
 
           <table>
-            <tbody>
-              ${itemRows}
-            </tbody>
+            <tbody>${itemRows}</tbody>
           </table>
 
           <hr class="solid-hr" style="margin-top: 6px;" />
@@ -939,6 +1018,10 @@
         </html>
       `;
 
+      executeFramePrint(receiptHTML, true);
+    }
+
+    function executeFramePrint(htmlContent, shouldClearCart = false) {
       let printFrame = document.getElementById('print-iframe');
       if (!printFrame) {
         printFrame = document.createElement('iframe');
@@ -954,13 +1037,13 @@
 
       const frameDoc = printFrame.contentWindow.document;
       frameDoc.open();
-      frameDoc.write(receiptHTML);
+      frameDoc.write(htmlContent);
       frameDoc.close();
 
       setTimeout(() => {
         printFrame.contentWindow.focus();
         printFrame.contentWindow.print();
-        resetCartFields();
+        if (shouldClearCart) resetCartFields();
       }, 300);
     }
 
