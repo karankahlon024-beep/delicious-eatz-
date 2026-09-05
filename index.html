@@ -18,26 +18,25 @@
 </head>
 <body class="h-screen w-screen flex flex-col bg-[#0f172a]">
 
-  <header class="bg-[#090d16] border-b border-[#1e293b] px-3 py-1.5 flex items-center justify-between text-white flex-shrink-0 z-30">
-    <div class="flex items-center space-x-2">
-      <div class="bg-white text-black px-2 py-0.5 rounded font-black text-xs tracking-wider flex items-center">
-        <i class="fa-solid fa-bolt mr-1 text-[10px]"></i> POS
+  <header class="bg-[#090d16] border-b border-[#1e293b] px-2.5 py-1.5 flex items-center justify-between text-white flex-shrink-0 z-30">
+    <div class="flex items-center space-x-1.5">
+      <div class="bg-white text-black px-1.5 py-0.5 rounded font-black text-[11px] tracking-wider flex items-center">
+        <i class="fa-solid fa-bolt mr-1 text-[9px]"></i> POS
       </div>
-      <span class="font-extrabold text-sm tracking-tight text-white">EATZ</span>
-      <span class="hidden sm:inline text-[10px] text-neutral-400 bg-[#1e293b] px-2 py-0.5 rounded font-mono">UNIVERSAL SYNC</span>
+      <span class="font-extrabold text-xs tracking-tight text-white">EATZ</span>
     </div>
 
-    <div class="flex items-center space-x-1.5">
-      <button onclick="switchView('tables')" id="nav-btn-tables" class="px-3 py-1 bg-white text-black font-extrabold text-xs rounded shadow-sm flex items-center">
+    <div class="flex items-center space-x-1">
+      <button onclick="switchView('tables')" id="nav-btn-tables" class="px-2.5 py-1 bg-white text-black font-extrabold text-[11px] rounded shadow-sm flex items-center">
         <i class="fa-solid fa-table-cells mr-1 text-[10px]"></i> Tables
       </button>
-      <button onclick="switchView('sales')" id="nav-btn-sales" class="px-3 py-1 bg-[#1e293b] hover:bg-[#334155] text-white font-bold text-xs rounded border border-[#334155] flex items-center">
+      <button onclick="switchView('sales')" id="nav-btn-sales" class="px-2.5 py-1 bg-[#1e293b] hover:bg-[#334155] text-white font-bold text-[11px] rounded border border-[#334155] flex items-center">
         <i class="fa-solid fa-chart-line mr-1 text-[10px]"></i> Sales
       </button>
-      <button onclick="switchView('held')" id="nav-btn-held" class="px-2.5 py-1 bg-[#1e293b] hover:bg-[#334155] text-amber-400 font-bold text-xs rounded border border-[#334155] flex items-center">
-        <i class="fa-solid fa-pause mr-1 text-[9px]"></i> Held (<span id="held-count-badge">0</span>)
+      <button onclick="switchView('held')" id="nav-btn-held" class="px-2 py-1 bg-[#1e293b] hover:bg-[#334155] text-amber-400 font-bold text-[11px] rounded border border-[#334155] flex items-center">
+        <i class="fa-solid fa-pause mr-1 text-[9px]"></i> Held(<span id="held-count-badge">0</span>)
       </button>
-      <button onclick="switchView('menu')" id="nav-btn-menu" class="px-2 py-1 bg-[#1e293b] hover:bg-[#334155] text-neutral-300 font-bold text-xs rounded border border-[#334155]">
+      <button onclick="switchView('menu')" id="nav-btn-menu" class="px-2 py-1 bg-[#1e293b] hover:bg-[#334155] text-neutral-300 font-bold text-[11px] rounded border border-[#334155]">
         <i class="fa-solid fa-sliders text-[10px]"></i>
       </button>
     </div>
@@ -232,9 +231,9 @@
       { id: 1101, name: 'Allu Tikki Meal', category: 'Meals', price_regular: 130, available: true }
     ];
 
-    let menu = JSON.parse(localStorage.getItem('de_menu_v30')) || DEFAULT_MENU;
-    let orders = JSON.parse(localStorage.getItem('de_orders_v30')) || [];
-    let heldOrders = JSON.parse(localStorage.getItem('de_held_v30')) || [];
+    let menu = JSON.parse(localStorage.getItem('de_menu_v31')) || DEFAULT_MENU;
+    let orders = JSON.parse(localStorage.getItem('de_orders_v31')) || [];
+    let heldOrders = JSON.parse(localStorage.getItem('de_held_v31')) || [];
     let cart = {};
     let activeCategory = 'All';
     let currentOrderMode = 'Dine In';
@@ -245,9 +244,9 @@
     let activeResumedHoldId = null;
 
     function saveState() {
-      localStorage.setItem('de_menu_v30', JSON.stringify(menu));
-      localStorage.setItem('de_orders_v30', JSON.stringify(orders));
-      localStorage.setItem('de_held_v30', JSON.stringify(heldOrders));
+      localStorage.setItem('de_menu_v31', JSON.stringify(menu));
+      localStorage.setItem('de_orders_v31', JSON.stringify(orders));
+      localStorage.setItem('de_held_v31', JSON.stringify(heldOrders));
       updateHeldBadge();
       renderTableCards();
     }
