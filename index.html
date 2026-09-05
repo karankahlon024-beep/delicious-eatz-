@@ -3,78 +3,139 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Delicious Eatz - POS Terminal</title>
+  <title>Delicious Eatz - POS</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-900 text-white min-h-screen p-3 pb-24">
+<body class="bg-gray-950 text-white min-h-screen flex flex-col md:flex-row text-xs">
 
-  <div class="max-w-md mx-auto">
-    <!-- Header -->
-    <header class="text-center mb-4">
-      <h1 class="text-3xl font-black tracking-widest text-orange-500 uppercase">Eatz</h1>
-      <p class="text-[10px] text-gray-400 uppercase tracking-wider">Delicious Eatz POS Terminal</p>
-    </header>
+  <!-- Left Side: Menu & Categories -->
+  <div class="flex-1 p-3 flex flex-col h-screen overflow-hidden">
+    <!-- Top Bar -->
+    <div class="flex items-center justify-between bg-gray-900 p-2.5 rounded-lg mb-3 border border-gray-800">
+      <div class="flex items-center gap-2">
+        <span class="bg-red-600 px-2 py-0.5 rounded font-bold text-[10px] text-white">POS</span>
+        <span class="font-bold tracking-wider text-white">DELICIOUS EATZ</span>
+        <span class="text-gray-400 text-[10px]">| Budhabarh</span>
+      </div>
+      <div class="flex items-center gap-3 text-gray-300 font-medium">
+        <span id="live-clock">9:28:08 PM</span>
+        <button class="flex items-center gap-1 bg-gray-800 px-2 py-1 rounded text-gray-300 hover:bg-gray-700">🕒 Orders</button>
+      </div>
+    </div>
 
-    <!-- Order Type Selection -->
-    <div class="flex gap-2 mb-4">
-      <button onclick="setOrderType('Dine In')" id="type-dine" class="flex-1 py-2 bg-orange-600 rounded-lg font-bold text-xs transition shadow">Dine In</button>
-      <button onclick="setOrderType('Takeaway')" id="type-take" class="flex-1 py-2 bg-gray-800 rounded-lg font-bold text-xs text-gray-400 transition shadow">Takeaway</button>
+    <!-- Search Bar -->
+    <div class="relative mb-3">
+      <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">🔍</span>
+      <input type="text" id="search-input" oninput="handleSearch()" placeholder="Search menu..." class="w-full bg-gray-900 border border-gray-800 rounded-lg pl-9 pr-4 py-2 text-white placeholder-gray-500 focus:outline-none focus:border-gray-700">
     </div>
 
     <!-- Category Tabs -->
-    <div class="flex gap-1.5 overflow-x-auto pb-2 mb-3 no-scrollbar text-xs">
-      <button onclick="filterCategory('all')" id="cat-all" class="cat-btn px-3 py-1.5 bg-orange-600 font-bold rounded-lg whitespace-nowrap">All</button>
-      <button onclick="filterCategory('Pizza Mania')" id="cat-Pizza Mania" class="cat-btn px-3 py-1.5 bg-gray-800 text-gray-400 font-bold rounded-lg whitespace-nowrap">Pizza Mania</button>
-      <button onclick="filterCategory('Special Veg Pizza')" id="cat-Special Veg Pizza" class="cat-btn px-3 py-1.5 bg-gray-800 text-gray-400 font-bold rounded-lg whitespace-nowrap">Special Pizza</button>
-      <button onclick="filterCategory('Burger')" id="cat-Burger" class="cat-btn px-3 py-1.5 bg-gray-800 text-gray-400 font-bold rounded-lg whitespace-nowrap">Burgers</button>
-      <button onclick="filterCategory('Sandwich')" id="cat-Sandwich" class="cat-btn px-3 py-1.5 bg-gray-800 text-gray-400 font-bold rounded-lg whitespace-nowrap">Sandwiches</button>
-      <button onclick="filterCategory('Pasta')" id="cat-Pasta" class="cat-btn px-3 py-1.5 bg-gray-800 text-gray-400 font-bold rounded-lg whitespace-nowrap">Pasta</button>
-      <button onclick="filterCategory('Wraps')" id="cat-Wraps" class="cat-btn px-3 py-1.5 bg-gray-800 text-gray-400 font-bold rounded-lg whitespace-nowrap">Wraps</button>
-      <button onclick="filterCategory('Veg Sides')" id="cat-Veg Sides" class="cat-btn px-3 py-1.5 bg-gray-800 text-gray-400 font-bold rounded-lg whitespace-nowrap">Sides</button>
-      <button onclick="filterCategory('Shakes')" id="cat-Shakes" class="cat-btn px-3 py-1.5 bg-gray-800 text-gray-400 font-bold rounded-lg whitespace-nowrap">Shakes</button>
-      <button onclick="filterCategory('Mocktails')" id="cat-Mocktails" class="cat-btn px-3 py-1.5 bg-gray-800 text-gray-400 font-bold rounded-lg whitespace-nowrap">Mocktails</button>
-      <button onclick="filterCategory('Coffee')" id="cat-Coffee" class="cat-btn px-3 py-1.5 bg-gray-800 text-gray-400 font-bold rounded-lg whitespace-nowrap">Coffee</button>
-      <button onclick="filterCategory('Meals')" id="cat-Meals" class="cat-btn px-3 py-1.5 bg-gray-800 text-gray-400 font-bold rounded-lg whitespace-nowrap">Meals</button>
-      <button onclick="filterCategory('Desserts')" id="cat-Desserts" class="cat-btn px-3 py-1.5 bg-gray-800 text-gray-400 font-bold rounded-lg whitespace-nowrap">Desserts</button>
+    <div class="flex gap-1.5 overflow-x-auto pb-2 mb-3 shrink-0 no-scrollbar">
+      <button onclick="filterCategory('all')" id="cat-all" class="cat-btn px-3 py-1.5 bg-red-600 font-bold rounded-lg whitespace-nowrap text-white">All</button>
+      <button onclick="filterCategory('Pizza Mania')" id="cat-Pizza Mania" class="cat-btn px-3 py-1.5 bg-gray-900 text-gray-400 font-bold rounded-lg whitespace-nowrap border border-gray-800">1. Pizza Mania</button>
+      <button onclick="filterCategory('Special Veg Pizza')" id="cat-Special Veg Pizza" class="cat-btn px-3 py-1.5 bg-gray-900 text-gray-400 font-bold rounded-lg whitespace-nowrap border border-gray-800">2. Special Veg Pizza</button>
+      <button onclick="filterCategory('Burger')" id="cat-Burger" class="cat-btn px-3 py-1.5 bg-gray-900 text-gray-400 font-bold rounded-lg whitespace-nowrap border border-gray-800">Burger</button>
+      <button onclick="filterCategory('Sandwich')" id="cat-Sandwich" class="cat-btn px-3 py-1.5 bg-gray-900 text-gray-400 font-bold rounded-lg whitespace-nowrap border border-gray-800">Sandwich</button>
+      <button onclick="filterCategory('Pasta')" id="cat-Pasta" class="cat-btn px-3 py-1.5 bg-gray-900 text-gray-400 font-bold rounded-lg whitespace-nowrap border border-gray-800">Pasta</button>
+      <button onclick="filterCategory('Wraps')" id="cat-Wraps" class="cat-btn px-3 py-1.5 bg-gray-900 text-gray-400 font-bold rounded-lg whitespace-nowrap border border-gray-800">Wraps</button>
+      <button onclick="filterCategory('Veg Sides')" id="cat-Veg Sides" class="cat-btn px-3 py-1.5 bg-gray-900 text-gray-400 font-bold rounded-lg whitespace-nowrap border border-gray-800">Veg Sides</button>
+      <button onclick="filterCategory('Shakes')" id="cat-Shakes" class="cat-btn px-3 py-1.5 bg-gray-900 text-gray-400 font-bold rounded-lg whitespace-nowrap border border-gray-800">Shakes</button>
+      <button onclick="filterCategory('Mocktails')" id="cat-Mocktails" class="cat-btn px-3 py-1.5 bg-gray-900 text-gray-400 font-bold rounded-lg whitespace-nowrap border border-gray-800">Mocktails</button>
+      <button onclick="filterCategory('Coffee')" id="cat-Coffee" class="cat-btn px-3 py-1.5 bg-gray-900 text-gray-400 font-bold rounded-lg whitespace-nowrap border border-gray-800">Coffee</button>
+      <button onclick="filterCategory('Meals')" id="cat-Meals" class="cat-btn px-3 py-1.5 bg-gray-900 text-gray-400 font-bold rounded-lg whitespace-nowrap border border-gray-800">Meals</button>
+      <button onclick="filterCategory('Desserts')" id="cat-Desserts" class="cat-btn px-3 py-1.5 bg-gray-900 text-gray-400 font-bold rounded-lg whitespace-nowrap border border-gray-800">Desserts</button>
     </div>
 
     <!-- Menu Grid -->
-    <div class="grid grid-cols-2 gap-2.5 mb-6" id="menu-items">
+    <div class="grid grid-cols-2 gap-2 overflow-y-auto pr-1 flex-1" id="menu-items">
       <!-- Populated dynamically -->
-    </div>
-
-    <!-- Sticky Cart & Checkout Panel -->
-    <div class="bg-gray-800 p-3.5 rounded-xl border border-gray-700 shadow-2xl">
-      <h2 class="text-[11px] font-bold text-gray-400 mb-1.5 uppercase tracking-wider">Current Order</h2>
-      <div id="cart-list" class="space-y-1.5 mb-2.5 text-xs max-h-32 overflow-y-auto pr-1">
-        <p class="text-gray-500 italic">Cart is empty</p>
-      </div>
-      <div class="border-t border-gray-700 pt-2 mb-3 flex justify-between items-center font-bold text-base">
-        <span>Total:</span>
-        <span id="cart-total" class="text-orange-500 text-lg">₹0</span>
-      </div>
-      <button onclick="checkoutOrder()" class="w-full bg-green-600 hover:bg-green-700 active:scale-95 font-bold py-3 rounded-xl text-base shadow-lg transition duration-200">
-        Place Order & Print Bill
-      </button>
     </div>
   </div>
 
-  <!-- Variant Selection Modal -->
-  <div id="variant-modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-50">
-    <div class="bg-gray-800 border border-gray-700 w-full max-w-xs rounded-2xl p-5 shadow-2xl">
-      <h3 id="modal-title" class="font-bold text-base text-white mb-3">Select Size</h3>
-      <div id="modal-options" class="space-y-2 mb-4">
-        <!-- Size options dynamically injected -->
+  <!-- Right Side: Cart, Type & Checkout Panel -->
+  <div class="w-full md:w-80 bg-gray-900 p-3 flex flex-col justify-between border-t md:border-t-0 md:border-l border-gray-800 h-screen">
+    <div>
+      <!-- Order Type & Bill ID Header -->
+      <div class="flex justify-between items-center mb-2">
+        <span class="text-gray-400 font-bold uppercase tracking-wider text-[10px]">TYPE</span>
+        <span id="bill-id-tag" class="text-amber-400 font-bold text-[10px]">#DE-PENDING</span>
       </div>
-      <button onclick="closeModal()" class="w-full py-2.5 bg-gray-700 hover:bg-gray-600 font-bold text-xs rounded-xl text-gray-300">Cancel</button>
+
+      <div class="flex gap-1 mb-3">
+        <button onclick="setOrderType('Dine')" id="type-dine" class="flex-1 py-1.5 bg-gray-800 rounded font-bold text-gray-300">Dine</button>
+        <button onclick="setOrderType('Away')" id="type-away" class="flex-1 py-1.5 bg-gray-800 rounded font-bold text-gray-300">Away</button>
+        <button onclick="setOrderType('Deliv')" id="type-deliv" class="flex-1 py-1.5 bg-amber-500 rounded font-bold text-black">Deliv</button>
+      </div>
+
+      <!-- Phone Number Input -->
+      <div class="mb-3 relative">
+        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-amber-400">📞</span>
+        <input type="text" id="customer-phone" placeholder="Phone #..." class="w-full bg-gray-950 border border-gray-800 rounded px-3 py-1.5 pl-9 text-white placeholder-gray-500 focus:outline-none focus:border-amber-500">
+      </div>
+
+      <!-- Cart Items List -->
+      <div id="cart-list" class="space-y-2 mb-3 overflow-y-auto max-h-[calc(100vh-340px)] pr-1">
+        <div class="text-center text-gray-500 py-12 flex flex-col items-center justify-center">
+          <span class="text-2xl mb-1">📄</span>
+          <span>No items added</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Totals & Payment Action Section -->
+    <div class="border-t border-gray-800 pt-2 shrink-0">
+      <div class="flex justify-between py-1 text-gray-300 font-medium">
+        <span>Subtotal</span>
+        <span id="cart-subtotal">₹0</span>
+      </div>
+      <div class="flex justify-between items-center py-1 text-gray-300 font-medium mb-2">
+        <span>Discount (₹)</span>
+        <input type="number" id="discount-input" value="0" oninput="updateCartUI()" class="w-16 bg-gray-950 border border-gray-800 rounded px-2 py-0.5 text-right text-white focus:outline-none">
+      </div>
+      <div class="flex justify-between py-1.5 text-sm font-bold border-t border-gray-800 mb-3">
+        <span class="text-white">Net</span>
+        <span id="cart-net" class="text-emerald-400 text-base">₹0</span>
+      </div>
+
+      <!-- Payment Method Buttons -->
+      <div class="flex gap-1 mb-2">
+        <button onclick="setPayment('Cash')" id="pay-Cash" class="flex-1 py-1.5 bg-amber-500 text-black font-bold rounded">Cash</button>
+        <button onclick="setPayment('UPI')" id="pay-UPI" class="flex-1 py-1.5 bg-gray-800 text-gray-400 font-bold rounded">UPI</button>
+        <button onclick="setPayment('Card')" id="pay-Card" class="flex-1 py-1.5 bg-gray-800 text-gray-400 font-bold rounded">Card</button>
+      </div>
+
+      <div class="flex gap-2">
+        <button onclick="clearCart()" class="flex-1 py-2 bg-gray-800 hover:bg-gray-700 font-bold rounded flex items-center justify-center gap-1 text-gray-300">
+          🗑️ Clear
+        </button>
+        <button onclick="checkoutOrder()" class="flex-[2] py-2 bg-red-600 hover:bg-red-700 font-bold rounded flex items-center justify-center gap-1 text-white shadow-lg">
+          🖨️ Settle
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Variant Size Modal -->
+  <div id="variant-modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-50">
+    <div class="bg-gray-900 border border-gray-800 w-full max-w-xs rounded-xl p-4 shadow-2xl">
+      <h3 id="modal-title" class="font-bold text-sm text-white mb-3">Select Size</h3>
+      <div id="modal-options" class="space-y-2 mb-3"></div>
+      <button onclick="closeModal()" class="w-full py-2 bg-gray-800 hover:bg-gray-700 font-bold rounded text-gray-300">Cancel</button>
     </div>
   </div>
 
   <script>
     const SHEETDB_API = 'https://sheetdb.io/api/v1/mbu5t23na13vg';
-    let orderType = 'Dine In';
+    let orderType = 'Deliv';
+    let paymentMethod = 'Cash';
     let cart = [];
     let currentCategory = 'all';
+
+    // Live Clock
+    setInterval(() => {
+      const now = new Date();
+      document.getElementById('live-clock').innerText = now.toLocaleTimeString();
+    }, 1000);
 
     const menu = [
       // Pizza Mania
@@ -89,7 +150,7 @@
       { name: 'Pineapple & Corn', category: 'Pizza Mania', prices: { Regular: 120, Medium: 230, Large: 380 } },
       { name: 'Delicious Special Pizza', category: 'Pizza Mania', prices: { Regular: 140, Medium: 270, Large: 440 } },
 
-      // Special Veg Pizza & 2 Veg & 3 Veg & 1 Veg
+      // Special Veg Pizza
       { name: 'Margherita (Double Cheese)', category: 'Special Veg Pizza', prices: { Regular: 150, Medium: 300, Large: 400 } },
       { name: 'Cheese & Mushroom', category: 'Special Veg Pizza', prices: { Regular: 150, Medium: 300, Large: 400 } },
       { name: 'Cheese & Corn', category: 'Special Veg Pizza', prices: { Regular: 150, Medium: 300, Large: 400 } },
@@ -102,7 +163,7 @@
       { name: 'Veg Paradise', category: 'Special Veg Pizza', prices: { Regular: 250, Medium: 500, Large: 630 } },
       { name: 'Delicious Supreme', category: 'Special Veg Pizza', prices: { Regular: 250, Medium: 500, Large: 630 } },
       { name: 'Kadhai Lover', category: 'Special Veg Pizza', prices: { Regular: 270, Medium: 550, Large: 650 } },
-      { name: 'Tandoori Panner Lover', category: 'Special Veg Pizza', prices: { Regular: 270, Medium: 550, Large: 650 } },
+      { name: 'Tandoori Paneer Lover', category: 'Special Veg Pizza', prices: { Regular: 270, Medium: 550, Large: 650 } },
       { name: 'Achari Lover', category: 'Special Veg Pizza', prices: { Regular: 270, Medium: 550, Large: 650 } },
       { name: 'Delicious Eatz Special', category: 'Special Veg Pizza', prices: { Regular: 270, Medium: 550, Large: 650 } },
       { name: 'Makhni Lover', category: 'Special Veg Pizza', prices: { Regular: 190, Medium: 380, Large: 590 } },
@@ -210,27 +271,37 @@
     function filterCategory(cat) {
       currentCategory = cat;
       document.querySelectorAll('.cat-btn').forEach(b => {
-        b.className = 'cat-btn px-3 py-1.5 bg-gray-800 text-gray-400 font-bold rounded-lg whitespace-nowrap';
+        b.className = 'cat-btn px-3 py-1.5 bg-gray-900 text-gray-400 font-bold rounded-lg whitespace-nowrap border border-gray-800';
       });
-      document.getElementById('cat-' + cat).className = 'cat-btn px-3 py-1.5 bg-orange-600 text-white font-bold rounded-lg whitespace-nowrap';
+      document.getElementById('cat-' + cat).className = 'cat-btn px-3 py-1.5 bg-red-600 text-white font-bold rounded-lg whitespace-nowrap';
+      renderMenu();
+    }
+
+    function handleSearch() {
       renderMenu();
     }
 
     function renderMenu() {
       const container = document.getElementById('menu-items');
-      const filtered = currentCategory === 'all' ? menu : menu.filter(i => i.category === currentCategory);
+      const query = document.getElementById('search-input').value.toLowerCase();
+      
+      let filtered = currentCategory === 'all' ? menu : menu.filter(i => i.category === currentCategory);
+      if (query) {
+        filtered = menu.filter(i => i.name.toLowerCase().includes(query));
+      }
       
       container.innerHTML = filtered.map((item) => {
-        let priceDisplay = '';
-        if (item.price) {
-          priceDisplay = `₹${item.price}`;
-        } else if (item.prices) {
-          priceDisplay = `From ₹${Math.min(...Object.values(item.prices))}`;
-        }
+        const categoryLabel = item.category.toUpperCase();
         return `
-          <button onclick="handleItemClick('${item.name.replace(/'/g, "\\'")}')" class="bg-gray-800 hover:bg-gray-700 active:scale-95 p-3 rounded-xl text-left border border-gray-700 transition shadow flex flex-col justify-between">
-            <div class="font-bold text-xs text-white line-clamp-2">${item.name}</div>
-            <div class="text-orange-400 font-semibold text-xs mt-2">${priceDisplay}</div>
+          <button onclick="handleItemClick('${item.name.replace(/'/g, "\\'")}')" class="bg-gray-900 hover:bg-gray-800 border border-gray-800 p-2.5 rounded-lg text-left transition flex flex-col justify-between h-20 shadow">
+            <div>
+              <div class="text-[9px] text-gray-500 font-bold uppercase tracking-wider">${categoryLabel}</div>
+              <div class="font-bold text-white text-xs truncate mt-0.5">${item.name}</div>
+            </div>
+            <div class="flex justify-between items-center mt-1">
+              <span class="text-white font-bold text-xs">${item.price ? '₹' + item.price : 'From ₹' + Math.min(...Object.values(item.prices))}</span>
+              ${item.prices ? '<span class="text-[10px] bg-gray-800 px-1.5 py-0.5 rounded text-gray-400">Sizes</span>' : ''}
+            </div>
           </button>
         `;
       }).join('');
@@ -241,7 +312,7 @@
       if (!item) return;
 
       if (item.price) {
-        addToCart(item.name, item.price, 'Regular');
+        addToCart(item.name, item.price);
       } else if (item.prices) {
         openVariantModal(item);
       }
@@ -254,9 +325,9 @@
 
       title.innerText = `Select Size: ${item.name}`;
       options.innerHTML = Object.entries(item.prices).map(([size, price]) => `
-        <button onclick="selectVariant('${item.name.replace(/'/g, "\\'")}', '${size}', ${price})" class="w-full flex justify-between items-center p-3 bg-gray-700 hover:bg-gray-600 rounded-xl font-bold text-sm transition">
+        <button onclick="selectVariant('${item.name.replace(/'/g, "\\'")}', '${size}', ${price})" class="w-full flex justify-between items-center p-2.5 bg-gray-800 hover:bg-gray-700 rounded font-bold text-xs transition">
           <span>${size}</span>
-          <span class="text-orange-400">₹${price}</span>
+          <span class="text-amber-400">₹${price}</span>
         </button>
       `).join('');
 
@@ -265,29 +336,45 @@
     }
 
     function selectVariant(name, size, price) {
-      addToCart(`${name} (${size})`, price, size);
+      addToCart(`${name} (${size})`, price);
       closeModal();
     }
 
     function closeModal() {
-      const modal = document.getElementById('variant-modal');
-      modal.classList.remove('flex');
-      modal.classList.add('hidden');
+      document.getElementById('variant-modal').classList.remove('flex');
+      document.getElementById('variant-modal').classList.add('hidden');
     }
 
     function setOrderType(type) {
       orderType = type;
-      document.getElementById('type-dine').className = type === 'Dine In' ? 'flex-1 py-2 bg-orange-600 rounded-lg font-bold text-xs transition shadow' : 'flex-1 py-2 bg-gray-800 rounded-lg font-bold text-xs text-gray-400 transition shadow';
-      document.getElementById('type-take').className = type === 'Takeaway' ? 'flex-1 py-2 bg-orange-600 rounded-lg font-bold text-xs transition shadow' : 'flex-1 py-2 bg-gray-800 rounded-lg font-bold text-xs text-gray-400 transition shadow';
+      ['dine', 'away', 'deliv'].forEach(t => {
+        const btn = document.getElementById('type-' + t);
+        if (t.toLowerCase() === type.toLowerCase()) {
+          btn.className = 'flex-1 py-1.5 bg-amber-500 rounded font-bold text-black';
+        } else {
+          btn.className = 'flex-1 py-1.5 bg-gray-800 rounded font-bold text-gray-300';
+        }
+      });
     }
 
-    function addToCart(name, price, variant) {
-      const cartKey = `${name}`;
-      const existing = cart.find(i => i.cartKey === cartKey);
+    function setPayment(method) {
+      paymentMethod = method;
+      ['Cash', 'UPI', 'Card'].forEach(m => {
+        const btn = document.getElementById('pay-' + m);
+        if (m === method) {
+          btn.className = 'flex-1 py-1.5 bg-amber-500 text-black font-bold rounded';
+        } else {
+          btn.className = 'flex-1 py-1.5 bg-gray-800 text-gray-400 font-bold rounded';
+        }
+      });
+    }
+
+    function addToCart(name, price) {
+      const existing = cart.find(i => i.name === name);
       if (existing) {
         existing.qty++;
       } else {
-        cart.push({ cartKey, name, price, qty: 1 });
+        cart.push({ name, price, qty: 1 });
       }
       updateCartUI();
     }
@@ -295,25 +382,40 @@
     function updateCartUI() {
       const list = document.getElementById('cart-list');
       if (cart.length === 0) {
-        list.innerHTML = '<p class="text-gray-500 italic">Cart is empty</p>';
-        document.getElementById('cart-total').innerText = '₹0';
+        list.innerHTML = `
+          <div class="text-center text-gray-500 py-12 flex flex-col items-center justify-center">
+            <span class="text-2xl mb-1">📄</span>
+            <span>No items added</span>
+          </div>
+        `;
+        document.getElementById('cart-subtotal').innerText = '₹0';
+        document.getElementById('cart-net').innerText = '₹0';
+        document.getElementById('bill-id-tag').innerText = '#DE-PENDING';
         return;
       }
+
+      document.getElementById('bill-id-tag').innerText = '#DE-' + Math.floor(1000 + Math.random() * 9000);
+
       list.innerHTML = cart.map((i, index) => `
-        <div class="flex justify-between items-center bg-gray-900/60 p-2 rounded-lg border border-gray-800">
+        <div class="flex justify-between items-center bg-gray-950 p-2 rounded border border-gray-800">
           <div>
-            <div class="font-medium text-xs">${i.name}</div>
-            <div class="text-orange-400 font-semibold text-[11px]">₹${i.price * i.qty}</div>
+            <div class="font-bold text-white">${i.name}</div>
+            <div class="text-amber-400">₹${i.price * i.qty}</div>
           </div>
-          <div class="flex items-center gap-2">
-            <button onclick="decreaseQty(${index})" class="w-6 h-6 bg-gray-700 hover:bg-gray-600 rounded font-bold text-xs">-</button>
-            <span class="text-xs font-bold">${i.qty}</span>
-            <button onclick="increaseQty(${index})" class="w-6 h-6 bg-gray-700 hover:bg-gray-600 rounded font-bold text-xs">+</button>
+          <div class="flex items-center gap-1.5">
+            <button onclick="decreaseQty(${index})" class="w-5 h-5 bg-gray-800 hover:bg-gray-700 rounded font-bold">-</button>
+            <span class="font-bold w-4 text-center">${i.qty}</span>
+            <button onclick="increaseQty(${index})" class="w-5 h-5 bg-gray-800 hover:bg-gray-700 rounded font-bold">+</button>
           </div>
         </div>
       `).join('');
-      const total = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
-      document.getElementById('cart-total').innerText = '₹' + total;
+
+      const subtotal = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+      const discount = parseFloat(document.getElementById('discount-input').value) || 0;
+      const net = Math.max(0, subtotal - discount);
+
+      document.getElementById('cart-subtotal').innerText = '₹' + subtotal;
+      document.getElementById('cart-net').innerText = '₹' + net;
     }
 
     function increaseQty(index) {
@@ -329,6 +431,11 @@
       updateCartUI();
     }
 
+    function clearCart() {
+      cart = [];
+      updateCartUI();
+    }
+
     function checkoutOrder() {
       if (cart.length === 0) {
         alert('Please add items to the cart first!');
@@ -336,14 +443,19 @@
       }
 
       const invoiceNum = Math.floor(1000 + Math.random() * 9000);
-      const totalAmount = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+      const subtotal = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+      const discount = parseFloat(document.getElementById('discount-input').value) || 0;
+      const totalAmount = Math.max(0, subtotal - discount);
       const itemsString = cart.map(i => `${i.name} x${i.qty}`).join(', ');
+      const phone = document.getElementById('customer-phone').value || 'Walk-in';
 
       const orderData = {
         Invoice: invoiceNum,
         Type: orderType,
+        Phone: phone,
         Items: itemsString,
         Total: totalAmount,
+        Payment: paymentMethod,
         Timestamp: new Date().toLocaleString()
       };
 
@@ -354,12 +466,12 @@
       })
       .then(res => res.json())
       .then(() => {
-        alert('Order #' + invoiceNum + ' placed successfully! Printing on counter...');
-        cart = [];
-        updateCartUI();
+        alert('Order #' + invoiceNum + ' settled successfully! Printing on counter...');
+        clearCart();
+        document.getElementById('customer-phone').value = '';
       })
       .catch(err => {
-        alert('Error saving order. Check your internet connection.');
+        alert('Error syncing order. Check your connection.');
         console.error(err);
       });
     }
