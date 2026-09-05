@@ -1408,12 +1408,8 @@
       if (view === 'menu') renderMenuEditor();
     }
 
-    fetchCloudSales();
-    renderTableCards();
-    renderCategories();
-    renderItems();
-    renderCart();
-    updateHeldBadge();
-  </script>
-</body>
-</html>
+          window.addEventListener('DOMContentLoaded', () => {
+      fetchCloudSales();
+      switchView('tables');
+    });
+
