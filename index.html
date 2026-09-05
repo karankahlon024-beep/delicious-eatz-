@@ -952,25 +952,11 @@
         })
         .catch(err => console.error('Cloud Fetch Error:', err));
     }
-
     function sendWhatsAppBill(record) {
-      const dateStr = new Date(record.time).toLocaleString();
-      let itemsText = record.items.map(i => `• ${i.name} (${i.variant}) x${i.qty} - ₹${i.price * i.qty}`).join('\n');
       
-      const message = `*🍕 DELICIOUS EATZ BILL*` +
-                      `\n-------------------` +
-                      `\n*Bill #:* ${record.invoice_no}` +
-                      `\n*Time:* ${dateStr}` +
-                      `\n*Type:* ${record.mode}${record.table ? ' (Table ' + record.table + ')' : ''}` +
-                      `\n*Payment:* ${record.payment_mode}` +
-                      `\n-------------------` +
-                      `\n${itemsText}` +
-                      `\n-------------------` +
-                      `\n*Grand Total:* ₹${record.grand_total}`;
-
-      const encodedUrl = `https://wa.me/${OWNER_WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
-      window.open(encodedUrl, '_blank');
     }
+
+      
 
     function generateKOTHTML() {
       const itemsInCart = Object.values(cart);
