@@ -3,82 +3,291 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Delicious Eatz - POS</title>
+  <title>Delicious Eatz - POS Terminal</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-900 text-white min-h-screen p-4">
+<body class="bg-gray-900 text-white min-h-screen p-3 pb-24">
 
   <div class="max-w-md mx-auto">
-    <header class="text-center mb-6">
-      <h1 class="text-3xl font-extrabold tracking-wider text-orange-500 uppercase">Eatz</h1>
-      <p class="text-xs text-gray-400">Delicious Eatz POS Terminal</p>
+    <!-- Header -->
+    <header class="text-center mb-4">
+      <h1 class="text-3xl font-black tracking-widest text-orange-500 uppercase">Eatz</h1>
+      <p class="text-[10px] text-gray-400 uppercase tracking-wider">Delicious Eatz POS Terminal</p>
     </header>
 
     <!-- Order Type Selection -->
     <div class="flex gap-2 mb-4">
-      <button onclick="setOrderType('Dine In')" id="type-dine" class="flex-1 py-2 bg-orange-600 rounded font-bold text-sm">Dine In</button>
-      <button onclick="setOrderType('Takeaway')" id="type-take" class="flex-1 py-2 bg-gray-800 rounded font-bold text-sm text-gray-400">Takeaway</button>
+      <button onclick="setOrderType('Dine In')" id="type-dine" class="flex-1 py-2 bg-orange-600 rounded-lg font-bold text-xs transition shadow">Dine In</button>
+      <button onclick="setOrderType('Takeaway')" id="type-take" class="flex-1 py-2 bg-gray-800 rounded-lg font-bold text-xs text-gray-400 transition shadow">Takeaway</button>
+    </div>
+
+    <!-- Category Tabs -->
+    <div class="flex gap-1.5 overflow-x-auto pb-2 mb-3 no-scrollbar text-xs">
+      <button onclick="filterCategory('all')" id="cat-all" class="cat-btn px-3 py-1.5 bg-orange-600 font-bold rounded-lg whitespace-nowrap">All</button>
+      <button onclick="filterCategory('Pizza Mania')" id="cat-Pizza Mania" class="cat-btn px-3 py-1.5 bg-gray-800 text-gray-400 font-bold rounded-lg whitespace-nowrap">Pizza Mania</button>
+      <button onclick="filterCategory('Special Veg Pizza')" id="cat-Special Veg Pizza" class="cat-btn px-3 py-1.5 bg-gray-800 text-gray-400 font-bold rounded-lg whitespace-nowrap">Special Pizza</button>
+      <button onclick="filterCategory('Burger')" id="cat-Burger" class="cat-btn px-3 py-1.5 bg-gray-800 text-gray-400 font-bold rounded-lg whitespace-nowrap">Burgers</button>
+      <button onclick="filterCategory('Sandwich')" id="cat-Sandwich" class="cat-btn px-3 py-1.5 bg-gray-800 text-gray-400 font-bold rounded-lg whitespace-nowrap">Sandwiches</button>
+      <button onclick="filterCategory('Pasta')" id="cat-Pasta" class="cat-btn px-3 py-1.5 bg-gray-800 text-gray-400 font-bold rounded-lg whitespace-nowrap">Pasta</button>
+      <button onclick="filterCategory('Wraps')" id="cat-Wraps" class="cat-btn px-3 py-1.5 bg-gray-800 text-gray-400 font-bold rounded-lg whitespace-nowrap">Wraps</button>
+      <button onclick="filterCategory('Veg Sides')" id="cat-Veg Sides" class="cat-btn px-3 py-1.5 bg-gray-800 text-gray-400 font-bold rounded-lg whitespace-nowrap">Sides</button>
+      <button onclick="filterCategory('Shakes')" id="cat-Shakes" class="cat-btn px-3 py-1.5 bg-gray-800 text-gray-400 font-bold rounded-lg whitespace-nowrap">Shakes</button>
+      <button onclick="filterCategory('Mocktails')" id="cat-Mocktails" class="cat-btn px-3 py-1.5 bg-gray-800 text-gray-400 font-bold rounded-lg whitespace-nowrap">Mocktails</button>
+      <button onclick="filterCategory('Coffee')" id="cat-Coffee" class="cat-btn px-3 py-1.5 bg-gray-800 text-gray-400 font-bold rounded-lg whitespace-nowrap">Coffee</button>
+      <button onclick="filterCategory('Meals')" id="cat-Meals" class="cat-btn px-3 py-1.5 bg-gray-800 text-gray-400 font-bold rounded-lg whitespace-nowrap">Meals</button>
+      <button onclick="filterCategory('Desserts')" id="cat-Desserts" class="cat-btn px-3 py-1.5 bg-gray-800 text-gray-400 font-bold rounded-lg whitespace-nowrap">Desserts</button>
     </div>
 
     <!-- Menu Grid -->
-    <div class="grid grid-cols-2 gap-3 mb-6" id="menu-items">
-      <!-- Items populated dynamically -->
+    <div class="grid grid-cols-2 gap-2.5 mb-6" id="menu-items">
+      <!-- Populated dynamically -->
     </div>
 
-    <!-- Cart Summary -->
-    <div class="bg-gray-800 p-4 rounded-lg mb-4">
-      <h2 class="text-sm font-bold text-gray-400 mb-2 uppercase tracking-wide">Current Order</h2>
-      <div id="cart-list" class="space-y-2 mb-3 text-sm max-h-40 overflow-y-auto">
+    <!-- Sticky Cart & Checkout Panel -->
+    <div class="bg-gray-800 p-3.5 rounded-xl border border-gray-700 shadow-2xl">
+      <h2 class="text-[11px] font-bold text-gray-400 mb-1.5 uppercase tracking-wider">Current Order</h2>
+      <div id="cart-list" class="space-y-1.5 mb-2.5 text-xs max-h-32 overflow-y-auto pr-1">
         <p class="text-gray-500 italic">Cart is empty</p>
       </div>
-      <div class="border-t border-gray-700 pt-2 flex justify-between font-bold text-lg">
+      <div class="border-t border-gray-700 pt-2 mb-3 flex justify-between items-center font-bold text-base">
         <span>Total:</span>
-        <span id="cart-total" class="text-orange-500">₹0</span>
+        <span id="cart-total" class="text-orange-500 text-lg">₹0</span>
       </div>
+      <button onclick="checkoutOrder()" class="w-full bg-green-600 hover:bg-green-700 active:scale-95 font-bold py-3 rounded-xl text-base shadow-lg transition duration-200">
+        Place Order & Print Bill
+      </button>
     </div>
+  </div>
 
-    <!-- Checkout Button -->
-    <button onclick="checkoutOrder()" class="w-full bg-green-600 hover:bg-green-700 font-bold py-3 rounded-lg text-lg shadow-lg transition duration-200">
-      Print Bill & Save Order
-    </button>
+  <!-- Variant Selection Modal -->
+  <div id="variant-modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-50">
+    <div class="bg-gray-800 border border-gray-700 w-full max-w-xs rounded-2xl p-5 shadow-2xl">
+      <h3 id="modal-title" class="font-bold text-base text-white mb-3">Select Size</h3>
+      <div id="modal-options" class="space-y-2 mb-4">
+        <!-- Size options dynamically injected -->
+      </div>
+      <button onclick="closeModal()" class="w-full py-2.5 bg-gray-700 hover:bg-gray-600 font-bold text-xs rounded-xl text-gray-300">Cancel</button>
+    </div>
   </div>
 
   <script>
     const SHEETDB_API = 'https://sheetdb.io/api/v1/mbu5t23na13vg';
     let orderType = 'Dine In';
     let cart = [];
+    let currentCategory = 'all';
 
     const menu = [
-      { name: 'Allu Petty Burger', price: 40 },
-      { name: 'Paneer Burger', price: 80 },
-      { name: 'Onion Pizza', price: 70 },
-      { name: 'Capsicum Pizza', price: 80 },
-      { name: 'Margherita (Reg)', price: 150 },
-      { name: 'Makhni Lover (Reg)', price: 190 }
+      // Pizza Mania
+      { name: 'Onion Pizza', category: 'Pizza Mania', prices: { Regular: 70, Medium: 130, Large: 220 } },
+      { name: 'Capsicum Pizza', category: 'Pizza Mania', prices: { Regular: 80, Medium: 150, Large: 250 } },
+      { name: 'Tomato Pizza', category: 'Pizza Mania', prices: { Regular: 80, Medium: 150, Large: 250 } },
+      { name: 'Mushroom Pizza', category: 'Pizza Mania', prices: { Regular: 80, Medium: 150, Large: 250 } },
+      { name: 'Corn Pizza', category: 'Pizza Mania', prices: { Regular: 90, Medium: 170, Large: 280 } },
+      { name: 'Capsicum & Paneer', category: 'Pizza Mania', prices: { Regular: 110, Medium: 210, Large: 340 } },
+      { name: 'Onion & Paneer', category: 'Pizza Mania', prices: { Regular: 110, Medium: 210, Large: 340 } },
+      { name: 'Capsicum & Corn', category: 'Pizza Mania', prices: { Regular: 110, Medium: 210, Large: 340 } },
+      { name: 'Pineapple & Corn', category: 'Pizza Mania', prices: { Regular: 120, Medium: 230, Large: 380 } },
+      { name: 'Delicious Special Pizza', category: 'Pizza Mania', prices: { Regular: 140, Medium: 270, Large: 440 } },
+
+      // Special Veg Pizza & 2 Veg & 3 Veg & 1 Veg
+      { name: 'Margherita (Double Cheese)', category: 'Special Veg Pizza', prices: { Regular: 150, Medium: 300, Large: 400 } },
+      { name: 'Cheese & Mushroom', category: 'Special Veg Pizza', prices: { Regular: 150, Medium: 300, Large: 400 } },
+      { name: 'Cheese & Corn', category: 'Special Veg Pizza', prices: { Regular: 150, Medium: 300, Large: 400 } },
+      { name: 'Achari Wonder', category: 'Special Veg Pizza', prices: { Regular: 150, Medium: 300, Large: 400 } },
+      { name: 'Mix Veg', category: 'Special Veg Pizza', prices: { Regular: 150, Medium: 300, Large: 400 } },
+      { name: 'Delicious Loaded', category: 'Special Veg Pizza', prices: { Regular: 250, Medium: 500, Large: 630 } },
+      { name: 'Veg Delight', category: 'Special Veg Pizza', prices: { Regular: 250, Medium: 500, Large: 630 } },
+      { name: 'Sweet & Spicy', category: 'Special Veg Pizza', prices: { Regular: 250, Medium: 500, Large: 630 } },
+      { name: 'Veggie Fresh', category: 'Special Veg Pizza', prices: { Regular: 250, Medium: 500, Large: 630 } },
+      { name: 'Veg Paradise', category: 'Special Veg Pizza', prices: { Regular: 250, Medium: 500, Large: 630 } },
+      { name: 'Delicious Supreme', category: 'Special Veg Pizza', prices: { Regular: 250, Medium: 500, Large: 630 } },
+      { name: 'Kadhai Lover', category: 'Special Veg Pizza', prices: { Regular: 270, Medium: 550, Large: 650 } },
+      { name: 'Tandoori Panner Lover', category: 'Special Veg Pizza', prices: { Regular: 270, Medium: 550, Large: 650 } },
+      { name: 'Achari Lover', category: 'Special Veg Pizza', prices: { Regular: 270, Medium: 550, Large: 650 } },
+      { name: 'Delicious Eatz Special', category: 'Special Veg Pizza', prices: { Regular: 270, Medium: 550, Large: 650 } },
+      { name: 'Makhni Lover', category: 'Special Veg Pizza', prices: { Regular: 190, Medium: 380, Large: 590 } },
+      { name: 'Farm House', category: 'Special Veg Pizza', prices: { Regular: 190, Medium: 380, Large: 590 } },
+      { name: 'Delicious Pasta Pizza', category: 'Special Veg Pizza', prices: { Regular: 190, Medium: 380, Large: 590 } },
+      { name: 'Paneer Lover', category: 'Special Veg Pizza', prices: { Regular: 190, Medium: 380, Large: 590 } },
+      { name: 'Country House', category: 'Special Veg Pizza', prices: { Regular: 190, Medium: 380, Large: 590 } },
+      { name: 'Maxican Green Wave', category: 'Special Veg Pizza', prices: { Regular: 190, Medium: 380, Large: 590 } },
+      { name: 'Spicy Corn Lover', category: 'Special Veg Pizza', prices: { Regular: 190, Medium: 380, Large: 590 } },
+
+      // Burger
+      { name: 'Allu Petty Burger', category: 'Burger', price: 40 },
+      { name: 'Herb Petty Burger', category: 'Burger', price: 50 },
+      { name: 'Spicy Burger', category: 'Burger', price: 60 },
+      { name: 'Cheesy Burger', category: 'Burger', price: 70 },
+      { name: 'Paneer Burger', category: 'Burger', price: 80 },
+      { name: 'Mushroom Burger', category: 'Burger', price: 70 },
+      { name: 'Spicy Paneer Burger', category: 'Burger', price: 120 },
+      { name: 'Double Petty Burger', category: 'Burger', price: 110 },
+      { name: 'Special Burger', category: 'Burger', price: 100 },
+
+      // Sandwich
+      { name: 'Grilled Sandwich', category: 'Sandwich', price: 70 },
+      { name: 'Spicy Sandwich', category: 'Sandwich', price: 80 },
+      { name: 'Mix Veg Sandwich', category: 'Sandwich', price: 100 },
+      { name: 'Creamy Sandwich', category: 'Sandwich', price: 90 },
+      { name: 'Paneer & Mushroom', category: 'Sandwich', price: 100 },
+      { name: 'Paneer Sandwich', category: 'Sandwich', price: 100 },
+      { name: 'Delicious Spl. Sandwich', category: 'Sandwich', price: 120 },
+
+      // Pasta
+      { name: 'Red Pasta', category: 'Pasta', price: 80 },
+      { name: 'White Pasta', category: 'Pasta', price: 90 },
+      { name: 'Spicy Pasta', category: 'Pasta', price: 100 },
+      { name: 'Mix Veg Pasta', category: 'Pasta', price: 100 },
+      { name: 'Makhni Pasta', category: 'Pasta', price: 100 },
+      { name: 'Cheesy Pasta', category: 'Pasta', price: 90 },
+
+      // Wraps
+      { name: 'Mix Veg Wrap', category: 'Wraps', price: 80 },
+      { name: 'Allu Tikki Wrap', category: 'Wraps', price: 90 },
+      { name: 'Paneer Wrap', category: 'Wraps', price: 100 },
+      { name: 'Spicy Paneer Wrap', category: 'Wraps', price: 120 },
+      { name: 'Spicy Wrap', category: 'Wraps', price: 120 },
+      { name: 'Paneer Mushroom Wrap', category: 'Wraps', price: 130 },
+      { name: 'Delicious Special Wrap', category: 'Wraps', price: 140 },
+
+      // Veg Sides
+      { name: 'Fries', category: 'Veg Sides', prices: { Regular: 100, Medium: 120, Large: 140 } },
+      { name: 'Peri Peri Fries', category: 'Veg Sides', prices: { Regular: 120, Medium: 150, Large: 170 } },
+      { name: 'Loaded Fries', category: 'Veg Sides', price: 100 },
+      { name: 'Garlic Bread', category: 'Veg Sides', prices: { Regular: 120, Medium: 150, Large: 180 } },
+      { name: 'Paneer Garlic Bread', category: 'Veg Sides', price: 100 },
+      { name: 'Calazone', category: 'Veg Sides', price: 120 },
+      { name: 'Potato Pops', category: 'Veg Sides', price: 60 },
+      { name: 'Veg Fingers', category: 'Veg Sides', price: 80 },
+      { name: 'Veg Parcel', category: 'Veg Sides', price: 100 },
+      { name: 'Paneer Parcel', category: 'Veg Sides', price: 110 },
+      { name: 'Mix Veg Parcel', category: 'Veg Sides', price: 90 },
+
+      // Shakes
+      { name: 'Vanilla Shake', category: 'Shakes', price: 90 },
+      { name: 'Strawberry Shake', category: 'Shakes', price: 90 },
+      { name: 'Butterscotch Shake', category: 'Shakes', price: 90 },
+      { name: 'Mango Shake', category: 'Shakes', price: 90 },
+      { name: 'Choco Shake', category: 'Shakes', price: 90 },
+      { name: 'Kit Kat Shake', category: 'Shakes', price: 100 },
+      { name: 'Brownie Shake', category: 'Shakes', price: 100 },
+      { name: 'Kesar Shake', category: 'Shakes', price: 100 },
+      { name: 'Paan Shake', category: 'Shakes', price: 100 },
+      { name: 'Bubble Shake', category: 'Shakes', price: 100 },
+      { name: 'Black Current Shake', category: 'Shakes', price: 100 },
+      { name: 'Oreo Shake', category: 'Shakes', price: 100 },
+
+      // Mocktails
+      { name: 'Mint Mojito', category: 'Mocktails', price: 90 },
+      { name: 'Mango Mojito', category: 'Mocktails', price: 80 },
+      { name: 'Lemon Soda', category: 'Mocktails', price: 70 },
+      { name: 'Strawberry Mojito', category: 'Mocktails', price: 80 },
+      { name: 'Pineapple Mojito', category: 'Mocktails', price: 80 },
+      { name: 'Green Apple Mojito', category: 'Mocktails', price: 80 },
+      { name: 'Blueberry Mojito', category: 'Mocktails', price: 80 },
+      { name: 'Orange Mojito', category: 'Mocktails', price: 80 },
+      { name: 'Bubble Gum Mojito', category: 'Mocktails', price: 90 },
+
+      // Coffee
+      { name: 'Hot Coffee', category: 'Coffee', price: 50 },
+      { name: 'Beat Coffee', category: 'Coffee', price: 60 },
+      { name: 'Cold Coffee', category: 'Coffee', price: 90 },
+      { name: 'Black Coffee', category: 'Coffee', price: 50 },
+
+      // Meals
+      { name: 'Allu Tikki Meal', category: 'Meals', price: 130 },
+      { name: 'Single Meal (Veg Burger + Fries + Coke)', category: 'Meals', price: 150 },
+      { name: 'Couple Meal (2 Burgers + 2 Fries + 2 Coke)', category: 'Meals', price: 310 },
+      { name: 'Family Meal', category: 'Meals', price: 700 },
+
+      // Desserts
+      { name: 'Vanilla Ice Cream', category: 'Desserts', price: 60 },
+      { name: 'Chocolate Ice Cream', category: 'Desserts', price: 70 },
+      { name: 'Brownie with Ice Cream', category: 'Desserts', price: 100 },
+      { name: 'Sizzle Brownie', category: 'Desserts', price: 120 }
     ];
+
+    function filterCategory(cat) {
+      currentCategory = cat;
+      document.querySelectorAll('.cat-btn').forEach(b => {
+        b.className = 'cat-btn px-3 py-1.5 bg-gray-800 text-gray-400 font-bold rounded-lg whitespace-nowrap';
+      });
+      document.getElementById('cat-' + cat).className = 'cat-btn px-3 py-1.5 bg-orange-600 text-white font-bold rounded-lg whitespace-nowrap';
+      renderMenu();
+    }
 
     function renderMenu() {
       const container = document.getElementById('menu-items');
-      container.innerHTML = menu.map((item, index) => `
-        <button onclick="addToCart('${item.name}', ${item.price})" class="bg-gray-800 hover:bg-gray-700 p-3 rounded-lg text-left border border-gray-700 transition">
-          <div class="font-bold text-sm text-white">${item.name}</div>
-          <div class="text-orange-400 font-semibold text-xs mt-1">₹${item.price}</div>
+      const filtered = currentCategory === 'all' ? menu : menu.filter(i => i.category === currentCategory);
+      
+      container.innerHTML = filtered.map((item) => {
+        let priceDisplay = '';
+        if (item.price) {
+          priceDisplay = `₹${item.price}`;
+        } else if (item.prices) {
+          priceDisplay = `From ₹${Math.min(...Object.values(item.prices))}`;
+        }
+        return `
+          <button onclick="handleItemClick('${item.name.replace(/'/g, "\\'")}')" class="bg-gray-800 hover:bg-gray-700 active:scale-95 p-3 rounded-xl text-left border border-gray-700 transition shadow flex flex-col justify-between">
+            <div class="font-bold text-xs text-white line-clamp-2">${item.name}</div>
+            <div class="text-orange-400 font-semibold text-xs mt-2">${priceDisplay}</div>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function handleItemClick(name) {
+      const item = menu.find(i => i.name === name);
+      if (!item) return;
+
+      if (item.price) {
+        addToCart(item.name, item.price, 'Regular');
+      } else if (item.prices) {
+        openVariantModal(item);
+      }
+    }
+
+    function openVariantModal(item) {
+      const modal = document.getElementById('variant-modal');
+      const title = document.getElementById('modal-title');
+      const options = document.getElementById('modal-options');
+
+      title.innerText = `Select Size: ${item.name}`;
+      options.innerHTML = Object.entries(item.prices).map(([size, price]) => `
+        <button onclick="selectVariant('${item.name.replace(/'/g, "\\'")}', '${size}', ${price})" class="w-full flex justify-between items-center p-3 bg-gray-700 hover:bg-gray-600 rounded-xl font-bold text-sm transition">
+          <span>${size}</span>
+          <span class="text-orange-400">₹${price}</span>
         </button>
       `).join('');
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function selectVariant(name, size, price) {
+      addToCart(`${name} (${size})`, price, size);
+      closeModal();
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('variant-modal');
+      modal.classList.remove('flex');
+      modal.classList.add('hidden');
     }
 
     function setOrderType(type) {
       orderType = type;
-      document.getElementById('type-dine').className = type === 'Dine In' ? 'flex-1 py-2 bg-orange-600 rounded font-bold text-sm' : 'flex-1 py-2 bg-gray-800 rounded font-bold text-sm text-gray-400';
-      document.getElementById('type-take').className = type === 'Takeaway' ? 'flex-1 py-2 bg-orange-600 rounded font-bold text-sm' : 'flex-1 py-2 bg-gray-800 rounded font-bold text-sm text-gray-400';
+      document.getElementById('type-dine').className = type === 'Dine In' ? 'flex-1 py-2 bg-orange-600 rounded-lg font-bold text-xs transition shadow' : 'flex-1 py-2 bg-gray-800 rounded-lg font-bold text-xs text-gray-400 transition shadow';
+      document.getElementById('type-take').className = type === 'Takeaway' ? 'flex-1 py-2 bg-orange-600 rounded-lg font-bold text-xs transition shadow' : 'flex-1 py-2 bg-gray-800 rounded-lg font-bold text-xs text-gray-400 transition shadow';
     }
 
-    function addToCart(name, price) {
-      const existing = cart.find(i => i.name === name);
+    function addToCart(name, price, variant) {
+      const cartKey = `${name}`;
+      const existing = cart.find(i => i.cartKey === cartKey);
       if (existing) {
         existing.qty++;
       } else {
-        cart.push({ name, price, qty: 1 });
+        cart.push({ cartKey, name, price, qty: 1 });
       }
       updateCartUI();
     }
@@ -90,14 +299,34 @@
         document.getElementById('cart-total').innerText = '₹0';
         return;
       }
-      list.innerHTML = cart.map(i => `
-        <div class="flex justify-between items-center bg-gray-900/50 p-2 rounded">
-          <span>${i.name} x${i.qty}</span>
-          <span class="text-orange-400">₹${i.price * i.qty}</span>
+      list.innerHTML = cart.map((i, index) => `
+        <div class="flex justify-between items-center bg-gray-900/60 p-2 rounded-lg border border-gray-800">
+          <div>
+            <div class="font-medium text-xs">${i.name}</div>
+            <div class="text-orange-400 font-semibold text-[11px]">₹${i.price * i.qty}</div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="decreaseQty(${index})" class="w-6 h-6 bg-gray-700 hover:bg-gray-600 rounded font-bold text-xs">-</button>
+            <span class="text-xs font-bold">${i.qty}</span>
+            <button onclick="increaseQty(${index})" class="w-6 h-6 bg-gray-700 hover:bg-gray-600 rounded font-bold text-xs">+</button>
+          </div>
         </div>
       `).join('');
       const total = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
       document.getElementById('cart-total').innerText = '₹' + total;
+    }
+
+    function increaseQty(index) {
+      cart[index].qty++;
+      updateCartUI();
+    }
+
+    function decreaseQty(index) {
+      cart[index].qty--;
+      if (cart[index].qty <= 0) {
+        cart.splice(index, 1);
+      }
+      updateCartUI();
     }
 
     function checkoutOrder() {
@@ -124,7 +353,7 @@
         body: JSON.stringify({ data: [orderData] })
       })
       .then(res => res.json())
-      .then(data => {
+      .then(() => {
         alert('Order #' + invoiceNum + ' placed successfully! Printing on counter...');
         cart = [];
         updateCartUI();
