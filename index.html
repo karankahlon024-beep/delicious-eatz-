@@ -99,10 +99,15 @@
           <span id="current-invoice-tag" class="font-mono text-black text-xs font-black bg-[#e2e8f0] px-2 py-0.5 rounded">#TBL-1</span>
         </div>
 
-        <div id="delivery-phone-wrap" class="hidden">
-          <div class="flex items-center bg-white border-2 border-amber-500 rounded-lg px-2 py-1">
-            <i class="fa-solid fa-phone text-amber-600 text-xs mr-2"></i>
-            <input id="delivery-phone-input" type="tel" placeholder="Customer Contact Number..." class="w-full bg-transparent text-xs font-bold font-mono text-black placeholder-neutral-400 focus:outline-none" />
+        <!-- Universal Customer Contact and Location/Address Inputs -->
+        <div class="grid grid-cols-2 gap-1.5">
+          <div class="flex items-center bg-white border border-[#cbd5e1] rounded-lg px-2 py-1">
+            <i class="fa-solid fa-phone text-neutral-500 text-[10px] mr-1.5"></i>
+            <input id="customer-phone-input" type="tel" placeholder="Contact No..." class="w-full bg-transparent text-xs font-bold font-mono text-black placeholder-neutral-400 focus:outline-none" />
+          </div>
+          <div class="flex items-center bg-white border border-[#cbd5e1] rounded-lg px-2 py-1">
+            <i class="fa-solid fa-location-dot text-neutral-500 text-[10px] mr-1.5"></i>
+            <input id="customer-location-input" type="text" placeholder="Location / Address..." class="w-full bg-transparent text-xs font-bold text-black placeholder-neutral-400 focus:outline-none" />
           </div>
         </div>
 
@@ -251,6 +256,8 @@
       <div id="menu-editor-list" class="space-y-2"></div>
     </div>
   </main>
+
+  <main id="view-menu" class="hidden"></main>
 
   <div id="size-modal" class="fixed inset-0 bg-black/75 flex items-center justify-center p-3 z-50 hidden">
     <div class="bg-white border border-[#cbd5e1] w-full max-w-xs rounded-2xl p-4 shadow-2xl">
@@ -572,7 +579,8 @@
       cart = {};
       activeResumedHoldId = null;
       document.getElementById('cart-discount').value = 0;
-      document.getElementById('delivery-phone-input').value = '';
+      document.getElementById('customer-phone-input').value = '';
+      document.getElementById('customer-location-input').value = '';
       if (isBogoActive) toggleBogo();
       renderCart();
     }
@@ -582,7 +590,8 @@
       if (itemsInCart.length === 0) return alert('Cart is empty.');
 
       const { sub, disc, bogoDiscount, grand } = recalcCart();
-      const phone = document.getElementById('delivery-phone-input').value.trim();
+      const phone = document.getElementById('customer-phone-input').value.trim();
+      const location = document.getElementById('customer-location-input').value.trim();
 
       const heldEntry = {
         hold_id: `HOLD-${Date.now().toString().slice(-4)}`,
@@ -590,6 +599,7 @@
         mode: currentOrderMode,
         table: currentOrderMode === 'Dine In' ? selectedTable : null,
         phone: phone || null,
+        location: location || null,
         cart: JSON.parse(JSON.stringify(cart)),
         isBogoActive: isBogoActive,
         bogoDiscount: bogoDiscount,
@@ -610,7 +620,8 @@
       const target = heldOrders[idx];
       cart = JSON.parse(JSON.stringify(target.cart));
       document.getElementById('cart-discount').value = target.discount || 0;
-      if (target.phone) document.getElementById('delivery-phone-input').value = target.phone;
+      if (target.phone) document.getElementById('customer-phone-input').value = target.phone;
+      if (target.location) document.getElementById('customer-location-input').value = target.location;
       
       if (target.isBogoActive !== isBogoActive) {
         toggleBogo();
@@ -754,13 +765,6 @@
       });
 
       btn.className = 'mode-btn py-1 rounded text-[10px] font-black uppercase tracking-wider bg-black text-white';
-
-      if (mode === 'Delivery') {
-        document.getElementById('delivery-phone-wrap').classList.remove('hidden');
-        document.getElementById('delivery-phone-input').focus();
-      } else {
-        document.getElementById('delivery-phone-wrap').classList.add('hidden');
-      }
     }
 
     function setPayment(mode, btn) {
@@ -892,7 +896,9 @@
           Mode: record.mode + (record.table ? ' T' + record.table : ''),
           Payment: record.payment_mode || 'Cash',
           Discount: (Number(record.discount) || 0) + (Number(record.bogo_discount) || 0),
-          Total: Number(record.grand_total) || 0
+          Total: Number(record.grand_total) || 0,
+          Phone: record.phone || '',
+          Location: record.location || ''
         }
       };
 
@@ -930,7 +936,9 @@
                 payment_mode: row.Payment || 'Cash',
                 discount: Number(row.Discount) || 0,
                 bogo_discount: 0,
-                grand_total: Number(row.Total) || 0
+                grand_total: Number(row.Total) || 0,
+                phone: row.Phone || null,
+                location: row.Location || null
               };
             }).reverse();
 
@@ -979,6 +987,9 @@
         orderTypeLabel = 'DELIVERY';
       }
 
+      const phoneVal = document.getElementById('customer-phone-input').value.trim();
+      const locationVal = document.getElementById('customer-location-input').value.trim();
+
       return `
         <!DOCTYPE html>
         <html>
@@ -990,6 +1001,7 @@
             .center { text-align: center; }
             .header-title { font-size: 18px; font-weight: 900; letter-spacing: 1px; }
             .type-banner { font-size: 13px; font-weight: 900; margin-top: 2px; padding: 2px 0; border-bottom: 2px solid #000; }
+            .customer-meta { font-size: 12px; font-weight: 700; margin-top: 4px; padding-bottom: 4px; border-bottom: 1px dashed #000; }
             table { width: 100%; border-collapse: collapse; margin-top: 4px; }
             th { font-size: 14px; font-weight: 900; padding: 4px 2px; border-bottom: 2px solid #000; }
             .total-box-container { display: flex; justify-content: flex-end; margin-top: 8px; }
@@ -1000,6 +1012,7 @@
         <body>
           <div class="center header-title">KOT</div>
           <div class="center type-banner">${orderTypeLabel}</div>
+          ${phoneVal || locationVal ? `<div class="customer-meta">${phoneVal ? 'Ph: ' + phoneVal : ''}${phoneVal && locationVal ? ' | ' : ''}${locationVal ? 'Loc: ' + locationVal : ''}</div>` : ''}
           <table>
             <thead>
               <tr>
@@ -1020,7 +1033,7 @@
       `;
     }
 
-    function generateBillHTML(invoiceNo, now, customerPhone) {
+    function generateBillHTML(invoiceNo, now, customerPhone, customerLocation) {
       const itemsPurchased = Object.values(cart);
       const { sub, disc, bogoDiscount, grand, totalItemsCount } = recalcCart();
       const pad = n => n.toString().padStart(2, '0');
@@ -1077,8 +1090,7 @@
             .subtitle { font-size: 11.5px; line-height: 1.2; margin-top: 2px; font-weight: 500; }
             .solid-hr { border: 0; border-top: 1.5px solid #000; margin: 5px 0; }
             .thick-hr { border: 0; border-top: 2.2px solid #000; margin: 4px 0; }
-            .name-row { font-size: 13px; font-weight: 700; padding: 2px 0; }
-            .phone-row { font-size: 13px; font-weight: 800; padding: 2px 0; }
+            .contact-row { font-size: 12px; font-weight: 800; padding: 2px 0; }
             .meta-grid { display: flex; justify-content: space-between; font-size: 12.5px; line-height: 1.35; padding: 1px 0; }
             table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 2px; }
             th { font-weight: 700; padding: 3px 0; }
@@ -1092,9 +1104,9 @@
             <div class="subtitle" style="font-weight: 600;">Ph: 7888950664, 8360084534</div>
           </div>
           <hr class="solid-hr" />
-          <div class="name-row">Name:</div>
-          ${currentOrderMode === 'Delivery' && customerPhone ? `<div class="phone-row">Contact: ${customerPhone}</div>` : ''}
-          <hr class="solid-hr" />
+          ${customerPhone ? `<div class="contact-row">Contact: ${customerPhone}</div>` : ''}
+          ${customerLocation ? `<div class="contact-row">Location: ${customerLocation}</div>` : ''}
+          ${customerPhone || customerLocation ? `<hr class="solid-hr" />` : ''}
           <div class="meta-grid">
             <div>Date: ${dateFormatted}</div>
             <div class="bold">${currentOrderMode === 'Dine In' ? 'Dine In: ' + selectedTable : currentOrderMode}</div>
@@ -1175,12 +1187,8 @@
       const itemsPurchased = Object.values(cart);
       if (itemsPurchased.length === 0) return alert('Add items to order first!');
 
-      const phone = document.getElementById('delivery-phone-input').value.trim();
-      if (currentOrderMode === 'Delivery' && !phone) {
-        alert('Please enter customer contact number for Delivery!');
-        document.getElementById('delivery-phone-input').focus();
-        return;
-      }
+      const phone = document.getElementById('customer-phone-input').value.trim();
+      const location = document.getElementById('customer-location-input').value.trim();
 
       const { sub, disc, bogoDiscount, grand } = recalcCart();
       const invoiceNo = `${Math.floor(1000 + Math.random() * 9000)}`;
@@ -1191,7 +1199,8 @@
         time: now.toISOString(),
         mode: currentOrderMode,
         table: currentOrderMode === 'Dine In' ? selectedTable : null,
-        phone: currentOrderMode === 'Delivery' ? phone : null,
+        phone: phone || null,
+        location: location || null,
         items: itemsPurchased,
         subtotal: sub,
         bogo_discount: bogoDiscount,
@@ -1217,12 +1226,8 @@
       const itemsPurchased = Object.values(cart);
       if (itemsPurchased.length === 0) return alert('Add items to order first!');
 
-      const phone = document.getElementById('delivery-phone-input').value.trim();
-      if (currentOrderMode === 'Delivery' && !phone) {
-        alert('Please enter customer contact number for Delivery!');
-        document.getElementById('delivery-phone-input').focus();
-        return;
-      }
+      const phone = document.getElementById('customer-phone-input').value.trim();
+      const location = document.getElementById('customer-location-input').value.trim();
 
       const { sub, disc, bogoDiscount, grand } = recalcCart();
       const invoiceNo = `${Math.floor(1000 + Math.random() * 9000)}`;
@@ -1233,7 +1238,8 @@
         time: now.toISOString(),
         mode: currentOrderMode,
         table: currentOrderMode === 'Dine In' ? selectedTable : null,
-        phone: currentOrderMode === 'Delivery' ? phone : null,
+        phone: phone || null,
+        location: location || null,
         items: itemsPurchased,
         subtotal: sub,
         bogo_discount: bogoDiscount,
@@ -1252,7 +1258,7 @@
 
       saveState();
 
-      const billHTML = generateBillHTML(invoiceNo, now, phone);
+      const billHTML = generateBillHTML(invoiceNo, now, phone, location);
       const kotHTML = generateKOTHTML();
 
       printHTML(billHTML, () => {
@@ -1377,10 +1383,12 @@
 
     function switchView(view) {
       ['tables', 'register', 'sales', 'held', 'menu'].forEach(v => {
-        document.getElementById(`view-${v}`).classList.add('hidden');
+        const el = document.getElementById(`view-${v}`);
+        if (el) el.classList.add('hidden');
       });
 
-      document.getElementById(`view-${view}`).classList.remove('hidden');
+      const target = document.getElementById(`view-${view}`);
+      if (target) target.classList.remove('hidden');
 
       ['tables', 'sales', 'held', 'menu'].forEach(v => {
         const btn = document.getElementById(`nav-btn-${v}`);
