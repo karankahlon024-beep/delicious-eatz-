@@ -1209,7 +1209,8 @@
 
       orders.unshift(record);
       syncToCloud(record);
-      sendWhatsAppBill(record);
+      // sendWhatsAppBill(record);
+
 
       if (activeResumedHoldId) {
         heldOrders = heldOrders.filter(h => h.hold_id !== activeResumedHoldId);
@@ -1252,7 +1253,8 @@
 
       orders.unshift(record);
       syncToCloud(record);
-      sendWhatsAppBill(record);
+      // sendWhatsAppBill(record);
+
 
       if (activeResumedHoldId) {
         heldOrders = heldOrders.filter(h => h.hold_id !== activeResumedHoldId);
@@ -1260,18 +1262,10 @@
       }
 
       saveState();
+  resetCartFields();
+  switchView('tables');
 
-      const billHTML = generateBillHTML(invoiceNo, now, phone);
-      const kotHTML = generateKOTHTML();
-
-      printHTML(billHTML, () => {
-        printHTML(kotHTML, () => {
-          resetCartFields();
-          switchView('tables');
-          window.focus();
-        });
-      });
-    }
+      
 
     function toggleAddForm() {
       const card = document.getElementById('add-item-card');
