@@ -27,20 +27,20 @@
       <span class="text-[10px] text-neutral-400 bg-[#1e293b] px-2 py-0.5 rounded font-mono">CLOUD SYNC</span>
     </div>
 
-<div class="flex items-center space-x-1.5">
-  <button onclick="switchView('tables')" id="nav-btn-tables" class="px-2.5 py-1 bg-white text-black font-extrabold text-xs rounded shadow-sm flex items-center">
-    <i class="fa-solid fa-table-cells mr-1 text-[10px]"></i> Tables
-  </button>
-  <button onclick="switchView('sales')" id="nav-btn-sales" class="px-2.5 py-1 bg-[#1e293b] hover:bg-[#334155] text-white font-bold text-xs rounded border border-[#334155] flex items-center">
-    <i class="fa-solid fa-chart-line mr-1 text-[10px]"></i> Sales
-  </button>
-  <button onclick="switchView('held')" id="nav-btn-held" class="px-2 py-1 bg-[#1e293b] hover:bg-[#334155] text-amber-400 font-bold text-xs rounded border border-[#334155] flex items-center">
-    <i class="fa-solid fa-pause mr-1 text-[10px]"></i> Held (<span id="held-count-badge">0</span>)
-  </button>
-  <button onclick="switchView('menu')" id="nav-btn-menu" class="px-2 py-1 bg-[#1e293b] hover:bg-[#334155] text-neutral-300 font-bold text-xs rounded border border-[#334155]">
-    <i class="fa-solid fa-sliders text-[10px]"></i>
-  </button>
-</div>
+    <div class="flex items-center space-x-1.5">
+      <button onclick="switchView('tables')" id="nav-btn-tables" class="px-2.5 py-1 bg-white text-black font-extrabold text-xs rounded shadow-sm flex items-center">
+        <i class="fa-solid fa-table-cells mr-1 text-[10px]"></i> Tables
+      </button>
+      <button onclick="switchView('sales')" id="nav-btn-sales" class="px-2.5 py-1 bg-[#1e293b] hover:bg-[#334155] text-white font-bold text-xs rounded border border-[#334155] flex items-center">
+        <i class="fa-solid fa-chart-line mr-1 text-[10px]"></i> Sales
+      </button>
+      <button onclick="switchView('held')" id="nav-btn-held" class="px-2 py-1 bg-[#1e293b] hover:bg-[#334155] text-amber-400 font-bold text-xs rounded border border-[#334155] flex items-center">
+        <i class="fa-solid fa-pause mr-1 text-[10px]"></i> Held (<span id="held-count-badge">0</span>)
+      </button>
+      <button onclick="switchView('menu')" id="nav-btn-menu" class="px-2 py-1 bg-[#1e293b] hover:bg-[#334155] text-neutral-300 font-bold text-xs rounded border border-[#334155]">
+        <i class="fa-solid fa-sliders text-[10px]"></i>
+      </button>
+    </div>
   </header>
 
   <main id="view-tables" class="flex-1 flex flex-col p-3 bg-[#0b1120] overflow-y-auto">
@@ -50,17 +50,17 @@
         <span class="text-xs font-black text-white uppercase tracking-wider">Floor Plan & Orders</span>
       </div>
 
-  <div class="flex items-center space-x-2 w-full sm:w-auto">
-    <button onclick="setModeAndOpen('Delivery')" class="pos-btn flex-1 sm:flex-none px-3 py-2 bg-black hover:bg-neutral-900 border border-[#334155] text-amber-400 font-extrabold text-xs rounded-lg shadow flex items-center justify-center">
-      <i class="fa-solid fa-motorcycle mr-1.5 text-sm"></i> NEW DELIVERY
-    </button>
-    <button onclick="setModeAndOpen('Takeaway')" class="pos-btn flex-1 sm:flex-none px-3 py-2 bg-black hover:bg-neutral-900 border border-[#334155] text-white font-extrabold text-xs rounded-lg shadow flex items-center justify-center">
-      <i class="fa-solid fa-bag-shopping mr-1.5 text-sm"></i> TAKEAWAY
-    </button>
-  </div>
-</div>
+      <div class="flex items-center space-x-2 w-full sm:w-auto">
+        <button onclick="setModeAndOpen('Delivery')" class="pos-btn flex-1 sm:flex-none px-3 py-2 bg-black hover:bg-neutral-900 border border-[#334155] text-amber-400 font-extrabold text-xs rounded-lg shadow flex items-center justify-center">
+          <i class="fa-solid fa-motorcycle mr-1.5 text-sm"></i> NEW DELIVERY
+        </button>
+        <button onclick="setModeAndOpen('Takeaway')" class="pos-btn flex-1 sm:flex-none px-3 py-2 bg-black hover:bg-neutral-900 border border-[#334155] text-white font-extrabold text-xs rounded-lg shadow flex items-center justify-center">
+          <i class="fa-solid fa-bag-shopping mr-1.5 text-sm"></i> TAKEAWAY
+        </button>
+      </div>
+    </div>
 
-<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3" id="table-cards-container"></div>
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3" id="table-cards-container"></div>
   </main>
 
   <main id="view-register" class="flex-1 flex flex-col md:flex-row overflow-hidden hidden bg-white">
@@ -75,73 +75,73 @@
         </div>
       </div>
 
-  <div class="flex items-center bg-[#e2e8f0] border-b border-[#cbd5e1] p-1 flex-shrink-0">
-    <button onclick="scrollCategories(-140)" class="w-6 h-7 bg-white hover:bg-neutral-200 border border-[#cbd5e1] rounded flex items-center justify-center text-xs font-black mr-1 flex-shrink-0">
-      <i class="fa-solid fa-chevron-left"></i>
-    </button>
-    <div id="category-bar" onwheel="handleCatWheel(event)" class="flex-1 flex items-center space-x-1.5 overflow-x-auto no-scrollbar scroll-smooth"></div>
-    <button onclick="scrollCategories(140)" class="w-6 h-7 bg-white hover:bg-neutral-200 border border-[#cbd5e1] rounded flex items-center justify-center text-xs font-black ml-1 flex-shrink-0">
-      <i class="fa-solid fa-chevron-right"></i>
-    </button>
-  </div>
-
-  <div id="items-grid" class="flex-1 overflow-y-auto p-2 grid grid-cols-2 lg:grid-cols-3 gap-2 content-start no-scrollbar"></div>
-</section>
-
-<section class="w-full md:w-[38%] flex flex-col overflow-hidden bg-white h-1/2 md:h-full border-t md:border-t-0">
-  <div class="p-2 bg-[#f8fafc] border-b border-[#cbd5e1] space-y-1.5 flex-shrink-0 shadow-sm">
-    <div class="flex items-center justify-between">
-      <div class="grid grid-cols-3 gap-1 flex-1 mr-2">
-        <button onclick="setOrderMode('Dine In', this)" class="mode-btn py-1 rounded text-[10px] font-black uppercase tracking-wider bg-black text-white">Dine In</button>
-        <button onclick="setOrderMode('Takeaway', this)" class="mode-btn py-1 rounded text-[10px] font-bold uppercase tracking-wider bg-white border border-[#cbd5e1] text-neutral-700">Pickup</button>
-        <button onclick="setOrderMode('Delivery', this)" class="mode-btn py-1 rounded text-[10px] font-bold uppercase tracking-wider bg-white border border-[#cbd5e1] text-neutral-700">Delivery</button>
+      <div class="flex items-center bg-[#e2e8f0] border-b border-[#cbd5e1] p-1 flex-shrink-0">
+        <button onclick="scrollCategories(-140)" class="w-6 h-7 bg-white hover:bg-neutral-200 border border-[#cbd5e1] rounded flex items-center justify-center text-xs font-black mr-1 flex-shrink-0">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <div id="category-bar" onwheel="handleCatWheel(event)" class="flex-1 flex items-center space-x-1.5 overflow-x-auto no-scrollbar scroll-smooth"></div>
+        <button onclick="scrollCategories(140)" class="w-6 h-7 bg-white hover:bg-neutral-200 border border-[#cbd5e1] rounded flex items-center justify-center text-xs font-black ml-1 flex-shrink-0">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
       </div>
-      <span id="current-invoice-tag" class="font-mono text-black text-xs font-black bg-[#e2e8f0] px-2 py-0.5 rounded">#TBL-1</span>
-    </div>
 
-    <div id="delivery-phone-wrap" class="hidden">
-      <div class="flex items-center bg-white border-2 border-amber-500 rounded-lg px-2 py-1">
-        <i class="fa-solid fa-phone text-amber-600 text-xs mr-2"></i>
-        <input id="delivery-phone-input" type="tel" placeholder="Customer Contact Number..." class="w-full bg-transparent text-xs font-bold font-mono text-black placeholder-neutral-400 focus:outline-none" />
-      </div>
-    </div>
+      <div id="items-grid" class="flex-1 overflow-y-auto p-2 grid grid-cols-2 lg:grid-cols-3 gap-2 content-start no-scrollbar"></div>
+    </section>
 
-    <div class="bg-white p-2 rounded-lg border border-[#cbd5e1] flex flex-col space-y-1">
-      <div class="flex items-center justify-between text-xs">
-        <span class="text-neutral-500 font-bold">Sub: <strong id="cart-subtotal" class="text-black font-mono">₹0</strong></span>
-        <div class="flex items-center space-x-1">
-          <span class="text-neutral-500 font-bold">Disc:</span>
-          <input id="cart-discount" type="number" value="0" min="0" oninput="recalcCart()" class="w-12 bg-[#f1f5f9] border border-[#cbd5e1] rounded px-1 py-0.5 text-right font-mono font-bold text-xs" />
+    <section class="w-full md:w-[38%] flex flex-col overflow-hidden bg-white h-1/2 md:h-full border-t md:border-t-0">
+      <div class="p-2 bg-[#f8fafc] border-b border-[#cbd5e1] space-y-1.5 flex-shrink-0 shadow-sm">
+        <div class="flex items-center justify-between">
+          <div class="grid grid-cols-3 gap-1 flex-1 mr-2">
+            <button onclick="setOrderMode('Dine In', this)" class="mode-btn py-1 rounded text-[10px] font-black uppercase tracking-wider bg-black text-white">Dine In</button>
+            <button onclick="setOrderMode('Takeaway', this)" class="mode-btn py-1 rounded text-[10px] font-bold uppercase tracking-wider bg-white border border-[#cbd5e1] text-neutral-700">Pickup</button>
+            <button onclick="setOrderMode('Delivery', this)" class="mode-btn py-1 rounded text-[10px] font-bold uppercase tracking-wider bg-white border border-[#cbd5e1] text-neutral-700">Delivery</button>
+          </div>
+          <span id="current-invoice-tag" class="font-mono text-black text-xs font-black bg-[#e2e8f0] px-2 py-0.5 rounded">#TBL-1</span>
         </div>
-        <div>
-          <span class="text-[10px] font-bold text-neutral-400">NET:</span>
-          <span id="cart-grand" class="text-black font-mono font-black text-sm ml-0.5">₹0</span>
+
+        <div id="delivery-phone-wrap" class="hidden">
+          <div class="flex items-center bg-white border-2 border-amber-500 rounded-lg px-2 py-1">
+            <i class="fa-solid fa-phone text-amber-600 text-xs mr-2"></i>
+            <input id="delivery-phone-input" type="tel" placeholder="Customer Contact Number..." class="w-full bg-transparent text-xs font-bold font-mono text-black placeholder-neutral-400 focus:outline-none" />
+          </div>
+        </div>
+
+        <div class="bg-white p-2 rounded-lg border border-[#cbd5e1] flex flex-col space-y-1">
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-neutral-500 font-bold">Sub: <strong id="cart-subtotal" class="text-black font-mono">₹0</strong></span>
+            <div class="flex items-center space-x-1">
+              <span class="text-neutral-500 font-bold">Disc:</span>
+              <input id="cart-discount" type="number" value="0" min="0" oninput="recalcCart()" class="w-12 bg-[#f1f5f9] border border-[#cbd5e1] rounded px-1 py-0.5 text-right font-mono font-bold text-xs" />
+            </div>
+            <div>
+              <span class="text-[10px] font-bold text-neutral-400">NET:</span>
+              <span id="cart-grand" class="text-black font-mono font-black text-sm ml-0.5">₹0</span>
+            </div>
+          </div>
+          <div id="bogo-applied-info" class="hidden text-emerald-700 text-[10px] font-black flex justify-between border-t border-neutral-200 pt-1">
+            <span><i class="fa-solid fa-gift mr-1"></i> BOGO Applied:</span>
+            <span id="bogo-discount-amount" class="font-mono">-₹0</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-1">
+          <button onclick="setPayment('Cash', this)" class="pay-btn py-1 rounded text-[10px] font-black uppercase bg-amber-400 text-black border border-amber-500 shadow-xs">Cash</button>
+          <button onclick="setPayment('UPI', this)" class="pay-btn py-1 rounded text-[10px] font-bold uppercase bg-white border border-[#cbd5e1] text-neutral-700">UPI</button>
+          <button onclick="setPayment('Card', this)" class="pay-btn py-1 rounded text-[10px] font-bold uppercase bg-white border border-[#cbd5e1] text-neutral-700">Card</button>
+        </div>
+
+        <div class="grid grid-cols-6 gap-1 pt-0.5">
+          <button onclick="printOnlyKOT()" class="pos-btn py-1.5 rounded bg-[#334155] hover:bg-[#1e293b] text-white text-[9px] font-black uppercase shadow">KOT</button>
+          <button id="btn-bogo-toggle" onclick="toggleBogo()" class="pos-btn py-1.5 rounded bg-white text-neutral-800 border border-[#cbd5e1] text-[9px] font-black uppercase">BOGO</button>
+          <button onclick="saveBillOnly()" class="pos-btn py-1.5 rounded bg-emerald-600 hover:bg-emerald-700 text-white text-[9px] font-black uppercase shadow">SAVE</button>
+          <button onclick="holdCurrentCart()" class="pos-btn py-1.5 rounded bg-amber-500 hover:bg-amber-600 text-black text-[9px] font-black uppercase">HOLD</button>
+          <button onclick="clearCart()" class="pos-btn py-1.5 rounded bg-[#e2e8f0] hover:bg-[#cbd5e1] text-neutral-800 text-[9px] font-black uppercase">CLR</button>
+          <button onclick="settleBillAndPrint()" class="pos-btn py-1.5 rounded bg-black hover:bg-neutral-900 text-white text-[9px] font-black uppercase shadow-lg">SETTLE</button>
         </div>
       </div>
-      <div id="bogo-applied-info" class="hidden text-emerald-700 text-[10px] font-black flex justify-between border-t border-neutral-200 pt-1">
-        <span><i class="fa-solid fa-gift mr-1"></i> BOGO Applied:</span>
-        <span id="bogo-discount-amount" class="font-mono">-₹0</span>
-      </div>
-    </div>
 
-    <div class="grid grid-cols-3 gap-1">
-      <button onclick="setPayment('Cash', this)" class="pay-btn py-1 rounded text-[10px] font-black uppercase bg-amber-400 text-black border border-amber-500 shadow-xs">Cash</button>
-      <button onclick="setPayment('UPI', this)" class="pay-btn py-1 rounded text-[10px] font-bold uppercase bg-white border border-[#cbd5e1] text-neutral-700">UPI</button>
-      <button onclick="setPayment('Card', this)" class="pay-btn py-1 rounded text-[10px] font-bold uppercase bg-white border border-[#cbd5e1] text-neutral-700">Card</button>
-    </div>
-
-    <div class="grid grid-cols-6 gap-1 pt-0.5">
-      <button onclick="printOnlyKOT()" class="pos-btn py-1.5 rounded bg-[#334155] hover:bg-[#1e293b] text-white text-[9px] font-black uppercase shadow">KOT</button>
-      <button id="btn-bogo-toggle" onclick="toggleBogo()" class="pos-btn py-1.5 rounded bg-white text-neutral-800 border border-[#cbd5e1] text-[9px] font-black uppercase">BOGO</button>
-      <button onclick="saveBillOnly()" class="pos-btn py-1.5 rounded bg-emerald-600 hover:bg-emerald-700 text-white text-[9px] font-black uppercase shadow">SAVE</button>
-      <button onclick="holdCurrentCart()" class="pos-btn py-1.5 rounded bg-amber-500 hover:bg-amber-600 text-black text-[9px] font-black uppercase">HOLD</button>
-      <button onclick="clearCart()" class="pos-btn py-1.5 rounded bg-[#e2e8f0] hover:bg-[#cbd5e1] text-neutral-800 text-[9px] font-black uppercase">CLR</button>
-      <button onclick="settleBillAndPrint()" class="pos-btn py-1.5 rounded bg-black hover:bg-neutral-900 text-white text-[9px] font-black uppercase shadow-lg">SETTLE</button>
-    </div>
-  </div>
-
-  <div class="flex-1 overflow-y-auto p-2 space-y-1.5 no-scrollbar bg-white" id="cart-items-container"></div>
-</section>
+      <div class="flex-1 overflow-y-auto p-2 space-y-1.5 no-scrollbar bg-white" id="cart-items-container"></div>
+    </section>
   </main>
 
   <main id="view-sales" class="flex-1 flex flex-col p-3 bg-[#0b1120] overflow-y-auto hidden">
@@ -152,35 +152,35 @@
           <p id="sales-report-date-tag" class="text-[11px] text-neutral-400 font-mono">Today</p>
         </div>
 
-    <div class="flex items-center space-x-1.5 flex-wrap">
-      <button id="btn-sales-month" onclick="filterSales('month')" class="px-2 py-1 bg-[#1e293b] hover:bg-[#334155] border border-neutral-700 rounded-lg text-xs font-bold text-white">Month</button>
-      <button id="btn-sales-yesterday" onclick="filterSales('yesterday')" class="px-2 py-1 bg-[#1e293b] hover:bg-[#334155] border border-neutral-700 rounded-lg text-xs font-bold text-white">Yesterday</button>
-      <button id="btn-sales-today" onclick="filterSales('today')" class="px-2 py-1 bg-white text-black rounded-lg text-xs font-black shadow">Today</button>
-      <button onclick="switchView('tables')" class="px-2 py-1 bg-neutral-700 text-white rounded-lg text-xs font-bold">Close</button>
+        <div class="flex items-center space-x-1.5 flex-wrap">
+          <button id="btn-sales-month" onclick="filterSales('month')" class="px-2 py-1 bg-[#1e293b] hover:bg-[#334155] border border-neutral-700 rounded-lg text-xs font-bold text-white">Month</button>
+          <button id="btn-sales-yesterday" onclick="filterSales('yesterday')" class="px-2 py-1 bg-[#1e293b] hover:bg-[#334155] border border-neutral-700 rounded-lg text-xs font-bold text-white">Yesterday</button>
+          <button id="btn-sales-today" onclick="filterSales('today')" class="px-2 py-1 bg-white text-black rounded-lg text-xs font-black shadow">Today</button>
+          <button onclick="switchView('tables')" class="px-2 py-1 bg-neutral-700 text-white rounded-lg text-xs font-bold">Close</button>
+        </div>
+      </div>
+
+      <div class="bg-[#f8fafc] border-b border-[#cbd5e1] p-3 flex items-center justify-between">
+        <span class="text-xs sm:text-sm font-bold text-neutral-600">Net Revenue: <strong id="sales-total-amount" class="text-lg sm:text-xl text-black font-mono font-black ml-1">₹0.00</strong></span>
+        <span class="text-xs font-bold text-neutral-500">Invoices: <strong id="sales-total-bills" class="font-mono text-black text-sm ml-1">0</strong></span>
+      </div>
+
+      <div class="flex-1 overflow-y-auto no-scrollbar">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead class="bg-[#f1f5f9] border-b border-[#cbd5e1] text-neutral-700 font-extrabold sticky top-0">
+            <tr>
+              <th class="p-2.5 border-r border-[#cbd5e1]">Bill #</th>
+              <th class="p-2.5 border-r border-[#cbd5e1]">Timestamp</th>
+              <th class="p-2.5 border-r border-[#cbd5e1]">Tender</th>
+              <th class="p-2.5 border-r border-[#cbd5e1]">Type</th>
+              <th class="p-2.5 border-r border-[#cbd5e1] text-right">Disc</th>
+              <th class="p-2.5 text-right">Net</th>
+            </tr>
+          </thead>
+          <tbody id="sales-table-body"></tbody>
+        </table>
+      </div>
     </div>
-  </div>
-
-  <div class="bg-[#f8fafc] border-b border-[#cbd5e1] p-3 flex items-center justify-between">
-    <span class="text-xs sm:text-sm font-bold text-neutral-600">Net Revenue: <strong id="sales-total-amount" class="text-lg sm:text-xl text-black font-mono font-black ml-1">₹0.00</strong></span>
-    <span class="text-xs font-bold text-neutral-500">Invoices: <strong id="sales-total-bills" class="font-mono text-black text-sm ml-1">0</strong></span>
-  </div>
-
-  <div class="flex-1 overflow-y-auto no-scrollbar">
-    <table class="w-full text-left text-xs border-collapse">
-      <thead class="bg-[#f1f5f9] border-b border-[#cbd5e1] text-neutral-700 font-extrabold sticky top-0">
-        <tr>
-          <th class="p-2.5 border-r border-[#cbd5e1]">Bill #</th>
-          <th class="p-2.5 border-r border-[#cbd5e1]">Timestamp</th>
-          <th class="p-2.5 border-r border-[#cbd5e1]">Tender</th>
-          <th class="p-2.5 border-r border-[#cbd5e1]">Type</th>
-          <th class="p-2.5 border-r border-[#cbd5e1] text-right">Disc</th>
-          <th class="p-2.5 text-right">Net</th>
-        </tr>
-      </thead>
-      <tbody id="sales-table-body"></tbody>
-    </table>
-  </div>
-</div>
   </main>
 
   <main id="view-held" class="flex-1 overflow-y-auto p-3 bg-[#0b1120] hidden">
@@ -203,53 +203,53 @@
         </div>
       </div>
 
-  <div id="add-item-card" class="bg-white border border-[#cbd5e1] p-3 rounded-xl hidden space-y-2 shadow-lg">
-    <h3 class="text-xs font-black text-black uppercase">Create New Item</h3>
-    <div class="space-y-2">
-      <div>
-        <label class="text-[10px] font-bold text-neutral-500 block mb-0.5">Item Name</label>
-        <input id="new-item-name" type="text" class="w-full bg-[#f8fafc] border border-[#cbd5e1] rounded p-2 text-xs font-bold text-black focus:outline-none" />
-      </div>
-      <div class="grid grid-cols-2 gap-2">
-        <div>
-          <label class="text-[10px] font-bold text-neutral-500 block mb-0.5">Category</label>
-          <select id="new-item-category" class="w-full bg-[#f8fafc] border border-[#cbd5e1] rounded p-2 text-xs font-bold text-black"></select>
+      <div id="add-item-card" class="bg-white border border-[#cbd5e1] p-3 rounded-xl hidden space-y-2 shadow-lg">
+        <h3 class="text-xs font-black text-black uppercase">Create New Item</h3>
+        <div class="space-y-2">
+          <div>
+            <label class="text-[10px] font-bold text-neutral-500 block mb-0.5">Item Name</label>
+            <input id="new-item-name" type="text" class="w-full bg-[#f8fafc] border border-[#cbd5e1] rounded p-2 text-xs font-bold text-black focus:outline-none" />
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-[10px] font-bold text-neutral-500 block mb-0.5">Category</label>
+              <select id="new-item-category" class="w-full bg-[#f8fafc] border border-[#cbd5e1] rounded p-2 text-xs font-bold text-black"></select>
+            </div>
+            <div>
+              <label class="text-[10px] font-bold text-neutral-500 block mb-0.5">Pricing Type</label>
+              <select id="new-item-type" onchange="toggleSizeInputs(this.value)" class="w-full bg-[#f8fafc] border border-[#cbd5e1] rounded p-2 text-xs font-bold text-black">
+                <option value="single">Single Price</option>
+                <option value="sizes">Sizes (R/M/L)</option>
+              </select>
+            </div>
+          </div>
+          <div id="new-single-price-wrap">
+            <label class="text-[10px] font-bold text-neutral-500 block mb-0.5">Price (₹)</label>
+            <input id="new-item-price" type="number" class="w-full bg-[#f8fafc] border border-[#cbd5e1] rounded p-2 text-xs font-bold text-black font-mono" />
+          </div>
+          <div id="new-sizes-price-wrap" class="hidden grid grid-cols-3 gap-2">
+            <div>
+              <label class="text-[10px] font-bold text-neutral-500 block mb-0.5">Regular</label>
+              <input id="new-item-price-reg" type="number" class="w-full bg-[#f8fafc] border border-[#cbd5e1] rounded p-1.5 text-xs font-bold text-black font-mono" />
+            </div>
+            <div>
+              <label class="text-[10px] font-bold text-neutral-500 block mb-0.5">Medium</label>
+              <input id="new-item-price-med" type="number" class="w-full bg-[#f8fafc] border border-[#cbd5e1] rounded p-1.5 text-xs font-bold text-black font-mono" />
+            </div>
+            <div>
+              <label class="text-[10px] font-bold text-neutral-500 block mb-0.5">Large</label>
+              <input id="new-item-price-lrg" type="number" class="w-full bg-[#f8fafc] border border-[#cbd5e1] rounded p-1.5 text-xs font-bold text-black font-mono" />
+            </div>
+          </div>
+          <div class="flex justify-end space-x-2 pt-2">
+            <button onclick="toggleAddForm()" class="px-3 py-1.5 bg-[#e2e8f0] rounded text-xs font-bold">Cancel</button>
+            <button onclick="saveNewItem()" class="px-4 py-1.5 bg-black rounded text-xs text-white font-black">Save Item</button>
+          </div>
         </div>
-        <div>
-          <label class="text-[10px] font-bold text-neutral-500 block mb-0.5">Pricing Type</label>
-          <select id="new-item-type" onchange="toggleSizeInputs(this.value)" class="w-full bg-[#f8fafc] border border-[#cbd5e1] rounded p-2 text-xs font-bold text-black">
-            <option value="single">Single Price</option>
-            <option value="sizes">Sizes (R/M/L)</option>
-          </select>
-        </div>
       </div>
-      <div id="new-single-price-wrap">
-        <label class="text-[10px] font-bold text-neutral-500 block mb-0.5">Price (₹)</label>
-        <input id="new-item-price" type="number" class="w-full bg-[#f8fafc] border border-[#cbd5e1] rounded p-2 text-xs font-bold text-black font-mono" />
-      </div>
-      <div id="new-sizes-price-wrap" class="hidden grid grid-cols-3 gap-2">
-        <div>
-          <label class="text-[10px] font-bold text-neutral-500 block mb-0.5">Regular</label>
-          <input id="new-item-price-reg" type="number" class="w-full bg-[#f8fafc] border border-[#cbd5e1] rounded p-1.5 text-xs font-bold text-black font-mono" />
-        </div>
-        <div>
-          <label class="text-[10px] font-bold text-neutral-500 block mb-0.5">Medium</label>
-          <input id="new-item-price-med" type="number" class="w-full bg-[#f8fafc] border border-[#cbd5e1] rounded p-1.5 text-xs font-bold text-black font-mono" />
-        </div>
-        <div>
-          <label class="text-[10px] font-bold text-neutral-500 block mb-0.5">Large</label>
-          <input id="new-item-price-lrg" type="number" class="w-full bg-[#f8fafc] border border-[#cbd5e1] rounded p-1.5 text-xs font-bold text-black font-mono" />
-        </div>
-      </div>
-      <div class="flex justify-end space-x-2 pt-2">
-        <button onclick="toggleAddForm()" class="px-3 py-1.5 bg-[#e2e8f0] rounded text-xs font-bold">Cancel</button>
-        <button onclick="saveNewItem()" class="px-4 py-1.5 bg-black rounded text-xs text-white font-black">Save Item</button>
-      </div>
-    </div>
-  </div>
 
-  <div id="menu-editor-list" class="space-y-2"></div>
-</div>
+      <div id="menu-editor-list" class="space-y-2"></div>
+    </div>
   </main>
 
   <div id="size-modal" class="fixed inset-0 bg-black/75 flex items-center justify-center p-3 z-50 hidden">
@@ -263,7 +263,6 @@
   </div>
 
   <script>
-    const OWNER_WHATSAPP_NUMBER = '917888950664';
     const SHEETDB_API = 'https://sheetdb.io/api/v1/mbu5t23na13vg';
 
     const DEFAULT_MENU = [
@@ -884,7 +883,7 @@
       });
     }
 
-    // CLOUD SYNC & ROBUST AUTO-FETCH
+    // CLOUD SYNC & AUTO-FETCH
     function syncToCloud(record) {
       const payload = {
         data: {
@@ -951,9 +950,225 @@
         .catch(err => console.error('Cloud Fetch Error:', err));
     }
 
-    // WHATSAPP BACKUP (DISABLED / REMOVED)
-    function sendWhatsAppBill(record) {
-      
+    // PRINT BRIDGE FUNCTIONS (SILENT AUTO-PRINT)
+    function generateKOTHTML() {
+      const itemsInCart = Object.values(cart);
+      let totalUnits = 0;
+      let rowsHTML = '';
+      let index = 1;
+
+      itemsInCart.forEach(it => {
+        totalUnits += it.qty;
+        const displayName = `${it.name.toUpperCase()} ${it.variant !== 'Std' ? '(' + it.variant.toUpperCase() + ')' : ''}`;
+        rowsHTML += `
+          <tr style="border-top: 1px dotted #000;">
+            <td style="padding: 5px 2px; vertical-align: top; width: 10%; font-size: 14px; font-weight: 800;">${index++}</td>
+            <td style="padding: 5px 4px; vertical-align: top; width: 62%; font-size: 13.5px; font-weight: 800; word-break: break-word;">${displayName}</td>
+            <td style="padding: 5px 2px; vertical-align: top; text-align: center; width: 14%; font-size: 13px; font-weight: 800;">QTY</td>
+            <td style="padding: 5px 2px; vertical-align: top; text-align: right; width: 14%; font-size: 15px; font-weight: 900;">${it.qty}</td>
+          </tr>
+        `;
+      });
+
+      let orderTypeLabel = 'DINE IN';
+      if (currentOrderMode === 'Dine In') {
+        orderTypeLabel = `DINE IN (TABLE ${selectedTable})`;
+      } else if (currentOrderMode === 'Takeaway') {
+        orderTypeLabel = 'PICKUP / TAKEAWAY';
+      } else if (currentOrderMode === 'Delivery') {
+        orderTypeLabel = 'DELIVERY';
+      }
+
+      return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>KOT</title>
+          <style>
+            @page { margin: 0; size: 72mm auto; }
+            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; color: #000; margin: 0; padding: 6px 10px; width: 68mm; font-size: 13px; line-height: 1.25; }
+            .center { text-align: center; }
+            .header-title { font-size: 18px; font-weight: 900; letter-spacing: 1px; }
+            .type-banner { font-size: 13px; font-weight: 900; margin-top: 2px; padding: 2px 0; border-bottom: 2px solid #000; }
+            table { width: 100%; border-collapse: collapse; margin-top: 4px; }
+            th { font-size: 14px; font-weight: 900; padding: 4px 2px; border-bottom: 2px solid #000; }
+            .total-box-container { display: flex; justify-content: flex-end; margin-top: 8px; }
+            .total-box { border: 1.5px solid #000; padding: 3px 8px; display: flex; justify-content: space-between; width: 62%; font-size: 14px; font-weight: 900; }
+            .user-tag { text-align: right; font-size: 12px; font-weight: 700; margin-top: 4px; }
+          </style>
+        </head>
+        <body>
+          <div class="center header-title">KOT</div>
+          <div class="center type-banner">${orderTypeLabel}</div>
+          <table>
+            <thead>
+              <tr>
+                <th style="text-align: left; width: 10%;">#</th>
+                <th style="text-align: left; width: 62%;">Product</th>
+                <th style="text-align: center; width: 14%;">Uom</th>
+                <th style="text-align: right; width: 14%;">Qty</th>
+              </tr>
+            </thead>
+            <tbody>${rowsHTML}</tbody>
+          </table>
+          <div class="total-box-container">
+            <div class="total-box"><span>Total :</span><span>${totalUnits}</span></div>
+          </div>
+          <div class="user-tag">User: ADMIN</div>
+        </body>
+        </html>
+      `;
+    }
+
+    function generateBillHTML(invoiceNo, now, customerPhone) {
+      const itemsPurchased = Object.values(cart);
+      const { sub, disc, bogoDiscount, grand, totalItemsCount } = recalcCart();
+      const pad = n => n.toString().padStart(2, '0');
+      const dateFormatted = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear().toString().slice(-2)}`;
+      const timeFormatted = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
+      let itemRows = '';
+      itemsPurchased.forEach(it => {
+        const displayName = `${it.name.toUpperCase()} ${it.variant !== 'Std' ? '(' + it.variant + ')' : ''}`;
+        const unitPrice = parseFloat(it.price).toFixed(2);
+        const lineTotal = parseFloat(it.price * it.qty).toFixed(2);
+
+        itemRows += `
+          <tr style="vertical-align: top;">
+            <td style="padding: 2px 0; font-weight: 700; width: 44%; word-break: break-word;">${displayName}</td>
+            <td style="padding: 2px 0; text-align: center; width: 14%;">${it.qty}</td>
+            <td style="padding: 2px 0; text-align: right; width: 21%;">${unitPrice}</td>
+            <td style="padding: 2px 0; text-align: right; width: 21%;">${lineTotal}</td>
+          </tr>
+        `;
+      });
+
+      if (bogoDiscount > 0) {
+        itemRows += `
+          <tr style="vertical-align: top; font-weight: 700;">
+            <td style="padding: 2px 0;">BOGO FREE PIZZA</td>
+            <td style="padding: 2px 0; text-align: center;">1</td>
+            <td style="padding: 2px 0; text-align: right;">-${parseFloat(bogoDiscount).toFixed(2)}</td>
+            <td style="padding: 2px 0; text-align: right;">-${parseFloat(bogoDiscount).toFixed(2)}</td>
+          </tr>
+        `;
+      }
+
+      if (disc > 0) {
+        itemRows += `
+          <tr style="vertical-align: top; font-weight: 700;">
+            <td colspan="3" style="padding: 2px 0;">DISCOUNT</td>
+            <td style="padding: 2px 0; text-align: right;">-${parseFloat(disc).toFixed(2)}</td>
+          </tr>
+        `;
+      }
+
+      return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Delicious Eatz</title>
+          <style>
+            @page { margin: 0; size: 72mm auto; }
+            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; color: #000; margin: 0; padding: 6px 10px; width: 68mm; font-size: 13.5px; line-height: 1.25; }
+            .center { text-align: center; }
+            .bold { font-weight: 800; }
+            .title { font-size: 16px; font-weight: 900; letter-spacing: 0.2px; }
+            .subtitle { font-size: 11.5px; line-height: 1.2; margin-top: 2px; font-weight: 500; }
+            .solid-hr { border: 0; border-top: 1.5px solid #000; margin: 5px 0; }
+            .thick-hr { border: 0; border-top: 2.2px solid #000; margin: 4px 0; }
+            .name-row { font-size: 13px; font-weight: 700; padding: 2px 0; }
+            .phone-row { font-size: 13px; font-weight: 800; padding: 2px 0; }
+            .meta-grid { display: flex; justify-content: space-between; font-size: 12.5px; line-height: 1.35; padding: 1px 0; }
+            table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 2px; }
+            th { font-weight: 700; padding: 3px 0; }
+            .grand-box { display: flex; justify-content: space-between; align-items: center; padding: 3px 0; font-size: 15.5px; font-weight: 900; }
+          </style>
+        </head>
+        <body>
+          <div class="center">
+            <div class="title">Delicious Eatz</div>
+            <div class="subtitle">Vop Budhabarh Tehsil Hajipur Dist Hoshiarpur</div>
+            <div class="subtitle" style="font-weight: 600;">Ph: 7888950664, 8360084534</div>
+          </div>
+          <hr class="solid-hr" />
+          <div class="name-row">Name:</div>
+          ${currentOrderMode === 'Delivery' && customerPhone ? `<div class="phone-row">Contact: ${customerPhone}</div>` : ''}
+          <hr class="solid-hr" />
+          <div class="meta-grid">
+            <div>Date: ${dateFormatted}</div>
+            <div class="bold">${currentOrderMode === 'Dine In' ? 'Dine In: ' + selectedTable : currentOrderMode}</div>
+          </div>
+          <div class="meta-grid">
+            <div>${timeFormatted}</div>
+            <div></div>
+          </div>
+          <div class="meta-grid">
+            <div>Cashier: biller</div>
+            <div>Bill No.: ${invoiceNo}</div>
+          </div>
+          <hr class="thick-hr" />
+          <table>
+            <thead>
+              <tr>
+                <th style="text-align: left; width: 44%;">Item</th>
+                <th style="text-align: center; width: 14%;">Qty.</th>
+                <th style="text-align: right; width: 21%;">Price</th>
+                <th style="text-align: right; width: 21%;">Amount</th>
+              </tr>
+            </thead>
+          </table>
+          <hr class="thick-hr" />
+          <table><tbody>${itemRows}</tbody></table>
+          <hr class="solid-hr" style="margin-top: 6px;" />
+          <div class="meta-grid bold" style="font-size: 13px;">
+            <div>Total Qty: ${totalItemsCount}</div>
+            <div style="text-align: right;">Sub Total &nbsp; ${parseFloat(sub).toFixed(2)}</div>
+          </div>
+          <hr class="thick-hr" />
+          <div class="grand-box">
+            <span style="font-size: 14.5px;">Grand Total</span>
+            <span>₹ ${parseFloat(grand).toFixed(2)}</span>
+          </div>
+          <hr class="thick-hr" />
+          <div class="center bold" style="font-size: 13.5px; padding: 4px 0 2px;">
+            Thanks
+          </div>
+        </body>
+        </html>
+      `;
+    }
+
+    function printHTML(content, callback) {
+      let iframe = document.getElementById('printer-bridge-frame');
+      if (!iframe) {
+        iframe = document.createElement('iframe');
+        iframe.id = 'printer-bridge-frame';
+        iframe.style.position = 'fixed';
+        iframe.style.right = '0';
+        iframe.style.bottom = '0';
+        iframe.style.width = '0';
+        iframe.style.height = '0';
+        iframe.style.border = '0';
+        document.body.appendChild(iframe);
+      }
+
+      const doc = iframe.contentWindow.document;
+      doc.open();
+      doc.write(content);
+      doc.close();
+
+      setTimeout(() => {
+        iframe.contentWindow.focus();
+        iframe.contentWindow.print();
+        window.focus();
+        if (callback) setTimeout(callback, 600);
+      }, 250);
+    }
+
+    function printOnlyKOT() {
+      if (Object.keys(cart).length === 0) return alert('No items in cart for KOT!');
+      printHTML(generateKOTHTML(), null);
     }
 
     function saveBillOnly() {
@@ -987,7 +1202,6 @@
 
       orders.unshift(record);
       syncToCloud(record);
-      // sendWhatsAppBill(record); // Disabled to prevent WhatsApp popups
 
       if (activeResumedHoldId) {
         heldOrders = heldOrders.filter(h => h.hold_id !== activeResumedHoldId);
@@ -1028,7 +1242,7 @@
         payment_mode: selectedPayment
       };
 
-           orders.unshift(record);
+      orders.unshift(record);
       syncToCloud(record);
 
       if (activeResumedHoldId) {
@@ -1042,13 +1256,14 @@
       const kotHTML = generateKOTHTML();
 
       printHTML(billHTML, () => {
-        printHTML(kotHTML, () => {
-          resetCartFields();
-          switchView('tables');
-          window.focus();
-        });
+        setTimeout(() => {
+          printHTML(kotHTML, () => {
+            resetCartFields();
+            switchView('tables');
+          });
+        }, 300);
       });
- 
+    }
 
     function toggleAddForm() {
       const card = document.getElementById('add-item-card');
