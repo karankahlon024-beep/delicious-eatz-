@@ -99,7 +99,6 @@
           <span id="current-invoice-tag" class="font-mono text-black text-xs font-black bg-[#e2e8f0] px-2 py-0.5 rounded">#TBL-1</span>
         </div>
 
-        <!-- Universal Customer Contact and Location/Address Inputs -->
         <div class="grid grid-cols-2 gap-1.5">
           <div class="flex items-center bg-white border border-[#cbd5e1] rounded-lg px-2 py-1">
             <i class="fa-solid fa-phone text-neutral-500 text-[10px] mr-1.5"></i>
@@ -257,8 +256,6 @@
     </div>
   </main>
 
-  <main id="view-menu" class="hidden"></main>
-
   <div id="size-modal" class="fixed inset-0 bg-black/75 flex items-center justify-center p-3 z-50 hidden">
     <div class="bg-white border border-[#cbd5e1] w-full max-w-xs rounded-2xl p-4 shadow-2xl">
       <div class="flex justify-between items-center mb-3">
@@ -273,6 +270,32 @@
     const SHEETDB_API = 'https://sheetdb.io/api/v1/mbu5t23na13vg';
 
     const DEFAULT_MENU = [
+      // Momos
+      { id: 1201, name: 'Steam Momo', category: 'Momos', price_regular: 60, available: true },
+      { id: 1202, name: 'Fried Momo', category: 'Momos', price_regular: 70, available: true },
+      { id: 1203, name: 'Kurkure Momo', category: 'Momos', price_regular: 80, available: true },
+      { id: 1204, name: 'Paneer Steam Momo', category: 'Paneer Momos', price_regular: 90, available: true },
+      { id: 1205, name: 'Paneer Fried Momo', category: 'Paneer Momos', price_regular: 100, available: true },
+      { id: 1206, name: 'Paneer Kurkure Momo', category: 'Paneer Momos', price_regular: 110, available: true },
+      
+      // Spring Rolls
+      { id: 1251, name: 'Fried Spring Roll', category: 'Spring Rolls', price_regular: 70, available: true },
+      { id: 1252, name: 'Kurkure Spring Roll', category: 'Spring Rolls', price_regular: 80, available: true },
+
+      // Noodles
+      { id: 1301, name: 'Hakka Noodles', category: 'Noodles', price_regular: 70, available: true },
+      { id: 1302, name: 'Veg Noodles', category: 'Noodles', price_regular: 80, available: true },
+
+      // Chaap
+      { id: 1351, name: 'Malai Chaap', category: 'Chaap', price_regular: 100, available: true },
+      { id: 1352, name: 'Masala Chaap', category: 'Chaap', price_regular: 120, available: true },
+
+      // Snacks
+      { id: 1401, name: 'Honey Chilli Potato', category: 'Snacks', price_regular: 120, available: true },
+      { id: 1402, name: 'Manchurian', category: 'Snacks', price_regular: 100, available: true },
+      { id: 1403, name: 'Kurkure Mushroom', category: 'Snacks', price_regular: 120, available: true },
+
+      // Original Pizza & Cafe Menu
       { id: 101, name: 'Onion Pizza', category: '1. Pizza Mania', price_regular: 70, available: true },
       { id: 102, name: 'Capsicum Pizza', category: '1. Pizza Mania', price_regular: 80, available: true },
       { id: 103, name: 'Tomato Pizza', category: '1. Pizza Mania', price_regular: 80, available: true },
@@ -374,11 +397,11 @@
       { id: 1104, name: 'Family Meal', category: 'Meals', price_regular: 700, available: true }
     ];
 
-    const DEFAULT_CATEGORIES = ['1. Pizza Mania', '2. Special Veg Pizza', '1 Veg', '2 Veg', '3 Veg', 'Burger', 'Sandwich', 'Pasta', 'Wraps', 'Veg Sides', 'Soup & Salad', 'Shakes', 'Beverages', 'Meals'];
+    const DEFAULT_CATEGORIES = ['Momos', 'Paneer Momos', 'Spring Rolls', 'Noodles', 'Chaap', 'Snacks', '1. Pizza Mania', '2. Special Veg Pizza', '1 Veg', '2 Veg', '3 Veg', 'Burger', 'Sandwich', 'Pasta', 'Wraps', 'Veg Sides', 'Soup & Salad', 'Shakes', 'Beverages', 'Meals'];
 
-    let menu = JSON.parse(localStorage.getItem('de_menu_v30')) || DEFAULT_MENU;
-    let orders = JSON.parse(localStorage.getItem('de_petpooja_orders_v30')) || [];
-    let heldOrders = JSON.parse(localStorage.getItem('de_held_orders_v30')) || [];
+    let menu = JSON.parse(localStorage.getItem('de_menu_v31')) || DEFAULT_MENU;
+    let orders = JSON.parse(localStorage.getItem('de_petpooja_orders_v31')) || [];
+    let heldOrders = JSON.parse(localStorage.getItem('de_held_orders_v31')) || [];
     let cart = {};
     let activeCategory = 'All';
     let currentOrderMode = 'Dine In';
@@ -389,9 +412,9 @@
     let activeResumedHoldId = null;
 
     function saveState() {
-      localStorage.setItem('de_menu_v30', JSON.stringify(menu));
-      localStorage.setItem('de_petpooja_orders_v30', JSON.stringify(orders));
-      localStorage.setItem('de_held_orders_v30', JSON.stringify(heldOrders));
+      localStorage.setItem('de_menu_v31', JSON.stringify(menu));
+      localStorage.setItem('de_petpooja_orders_v31', JSON.stringify(orders));
+      localStorage.setItem('de_held_orders_v31', JSON.stringify(heldOrders));
       updateHeldBadge();
       renderTableCards();
     }
@@ -887,7 +910,6 @@
       });
     }
 
-    // CLOUD SYNC & AUTO-FETCH
     function syncToCloud(record) {
       const payload = {
         data: {
@@ -958,7 +980,6 @@
         .catch(err => console.error('Cloud Fetch Error:', err));
     }
 
-    // PRINT BRIDGE FUNCTIONS (SILENT AUTO-PRINT)
     function generateKOTHTML() {
       const itemsInCart = Object.values(cart);
       let totalUnits = 0;
