@@ -164,6 +164,7 @@
         </div>
 
         <div class="flex items-center space-x-1.5 flex-wrap">
+          <button onclick="addManualSalePrompt()" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-lg text-xs shadow">+ Add Missing Sale</button>
           <button id="btn-sales-month" onclick="filterSales('month')" class="px-2 py-1 bg-[#1e293b] hover:bg-[#334155] border border-neutral-700 rounded-lg text-xs font-bold text-white">Month</button>
           <button id="btn-sales-yesterday" onclick="filterSales('yesterday')" class="px-2 py-1 bg-[#1e293b] hover:bg-[#334155] border border-neutral-700 rounded-lg text-xs font-bold text-white">Yesterday</button>
           <button id="btn-sales-today" onclick="filterSales('today')" class="px-2 py-1 bg-white text-black rounded-lg text-xs font-black shadow">Today</button>
@@ -399,9 +400,8 @@
 
     const DEFAULT_CATEGORIES = ['Dips', 'Chinese', '1. Pizza Mania', '2. Special Veg Pizza', '1 Veg', '2 Veg', '3 Veg', 'Burger', 'Sandwich', 'Pasta', 'Wraps', 'Veg Sides', 'Soup & Salad', 'Shakes', 'Beverages', 'Meals'];
 
-    // RECOVERY BRIDGE: Automatically pulls from any previous storage version keys if available
     function loadSavedOrders() {
-      for (let v = 34; v >= 25; v--) {
+      for (let v = 35; v >= 25; v--) {
         const found = localStorage.getItem(`de_petpooja_orders_v${v}`);
         if (found) {
           try {
@@ -413,9 +413,9 @@
       return [];
     }
 
-    let menu = JSON.parse(localStorage.getItem('de_menu_v35')) || DEFAULT_MENU;
+    let menu = JSON.parse(localStorage.getItem('de_menu_v36')) || DEFAULT_MENU;
     let orders = loadSavedOrders();
-    let heldOrders = JSON.parse(localStorage.getItem('de_held_orders_v35')) || [];
+    let heldOrders = JSON.parse(localStorage.getItem('de_held_orders_v36')) || [];
     let cart = {};
     let activeCategory = 'All';
     let currentOrderMode = 'Dine In';
@@ -427,9 +427,9 @@
     let isSettling = false;
 
     function saveState() {
-      localStorage.setItem('de_menu_v35', JSON.stringify(menu));
-      localStorage.setItem('de_petpooja_orders_v35', JSON.stringify(orders));
-      localStorage.setItem('de_held_orders_v35', JSON.stringify(heldOrders));
+      localStorage.setItem('de_menu_v36', JSON.stringify(menu));
+      localStorage.setItem('de_petpooja_orders_v36', JSON.stringify(orders));
+      localStorage.setItem('de_held_orders_v36', JSON.stringify(heldOrders));
       updateHeldBadge();
       renderTableCards();
     }
@@ -847,6 +847,34 @@
       if (btn) setOrderMode(mode, btn);
     }
 
+    function addManualSalePrompt() {
+      const amtStr = prompt("Enter total amount for the missing sale printed today:");
+      const amt = parseFloat(amtStr);
+      if (!amt || isNaN(amt) || amt <= 0) return;
+
+      const manualRecord = {
+        invoice_no: `M-${Math.floor(1000 + Math.random() * 9000)}`,
+        time: new Date().toISOString(),
+        mode: 'Takeaway',
+        table: null,
+        phone: 'Restored',
+        location: '',
+        items: [{ name: 'Restored Printed Sales', variant: 'Std', price: amt, qty: 1 }],
+        subtotal: amt,
+        bogo_discount: 0,
+        discount: 0,
+        delivery: 0,
+        grand_total: amt,
+        payment_mode: 'Cash'
+      };
+
+      orders.unshift(manualRecord);
+      syncToCloud(manualRecord);
+      saveState();
+      renderSalesReport();
+      alert(`Successfully added ₹${amt} to today's sales summary!`);
+    }
+
     function filterSales(timeFrame) {
       activeSalesFilter = timeFrame;
       const btnToday = document.getElementById('btn-sales-today');
@@ -910,7 +938,7 @@
       document.getElementById('sales-total-bills').innerText = filtered.length;
 
       if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-12 text-neutral-400 font-bold text-xs">No records found for this period.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-12 text-neutral-400 font-bold text-xs">No records found for this period. Click "+ Add Missing Sale" to restore today's printed totals.</td></tr>`;
         return;
       }
 
