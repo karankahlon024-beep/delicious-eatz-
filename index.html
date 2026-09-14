@@ -399,9 +399,23 @@
 
     const DEFAULT_CATEGORIES = ['Dips', 'Chinese', '1. Pizza Mania', '2. Special Veg Pizza', '1 Veg', '2 Veg', '3 Veg', 'Burger', 'Sandwich', 'Pasta', 'Wraps', 'Veg Sides', 'Soup & Salad', 'Shakes', 'Beverages', 'Meals'];
 
-    let menu = JSON.parse(localStorage.getItem('de_menu_v33')) || DEFAULT_MENU;
-    let orders = JSON.parse(localStorage.getItem('de_petpooja_orders_v33')) || [];
-    let heldOrders = JSON.parse(localStorage.getItem('de_held_orders_v33')) || [];
+    // RECOVERY BRIDGE: Automatically pulls from any previous storage version keys if available
+    function loadSavedOrders() {
+      for (let v = 34; v >= 25; v--) {
+        const found = localStorage.getItem(`de_petpooja_orders_v${v}`);
+        if (found) {
+          try {
+            const parsed = JSON.parse(found);
+            if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+          } catch(e) {}
+        }
+      }
+      return [];
+    }
+
+    let menu = JSON.parse(localStorage.getItem('de_menu_v35')) || DEFAULT_MENU;
+    let orders = loadSavedOrders();
+    let heldOrders = JSON.parse(localStorage.getItem('de_held_orders_v35')) || [];
     let cart = {};
     let activeCategory = 'All';
     let currentOrderMode = 'Dine In';
@@ -413,9 +427,9 @@
     let isSettling = false;
 
     function saveState() {
-      localStorage.setItem('de_menu_v33', JSON.stringify(menu));
-      localStorage.setItem('de_petpooja_orders_v33', JSON.stringify(orders));
-      localStorage.setItem('de_held_orders_v33', JSON.stringify(heldOrders));
+      localStorage.setItem('de_menu_v35', JSON.stringify(menu));
+      localStorage.setItem('de_petpooja_orders_v35', JSON.stringify(orders));
+      localStorage.setItem('de_held_orders_v35', JSON.stringify(heldOrders));
       updateHeldBadge();
       renderTableCards();
     }
@@ -619,7 +633,7 @@
       const location = document.getElementById('customer-location-input').value.trim();
 
       const heldEntry = {
-        hold_id: `HOLD-${Date.now().toString().slice(-4)}`,
+        hold_id: activeResumedHoldId || `HOLD-${Date.now().toString().slice(-4)}`,
         timestamp: new Date().toISOString(),
         mode: currentOrderMode,
         table: currentOrderMode === 'Dine In' ? selectedTable : null,
@@ -632,6 +646,10 @@
         delivery: delivery,
         grand: grand
       };
+
+      if (activeResumedHoldId) {
+        heldOrders = heldOrders.filter(h => h.hold_id !== activeResumedHoldId);
+      }
 
       heldOrders.unshift(heldEntry);
       saveState();
