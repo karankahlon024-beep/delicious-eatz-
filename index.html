@@ -110,16 +110,23 @@
           </div>
         </div>
 
-        <div class="bg-white p-2 rounded-lg border border-[#cbd5e1] flex flex-col space-y-1">
-          <div class="flex items-center justify-between text-xs">
+        <div class="bg-white p-2 rounded-lg border border-[#cbd5e1] flex flex-col space-y-1.5">
+          <div class="flex items-center justify-between text-xs gap-1">
             <span class="text-neutral-500 font-bold">Sub: <strong id="cart-subtotal" class="text-black font-mono">₹0</strong></span>
+            
             <div class="flex items-center space-x-1">
-              <span class="text-neutral-500 font-bold">Disc:</span>
+              <span class="text-[10px] text-neutral-500 font-bold">Del:</span>
+              <input id="cart-delivery" type="number" value="0" min="0" oninput="recalcCart()" class="w-12 bg-[#f1f5f9] border border-[#cbd5e1] rounded px-1 py-0.5 text-right font-mono font-bold text-xs" />
+            </div>
+
+            <div class="flex items-center space-x-1">
+              <span class="text-[10px] text-neutral-500 font-bold">Disc:</span>
               <input id="cart-discount" type="number" value="0" min="0" oninput="recalcCart()" class="w-12 bg-[#f1f5f9] border border-[#cbd5e1] rounded px-1 py-0.5 text-right font-mono font-bold text-xs" />
             </div>
+            
             <div>
-              <span class="text-[10px] font-bold text-neutral-400">NET:</span>
-              <span id="cart-grand" class="text-black font-mono font-black text-sm ml-0.5">₹0</span>
+              <span class="text-[9px] font-bold text-neutral-400">NET:</span>
+              <span id="cart-grand" class="text-black font-mono font-black text-xs ml-0.5">₹0</span>
             </div>
           </div>
           <div id="bogo-applied-info" class="hidden text-emerald-700 text-[10px] font-black flex justify-between border-t border-neutral-200 pt-1">
@@ -140,7 +147,7 @@
           <button onclick="saveBillOnly()" class="pos-btn py-1.5 rounded bg-emerald-600 hover:bg-emerald-700 text-white text-[9px] font-black uppercase shadow">SAVE</button>
           <button onclick="holdCurrentCart()" class="pos-btn py-1.5 rounded bg-amber-500 hover:bg-amber-600 text-black text-[9px] font-black uppercase">HOLD</button>
           <button onclick="clearCart()" class="pos-btn py-1.5 rounded bg-[#e2e8f0] hover:bg-[#cbd5e1] text-neutral-800 text-[9px] font-black uppercase">CLR</button>
-          <button onclick="settleBillAndPrint()" class="pos-btn py-1.5 rounded bg-black hover:bg-neutral-900 text-white text-[9px] font-black uppercase shadow-lg">SETTLE</button>
+          <button id="btn-settle" onclick="settleBillAndPrint()" class="pos-btn py-1.5 rounded bg-black hover:bg-neutral-900 text-white text-[9px] font-black uppercase shadow-lg">SETTLE</button>
         </div>
       </div>
 
@@ -270,7 +277,10 @@
     const SHEETDB_API = 'https://sheetdb.io/api/v1/mbu5t23na13vg';
 
     const DEFAULT_MENU = [
-      // Chinese
+      { id: 1451, name: 'Tandoori Mayo Dip', category: 'Dips', price_regular: 20, available: true },
+      { id: 1452, name: 'Cheese Dip', category: 'Dips', price_regular: 30, available: true },
+      { id: 1453, name: 'Spicy Schezwan Dip', category: 'Dips', price_regular: 20, available: true },
+      { id: 1454, name: 'Mint Chutney Dip', category: 'Dips', price_regular: 20, available: true },
       { id: 1201, name: 'Steam Momo', category: 'Chinese', price_regular: 60, available: true },
       { id: 1202, name: 'Fried Momo', category: 'Chinese', price_regular: 70, available: true },
       { id: 1203, name: 'Kurkure Momo', category: 'Chinese', price_regular: 80, available: true },
@@ -286,8 +296,6 @@
       { id: 1401, name: 'Honey Chilli Potato', category: 'Chinese', price_regular: 120, available: true },
       { id: 1402, name: 'Manchurian', category: 'Chinese', price_regular: 100, available: true },
       { id: 1403, name: 'Kurkure Mushroom', category: 'Chinese', price_regular: 120, available: true },
-
-      // Original Pizza & Cafe Menu
       { id: 101, name: 'Onion Pizza', category: '1. Pizza Mania', price_regular: 70, available: true },
       { id: 102, name: 'Capsicum Pizza', category: '1. Pizza Mania', price_regular: 80, available: true },
       { id: 103, name: 'Tomato Pizza', category: '1. Pizza Mania', price_regular: 80, available: true },
@@ -389,11 +397,11 @@
       { id: 1104, name: 'Family Meal', category: 'Meals', price_regular: 700, available: true }
     ];
 
-    const DEFAULT_CATEGORIES = ['Chinese', '1. Pizza Mania', '2. Special Veg Pizza', '1 Veg', '2 Veg', '3 Veg', 'Burger', 'Sandwich', 'Pasta', 'Wraps', 'Veg Sides', 'Soup & Salad', 'Shakes', 'Beverages', 'Meals'];
+    const DEFAULT_CATEGORIES = ['Dips', 'Chinese', '1. Pizza Mania', '2. Special Veg Pizza', '1 Veg', '2 Veg', '3 Veg', 'Burger', 'Sandwich', 'Pasta', 'Wraps', 'Veg Sides', 'Soup & Salad', 'Shakes', 'Beverages', 'Meals'];
 
-    let menu = JSON.parse(localStorage.getItem('de_menu_v32')) || DEFAULT_MENU;
-    let orders = JSON.parse(localStorage.getItem('de_petpooja_orders_v32')) || [];
-    let heldOrders = JSON.parse(localStorage.getItem('de_held_orders_v32')) || [];
+    let menu = JSON.parse(localStorage.getItem('de_menu_v33')) || DEFAULT_MENU;
+    let orders = JSON.parse(localStorage.getItem('de_petpooja_orders_v33')) || [];
+    let heldOrders = JSON.parse(localStorage.getItem('de_held_orders_v33')) || [];
     let cart = {};
     let activeCategory = 'All';
     let currentOrderMode = 'Dine In';
@@ -402,11 +410,12 @@
     let isBogoActive = false;
     let activeSalesFilter = 'today';
     let activeResumedHoldId = null;
+    let isSettling = false;
 
     function saveState() {
-      localStorage.setItem('de_menu_v32', JSON.stringify(menu));
-      localStorage.setItem('de_petpooja_orders_v32', JSON.stringify(orders));
-      localStorage.setItem('de_held_orders_v32', JSON.stringify(heldOrders));
+      localStorage.setItem('de_menu_v33', JSON.stringify(menu));
+      localStorage.setItem('de_petpooja_orders_v33', JSON.stringify(orders));
+      localStorage.setItem('de_held_orders_v33', JSON.stringify(heldOrders));
       updateHeldBadge();
       renderTableCards();
     }
@@ -594,6 +603,7 @@
       cart = {};
       activeResumedHoldId = null;
       document.getElementById('cart-discount').value = 0;
+      document.getElementById('cart-delivery').value = 0;
       document.getElementById('customer-phone-input').value = '';
       document.getElementById('customer-location-input').value = '';
       if (isBogoActive) toggleBogo();
@@ -604,7 +614,7 @@
       const itemsInCart = Object.values(cart);
       if (itemsInCart.length === 0) return alert('Cart is empty.');
 
-      const { sub, disc, bogoDiscount, grand } = recalcCart();
+      const { sub, disc, delivery, bogoDiscount, grand } = recalcCart();
       const phone = document.getElementById('customer-phone-input').value.trim();
       const location = document.getElementById('customer-location-input').value.trim();
 
@@ -619,6 +629,7 @@
         isBogoActive: isBogoActive,
         bogoDiscount: bogoDiscount,
         discount: disc,
+        delivery: delivery,
         grand: grand
       };
 
@@ -635,6 +646,7 @@
       const target = heldOrders[idx];
       cart = JSON.parse(JSON.stringify(target.cart));
       document.getElementById('cart-discount').value = target.discount || 0;
+      document.getElementById('cart-delivery').value = target.delivery || 0;
       if (target.phone) document.getElementById('customer-phone-input').value = target.phone;
       if (target.location) document.getElementById('customer-location-input').value = target.location;
       
@@ -756,8 +768,10 @@
       }
 
       const manualDisc = Math.max(0, parseFloat(document.getElementById('cart-discount').value) || 0);
+      const delivery = Math.max(0, parseFloat(document.getElementById('cart-delivery').value) || 0);
+      
       const totalDisc = Math.min(sub, bogoDiscount + manualDisc);
-      const grand = Math.max(0, sub - totalDisc);
+      const grand = Math.max(0, sub - totalDisc + delivery);
 
       document.getElementById('cart-subtotal').innerText = `₹${sub}`;
       document.getElementById('cart-grand').innerText = `₹${grand}`;
@@ -770,7 +784,7 @@
         bogoInfo.classList.add('hidden');
       }
 
-      return { sub, disc: manualDisc, bogoDiscount, totalDisc, grand, totalItemsCount };
+      return { sub, disc: manualDisc, delivery, bogoDiscount, totalDisc, grand, totalItemsCount };
     }
 
     function setOrderMode(mode, btn) {
@@ -1048,7 +1062,7 @@
 
     function generateBillHTML(invoiceNo, now, customerPhone, customerLocation) {
       const itemsPurchased = Object.values(cart);
-      const { sub, disc, bogoDiscount, grand, totalItemsCount } = recalcCart();
+      const { sub, disc, delivery, bogoDiscount, grand, totalItemsCount } = recalcCart();
       const pad = n => n.toString().padStart(2, '0');
       const dateFormatted = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear().toString().slice(-2)}`;
       const timeFormatted = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
@@ -1085,6 +1099,15 @@
           <tr style="vertical-align: top; font-weight: 700;">
             <td colspan="3" style="padding: 2px 0;">DISCOUNT</td>
             <td style="padding: 2px 0; text-align: right;">-${parseFloat(disc).toFixed(2)}</td>
+          </tr>
+        `;
+      }
+
+      if (delivery > 0) {
+        itemRows += `
+          <tr style="vertical-align: top; font-weight: 700;">
+            <td colspan="3" style="padding: 2px 0;">DELIVERY CHARGES</td>
+            <td style="padding: 2px 0; text-align: right;">+${parseFloat(delivery).toFixed(2)}</td>
           </tr>
         `;
       }
@@ -1203,7 +1226,7 @@
       const phone = document.getElementById('customer-phone-input').value.trim();
       const location = document.getElementById('customer-location-input').value.trim();
 
-      const { sub, disc, bogoDiscount, grand } = recalcCart();
+      const { sub, disc, delivery, bogoDiscount, grand } = recalcCart();
       const invoiceNo = `${Math.floor(1000 + Math.random() * 9000)}`;
       const now = new Date();
 
@@ -1218,6 +1241,7 @@
         subtotal: sub,
         bogo_discount: bogoDiscount,
         discount: disc,
+        delivery: delivery,
         grand_total: grand,
         payment_mode: selectedPayment
       };
@@ -1236,13 +1260,18 @@
     }
 
     function settleBillAndPrint() {
+      if (isSettling) return;
       const itemsPurchased = Object.values(cart);
       if (itemsPurchased.length === 0) return alert('Add items to order first!');
+
+      isSettling = true;
+      const settleBtn = document.getElementById('btn-settle');
+      settleBtn.innerText = 'PRINTING...';
 
       const phone = document.getElementById('customer-phone-input').value.trim();
       const location = document.getElementById('customer-location-input').value.trim();
 
-      const { sub, disc, bogoDiscount, grand } = recalcCart();
+      const { sub, disc, delivery, bogoDiscount, grand } = recalcCart();
       const invoiceNo = `${Math.floor(1000 + Math.random() * 9000)}`;
       const now = new Date();
 
@@ -1257,6 +1286,7 @@
         subtotal: sub,
         bogo_discount: bogoDiscount,
         discount: disc,
+        delivery: delivery,
         grand_total: grand,
         payment_mode: selectedPayment
       };
@@ -1279,8 +1309,10 @@
           printHTML(kotHTML, () => {
             resetCartFields();
             switchView('tables');
+            settleBtn.innerText = 'SETTLE';
+            isSettling = false;
           });
-        }, 300);
+        }, 400);
       });
     }
 
