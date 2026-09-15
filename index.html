@@ -63,31 +63,34 @@
     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3" id="table-cards-container"></div>
   </main>
 
+  <!-- PETPOOJA REGISTER VIEW -->
   <main id="view-register" class="flex-1 flex flex-col md:flex-row overflow-hidden hidden bg-white">
-    <section class="w-full md:w-[62%] flex flex-col overflow-hidden bg-[#f8fafc] border-r border-[#cbd5e1] h-1/2 md:h-full">
-      <div class="p-2 border-b border-[#cbd5e1] bg-white flex items-center space-x-2 flex-shrink-0">
-        <button onclick="switchView('tables')" class="px-3 py-1.5 bg-[#0f172a] hover:bg-black text-white rounded-lg text-xs font-black flex items-center">
-          <i class="fa-solid fa-arrow-left mr-1.5"></i> TABLES
-        </button>
-        <div class="relative flex-1">
-          <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-neutral-400"></i>
-          <input id="item-search" type="text" placeholder="Search menu..." oninput="renderItems()" class="w-full pl-8 pr-3 py-1.5 bg-[#f1f5f9] border border-[#cbd5e1] rounded-lg text-xs font-bold text-black focus:outline-none focus:border-black" />
+    
+    <!-- LEFT: VERTICAL CATEGORY SIDEBAR + ITEM GRID -->
+    <section class="w-full md:w-[62%] flex flex-col md:flex-row overflow-hidden bg-[#f8fafc] border-r border-[#cbd5e1] h-1/2 md:h-full">
+      
+      <!-- Petpooja Vertical Category Sidebar -->
+      <div class="w-full md:w-44 bg-[#e2e8f0] border-r border-[#cbd5e1] flex flex-col flex-shrink-0 overflow-y-auto no-scrollbar" id="category-sidebar">
+        <!-- Categories injected here -->
+      </div>
+
+      <!-- Main Item Grid & Search Section -->
+      <div class="flex-1 flex flex-col overflow-hidden bg-[#f8fafc]">
+        <div class="p-2 border-b border-[#cbd5e1] bg-white flex items-center space-x-2 flex-shrink-0">
+          <button onclick="switchView('tables')" class="px-3 py-1.5 bg-[#0f172a] hover:bg-black text-white rounded-lg text-xs font-black flex items-center flex-shrink-0">
+            <i class="fa-solid fa-arrow-left mr-1.5"></i> TABLES
+          </button>
+          <div class="relative flex-1">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-neutral-400"></i>
+            <input id="item-search" type="text" placeholder="Search menu..." oninput="renderItems()" class="w-full pl-8 pr-3 py-1.5 bg-[#f1f5f9] border border-[#cbd5e1] rounded-lg text-xs font-bold text-black focus:outline-none focus:border-black" />
+          </div>
         </div>
-      </div>
 
-      <div class="flex items-center bg-[#e2e8f0] border-b border-[#cbd5e1] p-1 flex-shrink-0">
-        <button onclick="scrollCategories(-140)" class="w-6 h-7 bg-white hover:bg-neutral-200 border border-[#cbd5e1] rounded flex items-center justify-center text-xs font-black mr-1 flex-shrink-0">
-          <i class="fa-solid fa-chevron-left"></i>
-        </button>
-        <div id="category-bar" onwheel="handleCatWheel(event)" class="flex-1 flex items-center space-x-1.5 overflow-x-auto no-scrollbar scroll-smooth"></div>
-        <button onclick="scrollCategories(140)" class="w-6 h-7 bg-white hover:bg-neutral-200 border border-[#cbd5e1] rounded flex items-center justify-center text-xs font-black ml-1 flex-shrink-0">
-          <i class="fa-solid fa-chevron-right"></i>
-        </button>
+        <div id="items-grid" class="flex-1 overflow-y-auto p-2 grid grid-cols-2 lg:grid-cols-3 gap-2 content-start no-scrollbar"></div>
       </div>
-
-      <div id="items-grid" class="flex-1 overflow-y-auto p-2 grid grid-cols-2 lg:grid-cols-3 gap-2 content-start no-scrollbar"></div>
     </section>
 
+    <!-- RIGHT: CART & BILLING PANEL -->
     <section class="w-full md:w-[38%] flex flex-col overflow-hidden bg-white h-1/2 md:h-full border-t md:border-t-0">
       <div class="p-2 bg-[#f8fafc] border-b border-[#cbd5e1] space-y-1.5 flex-shrink-0 shadow-sm">
         <div class="flex items-center justify-between">
@@ -401,7 +404,7 @@
     const DEFAULT_CATEGORIES = ['Dips', 'Chinese', '1. Pizza Mania', '2. Special Veg Pizza', '1 Veg', '2 Veg', '3 Veg', 'Burger', 'Sandwich', 'Pasta', 'Wraps', 'Veg Sides', 'Soup & Salad', 'Shakes', 'Beverages', 'Meals'];
 
     function loadSavedOrders() {
-      for (let v = 35; v >= 25; v--) {
+      for (let v = 36; v >= 25; v--) {
         const found = localStorage.getItem(`de_petpooja_orders_v${v}`);
         if (found) {
           try {
@@ -413,9 +416,9 @@
       return [];
     }
 
-    let menu = JSON.parse(localStorage.getItem('de_menu_v36')) || DEFAULT_MENU;
+    let menu = JSON.parse(localStorage.getItem('de_menu_v37')) || DEFAULT_MENU;
     let orders = loadSavedOrders();
-    let heldOrders = JSON.parse(localStorage.getItem('de_held_orders_v36')) || [];
+    let heldOrders = JSON.parse(localStorage.getItem('de_held_orders_v37')) || [];
     let cart = {};
     let activeCategory = 'All';
     let currentOrderMode = 'Dine In';
@@ -427,26 +430,15 @@
     let isSettling = false;
 
     function saveState() {
-      localStorage.setItem('de_menu_v36', JSON.stringify(menu));
-      localStorage.setItem('de_petpooja_orders_v36', JSON.stringify(orders));
-      localStorage.setItem('de_held_orders_v36', JSON.stringify(heldOrders));
+      localStorage.setItem('de_menu_v37', JSON.stringify(menu));
+      localStorage.setItem('de_petpooja_orders_v37', JSON.stringify(orders));
+      localStorage.setItem('de_held_orders_v37', JSON.stringify(heldOrders));
       updateHeldBadge();
       renderTableCards();
     }
 
     function updateHeldBadge() {
       document.getElementById('held-count-badge').innerText = heldOrders.length;
-    }
-
-    function scrollCategories(amount) {
-      document.getElementById('category-bar').scrollBy({ left: amount, behavior: 'smooth' });
-    }
-
-    function handleCatWheel(e) {
-      if (e.deltaY !== 0) {
-        e.preventDefault();
-        document.getElementById('category-bar').scrollLeft += e.deltaY;
-      }
     }
 
     function toggleBogo() {
@@ -507,22 +499,24 @@
       });
     }
 
+    // Render Petpooja Vertical Sidebar Categories
     function renderCategories() {
-      const bar = document.getElementById('category-bar');
-      bar.innerHTML = '';
+      const sidebar = document.getElementById('category-sidebar');
+      sidebar.innerHTML = '';
       const allCats = ['All', ...getUniqueCategories()];
+      
       allCats.forEach(cat => {
         const btn = document.createElement('button');
         btn.innerText = cat;
-        btn.className = `pos-btn px-3 py-1.5 rounded-lg font-black whitespace-nowrap text-xs transition flex-shrink-0 ${
-          cat === activeCategory ? 'bg-black text-white shadow' : 'bg-white text-neutral-800 hover:bg-neutral-200 border border-[#cbd5e1]'
+        btn.className = `pos-btn w-full px-3 py-3 text-left font-bold text-xs uppercase transition border-b border-[#cbd5e1] flex items-center justify-between ${
+          cat === activeCategory ? 'bg-black text-white font-black border-l-4 border-l-amber-400' : 'bg-[#e2e8f0] text-neutral-800 hover:bg-[#cbd5e1]'
         }`;
         btn.onclick = () => {
           activeCategory = cat;
           renderCategories();
           renderItems();
         };
-        bar.appendChild(btn);
+        sidebar.appendChild(btn);
       });
     }
 
@@ -1495,6 +1489,10 @@
       });
 
       if (view === 'tables') renderTableCards();
+      if (view === 'register') {
+        renderCategories();
+        renderItems();
+      }
       if (view === 'sales') {
         fetchCloudSales();
         filterSales('today');
