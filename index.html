@@ -144,6 +144,9 @@
 
     </main>
 
+    <!-- HIDDEN PRINT IFRAME (Bypasses popup blockers & prints instantly) -->
+    <iframe id="print-frame" name="print-frame" style="display:none;"></iframe>
+
     <!-- SALES LEDGER MODAL -->
     <div id="sales-ledger-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center z-50">
         <div class="bg-white rounded-lg shadow-xl w-[600px] p-5 space-y-4 max-h-[85vh] flex flex-col">
@@ -721,7 +724,7 @@
                 list.innerHTML = permanentSalesLedger.slice(0, 50).map(o => `
                     <div class="py-2 flex justify-between items-center text-xs">
                         <div>
-                            <div class="font-bold text-slate-850">${o.customerName} (Bill #${o.billNo}) - <span class="text-[#d32f2f]">₹${o.total.toFixed(2)}</span></div>
+                            <div class="font-bold text-slate-800">${o.customerName} (Bill #${o.billNo}) - <span class="text-[#d32f2f]">₹${o.total.toFixed(2)}</span></div>
                             <div class="text-slate-500 text-[11px]">${o.dateStr} ${o.timeStr} | ${o.type} | Pay: ${o.payMode} | Items: ${o.items.reduce((s,i)=>s+i.qty,0)}</div>
                         </div>
                         <button onclick="reprintInvoice('${o.id}')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 py-1 rounded font-semibold">Reprint</button>
@@ -976,9 +979,11 @@
             }).then(res => {
                 showToast(`Receipt dispatched directly to thermal printer!`);
             }).catch(err => {
-                // Exact replica thermal window matching the left receipt format in image_9.png
-                const printWindow = window.open('', '_blank', 'width=350,height=600');
-                
+                // Direct hidden iframe printing bypassing popup blockers
+                const frame = document.getElementById('print-frame');
+                const doc = frame.contentWindow.document;
+                doc.open();
+
                 let htmlItems = ord.items.map(i => `
                     <tr>
                         <td style="padding: 2px 0; font-size: 11px;" colspan="2">${i.name}</td>
@@ -991,20 +996,19 @@
 
                 const totalQty = ord.items.reduce((s, i) => s + i.qty, 0);
 
-                printWindow.document.write(`
+                doc.write(`
                     <html>
                     <head>
-                        <title></title>
                         <style>
                             @page { size: auto; margin: 0mm; }
-                            body { font-family: 'Courier New', monospace; font-size: 11px; width: 270px; margin: 0 auto; color: #000; padding: 5px; }
+                            body { font-family: 'Courier New', monospace; font-size: 11px; width: 270px; margin: 0; color: #000; padding: 5px; }
                             .center { text-align: center; }
                             .bold { font-weight: bold; }
                             .line { border-bottom: 1px dashed #000; margin: 4px 0; }
                             table { width: 100%; border-collapse: collapse; }
                         </style>
                     </head>
-                    <body onload="window.print(); window.close();">
+                    <body>
                         <div class="center bold" style="font-size: 15px;">Delicious Eatz</div>
                         <div class="center" style="font-size: 10px;">Vop Budhabarh Tehsil Hajipur Dist<br>Hoshiarpur</div>
                         <div class="center" style="font-size: 10px; margin-top: 2px;">Ph: 7888950664, 8360084534</div>
@@ -1045,8 +1049,14 @@
                     </body>
                     </html>
                 `);
-                printWindow.document.close();
-                showToast(`Receipt generated.`);
+                doc.close();
+
+                setTimeout(() => {
+                    frame.contentWindow.focus();
+                    frame.contentWindow.print();
+                }, 250);
+
+                showToast(`Receipt sent to printer.`);
             });
         }
     </script>
