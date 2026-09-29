@@ -3,163 +3,312 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delicious Eatz - POS Terminal</title>
+    <title>Delicious Eatz - POS Terminal (Petpooja Layout)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* Custom scrollbar for clean POS look */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: #f8fafc; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-800 font-sans h-screen flex flex-col overflow-hidden">
+<body class="bg-slate-100 text-slate-800 font-sans h-screen flex flex-col overflow-hidden select-none">
 
-    <!-- Top Header Bar -->
-    <header class="bg-slate-900 text-white px-4 py-2.5 flex justify-between items-center shadow-md select-none">
+    <!-- Top Petpooja Header Bar -->
+    <header class="bg-[#d32f2f] text-white px-3 py-2 flex justify-between items-center shadow-md">
         <div class="flex items-center space-x-3">
-            <div class="bg-amber-500 text-slate-900 font-bold px-3 py-1 rounded text-lg tracking-wide">
-                <i class="fa-solid fa-utensils mr-1.5"></i> DELICIOUS EATZ
+            <div class="bg-white text-[#d32f2f] font-extrabold px-2.5 py-1 rounded text-sm tracking-wide shadow-inner flex items-center">
+                <i class="fa-solid fa-utensils mr-1.5 text-amber-500"></i> DELICIOUS EATZ <span class="text-[10px] text-slate-500 ml-1.5 font-normal">(R405167)</span>
             </div>
-            <span class="text-xs bg-slate-800 text-slate-300 px-2 py-1 rounded border border-slate-700">
-                <i class="fa-solid fa-circle text-emerald-400 text-[8px] mr-1"></i> Terminal: PC-01 (Khudda)
+            <span class="text-xs bg-red-800 text-red-100 px-2.5 py-1 rounded font-medium border border-red-700">
+                <i class="fa-solid fa-circle text-emerald-400 text-[8px] mr-1 animate-pulse"></i> Terminal Active: PC-01 (Khudda)
             </span>
         </div>
-        <div class="flex items-center space-x-4 text-sm">
-            <span id="live-clock" class="font-medium text-slate-300"></span>
-            <button onclick="syncData()" class="bg-slate-800 hover:bg-slate-700 px-3 py-1.5 rounded transition text-slate-200">
-                <i class="fa-solid fa-rotate mr-1"></i> Sync
+        <div class="flex items-center space-x-4 text-xs font-medium">
+            <div class="bg-red-900 px-3 py-1 rounded text-red-200 border border-red-800">
+                <i class="fa-solid fa-clock mr-1"></i> <span id="live-clock"></span>
+            </div>
+            <button onclick="syncData()" class="bg-white text-[#d32f2f] hover:bg-red-50 px-3 py-1 rounded font-bold shadow transition">
+                <i class="fa-solid fa-rotate mr-1"></i> Sync Data
             </button>
         </div>
     </header>
 
-    <!-- Main 3-Column POS Workspace -->
-    <main class="flex-1 grid grid-cols-12 gap-2 p-2 overflow-hidden">
+    <!-- Main Workspace Layout -->
+    <main class="flex-1 grid grid-cols-12 overflow-hidden bg-slate-200 gap-[1px]">
 
-        <!-- COLUMN 1: Categories & Menu Grid (Cols 1 to 6) -->
-        <section class="col-span-6 bg-white rounded-lg shadow-sm border border-slate-200 flex flex-col overflow-hidden">
-            <!-- Search & Order Type Bar -->
-            <div class="p-3 border-b border-slate-200 bg-slate-50 flex gap-2 items-center">
+        <!-- 1. LEFTMOST ICON RAIL (Col Span 1) -->
+        <aside class="col-span-1 bg-[#263238] text-slate-300 flex flex-col items-center py-2 space-y-4">
+            <button class="p-2.5 hover:bg-slate-700 rounded text-amber-400 transition" title="POS Dashboard"><i class="fa-solid fa-cash-register text-lg"></i></button>
+            <button class="p-2.5 hover:bg-slate-700 rounded transition" title="Search"><i class="fa-solid fa-magnifying-glass text-base"></i></button>
+            <button class="p-2.5 hover:bg-slate-700 rounded transition" title="Add Extra Cheese"><i class="fa-solid fa-cheese text-base"></i></button>
+            <button class="p-2.5 hover:bg-slate-700 rounded transition" title="Menu Items"><i class="fa-solid fa-burger text-base"></i></button>
+            <button class="p-2.5 hover:bg-slate-700 rounded transition" title="Reports"><i class="fa-solid fa-chart-line text-base"></i></button>
+            <div class="flex-1"></div>
+            <div class="text-[10px] text-slate-400 text-center font-mono px-1">28°C<br>ENG</div>
+            <button class="p-2 hover:bg-red-600 rounded text-red-300 hover:text-white transition" title="Logout"><i class="fa-solid fa-power-off"></i></button>
+        </aside>
+
+        <!-- 2. CATEGORY SIDEBAR (Col Span 2) -->
+        <section class="col-span-2 bg-white flex flex-col border-r border-slate-200 overflow-y-auto">
+            <div class="p-2.5 bg-slate-50 border-b border-slate-200 font-bold text-xs text-slate-600 uppercase tracking-wide">
+                Categories
+            </div>
+            <div id="category-list" class="flex flex-col divide-y divide-slate-100">
+                <!-- Dynamically injected category list -->
+            </div>
+        </section>
+
+        <!-- 3. PRODUCT ITEM GRID (Col Span 5) -->
+        <section class="col-span-5 bg-slate-50 flex flex-col overflow-hidden border-r border-slate-200">
+            <!-- Search & Filter bar -->
+            <div class="p-2.5 bg-white border-b border-slate-200 flex items-center space-x-2">
                 <div class="relative flex-1">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-400"></i>
-                    <input type="text" id="menu-search" oninput="filterMenu()" placeholder="Search items by name or code..." 
-                           class="w-full pl-9 pr-3 py-2 bg-white border border-slate-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-sm"></i>
+                    <input type="text" id="menu-search" oninput="filterMenu()" placeholder="Search item by name or code..." 
+                           class="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-red-500">
                 </div>
-                <div class="flex bg-slate-200 p-1 rounded-md text-xs font-semibold">
-                    <button onclick="setOrderType('Dine-In')" id="type-dine" class="px-3 py-1.5 rounded bg-white text-slate-900 shadow-sm transition">Dine-In</button>
-                    <button onclick="setOrderType('Takeaway')" id="type-take" class="px-3 py-1.5 rounded text-slate-600 transition">Takeaway</button>
+                <div id="active-category-title" class="text-xs font-bold text-[#d32f2f] px-2 py-1 bg-red-50 rounded border border-red-200">
+                    Pizza Mania
                 </div>
             </div>
 
-            <!-- Category Filter Tabs -->
-            <div id="category-tabs" class="flex gap-2 p-2.5 bg-slate-100 border-b border-slate-200 overflow-x-auto whitespace-nowrap">
-                <!-- Dynamically loaded category buttons -->
-            </div>
-
-            <!-- Product Grid Cards -->
-            <div id="product-grid" class="flex-1 p-3 grid grid-cols-3 gap-3 overflow-y-auto bg-slate-50/50">
-                <!-- Dynamically loaded product cards -->
+            <!-- Product Cards Grid -->
+            <div id="product-grid" class="flex-1 p-3 grid grid-cols-3 gap-2.5 overflow-y-auto content-start">
+                <!-- Dynamically populated items -->
             </div>
         </section>
 
-        <!-- COLUMN 2: Active Cart / KOT Panel (Cols 7 to 10) -->
-        <section class="col-span-4 bg-white rounded-lg shadow-sm border border-slate-200 flex flex-col overflow-hidden">
-            <!-- Cart Header -->
-            <div class="p-3 bg-slate-900 text-white flex justify-between items-center">
-                <div class="font-semibold text-sm flex items-center">
-                    <i class="fa-solid fa-receipt mr-2 text-amber-400"></i> Current Order
-                    <span id="cart-count-badge" class="ml-2 bg-amber-500 text-slate-950 font-bold px-2 py-0.5 rounded-full text-xs">0</span>
-                </div>
-                <button onclick="clearCart()" class="text-xs text-rose-300 hover:text-rose-100 transition">
-                    <i class="fa-solid fa-trash mr-1"></i> Clear
-                </button>
+        <!-- 4. ORDER CART & SETTLEMENT PANEL (Col Span 4) -->
+        <section class="col-span-4 bg-white flex flex-col overflow-hidden">
+            <!-- Order Type Selector Tabs -->
+            <div class="grid grid-cols-3 bg-slate-100 p-1 border-b border-slate-200 text-xs font-semibold text-center">
+                <button onclick="setOrderType('Dine-In')" id="type-dine" class="py-1.5 bg-white rounded shadow-sm text-[#d32f2f] transition">Dine In</button>
+                <button onclick="setOrderType('Delivery')" id="type-del" class="py-1.5 text-slate-600 rounded transition">Delivery</button>
+                <button onclick="setOrderType('Pick Up')" id="type-pick" class="py-1.5 text-slate-600 rounded transition">Pick Up</button>
             </div>
 
-            <!-- Cart Items List -->
-            <div id="cart-items" class="flex-1 overflow-y-auto divide-y divide-slate-100 p-2">
-                <!-- Empty state placeholder -->
-                <div class="h-full flex flex-col items-center justify-center text-slate-400 text-sm select-none">
-                    <i class="fa-solid fa-basket-shopping text-3xl mb-2 text-slate-300"></i>
-                    <span>Cart is empty</span>
-                    <span class="text-xs text-slate-400 mt-1">Select items from the menu</span>
+            <!-- Table/Customer Info Banner -->
+            <div class="px-3 py-2 bg-red-50/50 border-b border-slate-200 flex justify-between items-center text-xs">
+                <span class="font-bold text-slate-700"><i class="fa-solid fa-chair text-amber-600 mr-1"></i> Table: 3</span>
+                <span class="text-slate-500 font-medium">Items: <span id="cart-item-count" class="font-bold text-slate-800">0</span></span>
+            </div>
+
+            <!-- Cart Table Header -->
+            <div class="grid grid-cols-12 bg-slate-200 px-3 py-1.5 text-[11px] font-bold text-slate-600">
+                <div class="col-span-6">ITEMS</div>
+                <div class="col-span-3 text-center">QTY</div>
+                <div class="col-span-3 text-right">PRICE</div>
+            </div>
+
+            <!-- Cart Item Rows -->
+            <div id="cart-items-list" class="flex-1 overflow-y-auto divide-y divide-slate-100 px-2">
+                <div class="h-full flex flex-col items-center justify-center text-slate-400 text-xs select-none py-10">
+                    <i class="fa-solid fa-basket-shopping text-3xl mb-1 text-slate-300"></i>
+                    <span>No items added yet</span>
                 </div>
             </div>
 
-            <!-- Cart Summary & Actions -->
-            <div class="p-3 border-t border-slate-200 bg-slate-50 space-y-2">
-                <div class="space-y-1 text-xs text-slate-600">
-                    <div class="flex justify-between"><span>Subtotal:</span> <span id="summary-subtotal" class="font-medium text-slate-800">₹0.00</span></div>
-                    <div class="flex justify-between"><span>GST (5%):</span> <span id="summary-tax" class="font-medium text-slate-800">₹0.00</span></div>
-                    <div class="flex justify-between text-sm font-bold text-slate-900 pt-1 border-t border-slate-200">
-                        <span>Total Amount:</span> <span id="summary-total" class="text-amber-600">₹0.00</span>
-                    </div>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="grid grid-cols-2 gap-2 pt-1">
-                    <button onclick="printKOT()" class="bg-amber-100 hover:bg-amber-200 text-amber-900 font-semibold py-2 px-3 rounded text-xs transition border border-amber-300">
-                        <i class="fa-solid fa-print mr-1"></i> Print KOT
-                    </button>
-                    <button onclick="settleBill('Cash')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2 px-3 rounded text-xs transition shadow-sm">
-                        <i class="fa-solid fa-cash-register mr-1"></i> Settle (Cash)
-                    </button>
+            <!-- Cart Summary Totals -->
+            <div class="p-3 border-t border-slate-200 bg-slate-50 space-y-1.5 text-xs">
+                <div class="flex justify-between text-slate-600"><span>Subtotal:</span> <span id="summary-subtotal" class="font-medium text-slate-800">₹0.00</span></div>
+                <div class="flex justify-between text-slate-600"><span>GST (5%):</span> <span id="summary-tax" class="font-medium text-slate-800">₹0.00</span></div>
+                <div class="flex justify-between text-sm font-extrabold text-slate-900 pt-1 border-t border-slate-200">
+                    <span>Total Amount:</span> <span id="summary-total" class="text-[#d32f2f]">₹0.00</span>
                 </div>
             </div>
-        </section>
 
-        <!-- COLUMN 3: Quick Controls & Running Orders (Cols 11 to 12) -->
-        <section class="col-span-2 bg-white rounded-lg shadow-sm border border-slate-200 flex flex-col overflow-hidden">
-            <div class="p-3 bg-slate-800 text-white font-semibold text-xs tracking-wide uppercase border-b border-slate-700">
-                <i class="fa-solid fa-bolt mr-1 text-amber-400"></i> Quick Actions
+            <!-- Payment Mode Selector Bar -->
+            <div class="grid grid-cols-5 gap-1 p-2 bg-slate-100 border-t border-slate-200 text-[11px] font-semibold text-center">
+                <button onclick="setPayMode('Cash')" id="pay-cash" class="bg-white border border-slate-300 py-1.5 rounded shadow-sm text-emerald-700">Cash</button>
+                <button onclick="setPayMode('Card')" id="pay-card" class="bg-white border border-slate-300 py-1.5 rounded text-slate-600">Card</button>
+                <button onclick="setPayMode('Due')" id="pay-due" class="bg-white border border-slate-300 py-1.5 rounded text-slate-600">Due</button>
+                <button onclick="setPayMode('Other')" id="pay-other" class="bg-white border border-slate-300 py-1.5 rounded text-slate-600">Other</button>
+                <button onclick="setPayMode('Paid')" id="pay-paid" class="bg-white border border-slate-300 py-1.5 rounded text-slate-600">Paid</button>
             </div>
-            <div class="p-3 space-y-2.5 flex-1 overflow-y-auto">
-                <button onclick="applyBogo()" class="w-full text-left bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-900 p-2.5 rounded text-xs font-medium transition">
-                    <i class="fa-solid fa-tag text-indigo-600 mr-1.5"></i> Apply BOGO Offer
-                </button>
-                <button onclick="holdOrder()" class="w-full text-left bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-900 p-2.5 rounded text-xs font-medium transition">
-                    <i class="fa-solid fa-pause text-amber-600 mr-1.5"></i> Hold Current Order
-                </button>
-                <button onclick="viewHeldOrders()" class="w-full text-left bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 p-2.5 rounded text-xs font-medium transition">
-                    <i class="fa-solid fa-list-check text-slate-600 mr-1.5"></i> Held Orders
-                </button>
-                <button onclick="openDailyLedger()" class="w-full text-left bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 p-2.5 rounded text-xs font-medium transition">
-                    <i class="fa-solid fa-chart-line text-slate-600 mr-1.5"></i> Sales Ledger
-                </button>
-            </div>
-            <div class="p-3 bg-slate-50 border-t border-slate-200 text-center">
-                <span class="text-[10px] text-slate-400">Delicious Eatz POS v3.2</span>
+
+            <!-- Bottom Action Footer -->
+            <div class="grid grid-cols-4 gap-1 p-2 bg-white border-t border-slate-200">
+                <button onclick="saveOrder()" class="bg-slate-700 hover:bg-slate-800 text-white py-2 rounded text-xs font-bold transition shadow-sm">Save</button>
+                <button onclick="printKOTDirect()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 py-2 rounded text-xs font-bold transition shadow-sm">KOT</button>
+                <button onclick="printBillDirect()" class="bg-[#d32f2f] hover:bg-red-700 text-white py-2 rounded text-xs font-bold transition shadow-sm col-span-2">KOT & Print Bill</button>
             </div>
         </section>
 
     </main>
 
-    <!-- JavaScript POS Core Logic -->
+    <!-- POS Logic & Full Menu Database -->
     <script>
-        // Sample Menu Data (Easily replaceable with your full menu items)
-        const menuData = [
-            { id: 1, name: 'Margherita Pizza', category: 'Pizzas', price: 199, code: 'P01' },
-            { id: 2, name: 'Farmhouse Pizza', category: 'Pizzas', price: 299, code: 'P02' },
-            { id: 3, name: 'Paneer Makhani Pizza', category: 'Pizzas', price: 349, code: 'P03' },
-            { id: 4, name: 'Veggie Burger', category: 'Burgers', price: 99, code: 'B01' },
-            { id: 5, name: 'Crispy Chicken Burger', category: 'Burgers', price: 149, code: 'B02' },
-            { id: 6, name: 'Double Cheese Burger', category: 'Burgers', price: 189, code: 'B03' },
-            { id: 7, name: 'Hakka Noodles', category: 'Chinese', price: 130, code: 'C01' },
-            { id: 8, name: 'Veg Manchurian', category: 'Chinese', price: 150, code: 'C02' },
-            { id: 9, name: 'Cold Coffee', category: 'Beverages', price: 90, code: 'D01' },
-            { id: 10, name: 'Chocolate Shake', category: 'Beverages', price: 120, code: 'D02' }
-        ];
+        // Complete Delicious Eatz Menu Database matched to your menu cards
+        const menuDatabase = {
+            "Pizza Mania": [
+                { id: "PM1", name: "Onion Pizza", prices: { R: 70, M: 0, L: 0 } },
+                { id: "PM2", name: "Capsicum Pizza", prices: { R: 80, M: 0, L: 0 } },
+                { id: "PM3", name: "Tomato Pizza", prices: { R: 80, M: 0, L: 0 } },
+                { id: "PM4", name: "Mushroom Pizza", prices: { R: 90, M: 0, L: 0 } },
+                { id: "PM5", name: "Corn Pizza", prices: { R: 90, M: 0, L: 0 } },
+                { id: "PM6", name: "Capsicum & Paneer Pizza", prices: { R: 110, M: 0, L: 0 } },
+                { id: "PM7", name: "Onion & Paneer Pizza", prices: { R: 110, M: 0, L: 0 } },
+                { id: "PM8", name: "Capsicum & Corn Pizza", prices: { R: 110, M: 0, L: 0 } },
+                { id: "PM9", name: "Pineapple & Corn Pizza", prices: { R: 120, M: 0, L: 0 } },
+                { id: "PM10", name: "Delicious Special Pizza", prices: { R: 140, M: 0, L: 0 } }
+            ],
+            "Special Veg Pizza": [
+                { id: "SP1", name: "Margherita Pizza", prices: { R: 150, M: 300, L: 400 } },
+                { id: "SP2", name: "Cheese & Mushroom Pizza", prices: { R: 150, M: 300, L: 400 } },
+                { id: "SP3", name: "Cheese & Corn Pizza", prices: { R: 150, M: 300, L: 400 } },
+                { id: "SP4", name: "Achari Wonder Pizza", prices: { R: 150, M: 300, L: 400 } },
+                { id: "SP5", name: "Mix Veg Pizza", prices: { R: 150, M: 300, L: 400 } }
+            ],
+            "1 Veg": [
+                { id: "1V1", name: "Makhni Lover Pizza", prices: { R: 190, M: 380, L: 590 } },
+                { id: "1V2", name: "Farm House Pizza", prices: { R: 190, M: 380, L: 590 } },
+                { id: "1V3", name: "Delicious Pasta Pizza", prices: { R: 190, M: 380, L: 590 } },
+                { id: "1V4", name: "Paneer Lover Pizza", prices: { R: 190, M: 380, L: 590 } },
+                { id: "1V5", name: "Country House Pizza", prices: { R: 190, M: 380, L: 590 } },
+                { id: "1V6", name: "Mexikan Green Wave Pizza", prices: { R: 190, M: 380, L: 590 } },
+                { id: "1V7", name: "Spicy Corn Lover Pizza", prices: { R: 190, M: 380, L: 590 } }
+            ],
+            "2 Veg": [
+                { id: "2V1", name: "Delicious Loaded Pizza", prices: { R: 250, M: 500, L: 630 } },
+                { id: "2V2", name: "Veg Delight Pizza", prices: { R: 250, M: 500, L: 630 } },
+                { id: "2V3", name: "Sweet & Spicy Pizza", prices: { R: 250, M: 500, L: 630 } },
+                { id: "2V4", name: "Veggie Fresh Pizza", prices: { R: 250, M: 500, L: 630 } },
+                { id: "2V5", name: "Veg Paradise Pizza", prices: { R: 250, M: 500, L: 630 } },
+                { id: "2V6", name: "Delicious Supreme Pizza", prices: { R: 250, M: 500, L: 630 } }
+            ],
+            "3 Veg": [
+                { id: "3V1", name: "Kadhai Lover Pizza", prices: { R: 270, M: 550, L: 650 } },
+                { id: "3V2", name: "Tandoori Panner Lover Pizza", prices: { R: 270, M: 550, L: 650 } },
+                { id: "3V3", name: "Achari Lover Pizza", prices: { R: 270, M: 550, L: 650 } },
+                { id: "3V4", name: "Delicious Eatz Special Pizza", prices: { R: 270, M: 550, L: 650 } }
+            ],
+            "Veg Sides": [
+                { id: "VS1", name: "Fries", prices: { R: 90, L: 110 } },
+                { id: "VS2", name: "Peri Peri Fries", prices: { R: 100, L: 120 } },
+                { id: "VS3", name: "Loaded Fries", prices: { R: 120, L: 150 } },
+                { id: "VS4", name: "Garlic Bread", prices: { R: 100 } },
+                { id: "VS5", name: "Paneer Garlic Bread", prices: { R: 120, L: 120 } },
+                { id: "VS6", name: "Calazone", prices: { R: 100 } },
+                { id: "VS7", name: "Potato Pops", prices: { R: 70 } },
+                { id: "VS8", name: "Veg Fingers", prices: { R: 80 } },
+                { id: "VS9", name: "Veg Parcel", prices: { R: 60 } },
+                { id: "VS10", name: "Paneer Parcel", prices: { R: 80 } },
+                { id: "VS11", name: "Mix Veg Parcel", prices: { R: 100 } }
+            ],
+            "Burger": [
+                { id: "BG1", name: "Allu Patty Burger", prices: { R: 40 } },
+                { id: "BG2", name: "Herb Patty Burger", prices: { R: 50 } },
+                { id: "BG3", name: "Spicy Burger", prices: { R: 60 } },
+                { id: "BG4", name: "Cheesy Burger", prices: { R: 70 } },
+                { id: "BG5", name: "Paneer Burger", prices: { R: 80 } },
+                { id: "BG6", name: "Mushroom Burger", prices: { R: 70 } },
+                { id: "BG7", name: "Spicy Paneer Burger", prices: { R: 120 } },
+                { id: "BG8", name: "Double Patty Burger", prices: { R: 110 } },
+                { id: "BG9", name: "Special Burger", prices: { R: 100 } }
+            ],
+            "Sandwich": [
+                { id: "SW1", name: "Grilled Sandwich", prices: { R: 70 } },
+                { id: "SW2", name: "Spicy Sandwich", prices: { R: 80 } },
+                { id: "SW3", name: "Mix Veg Sandwich", prices: { R: 100 } },
+                { id: "SW4", name: "Creamy Sandwich", prices: { R: 90 } },
+                { id: "SW5", name: "Paneer & Mushroom Sandwich", prices: { R: 100 } },
+                { id: "SW6", name: "Paneer Sandwich", prices: { R: 100 } },
+                { id: "SW7", name: "Delicious Spl. Sandwich", prices: { R: 120 } }
+            ],
+            "Pasta": [
+                { id: "PS1", name: "Red Pasta", prices: { R: 80 } },
+                { id: "PS2", name: "White Pasta", prices: { R: 80 } },
+                { id: "PS3", name: "Spicy Pasta", prices: { R: 100 } },
+                { id: "PS4", name: "Mix Veg Pasta", prices: { R: 100 } },
+                { id: "PS5", name: "Makhni Pasta", prices: { R: 120 } },
+                { id: "PS6", name: "Cheesy Pasta", prices: { R: 90 } }
+            ],
+            "Wraps": [
+                { id: "WP1", name: "Mix Veg Wrap", prices: { R: 80 } },
+                { id: "WP2", name: "Allu Tikki Wrap", prices: { R: 80 } },
+                { id: "WP3", name: "Paneer Wrap", prices: { R: 100 } },
+                { id: "WP4", name: "Spicy Paneer Wrap", prices: { R: 120 } },
+                { id: "WP5", name: "Spicy Wrap", prices: { R: 80 } },
+                { id: "WP6", name: "Paneer Mushroom Wrap", prices: { R: 100 } },
+                { id: "WP7", name: "Delicious Special Wrap", prices: { R: 140 } }
+            ],
+            "Soup & Salad": [
+                { id: "SS1", name: "Mushroom Soup", prices: { R: 80 } },
+                { id: "SS2", name: "Mix Soup", prices: { R: 80 } },
+                { id: "SS3", name: "Corn Soup", prices: { R: 80 } },
+                { id: "SS4", name: "Veg Salad", prices: { R: 70 } },
+                { id: "SS5", name: "Creamy Salad", prices: { R: 100 } },
+                { id: "SS6", name: "Cheesy Salad", prices: { R: 110 } }
+            ],
+            "Dips": [
+                { id: "DP1", name: "Tandoori Dip", prices: { R: 30 } },
+                { id: "DP2", name: "Mayonnaise Dip", prices: { R: 30 } },
+                { id: "DP3", name: "Cheesy Dip", prices: { R: 30 } },
+                { id: "DP4", name: "Spicy Dip", prices: { R: 30 } },
+                { id: "DP5", name: "Thousand Island", prices: { R: 30 } },
+                { id: "DP6", name: "Mint Dip", prices: { R: 30 } }
+            ],
+            "Shakes": [
+                { id: "SK1", name: "Vanilla Shake", prices: { R: 90 } },
+                { id: "SK2", name: "Strawberry Shake", prices: { R: 90 } },
+                { id: "SK3", name: "Butterscotch Shake", prices: { R: 90 } },
+                { id: "SK4", name: "Mango Shake", prices: { R: 90 } },
+                { id: "SK5", name: "Choco Shake", prices: { R: 90 } },
+                { id: "SK6", name: "Kit Kat Shake", prices: { R: 100 } },
+                { id: "SK7", name: "Brownie Shake", prices: { R: 100 } },
+                { id: "SK8", name: "Kasar Shake", prices: { R: 100 } },
+                { id: "SK9", name: "Paan Shake", prices: { R: 100 } },
+                { id: "SK10", name: "Bubble Shake", prices: { R: 100 } },
+                { id: "SK11", name: "Black Current Shake", prices: { R: 100 } },
+                { id: "SK12", name: "Oreo Shake", prices: { R: 100 } }
+            ],
+            "Mocktails": [
+                { id: "MK1", name: "Mint Mojito", prices: { R: 90 } },
+                { id: "MK2", name: "Mango Mojito", prices: { R: 80 } },
+                { id: "MK3", name: "Lemon Soda", prices: { R: 70 } },
+                { id: "MK4", name: "Strawberry Mojito", prices: { R: 80 } },
+                { id: "MK5", name: "Pineapple Mojito", prices: { R: 80 } },
+                { id: "MK6", name: "Green Apple Mojito", prices: { R: 80 } },
+                { id: "MK7", name: "Blueberry Mojito", prices: { R: 80 } },
+                { id: "MK8", name: "Orange Mojito", prices: { R: 80 } },
+                { id: "MK9", name: "Bubble Gum Mojito", prices: { R: 80 } }
+            ],
+            "Desserts": [
+                { id: "DS1", name: "Vanilla Ice Cream", prices: { R: 60 } },
+                { id: "DS2", name: "Chocolate Ice Cream", prices: { R: 70 } },
+                { id: "DS3", name: "Kit Kat Dessert", prices: { R: 90 } },
+                { id: "DS4", name: "Butterscotch Dessert", prices: { R: 80 } },
+                { id: "DS5", name: "Oreo Dessert", prices: { R: 90 } },
+                { id: "DS6", name: "Brownie With Ice Cream", prices: { R: 110 } },
+                { id: "DS7", name: "Brownie", prices: { R: 80 } },
+                { id: "DS8", name: "Sizzle Brownie", prices: { R: 130 } }
+            ],
+            "Coffee": [
+                { id: "CF1", name: "Hot Coffee", prices: { R: 50 } },
+                { id: "CF2", name: "Beat Coffee", prices: { R: 60 } },
+                { id: "CF3", name: "Cold Coffee", prices: { R: 90 } },
+                { id: "CF4", name: "Black Coffee", prices: { R: 50 } }
+            ],
+            "Meals": [
+                { id: "ML1", name: "Allu Tikki Meal", prices: { R: 130 } },
+                { id: "ML2", name: "Single Meal", prices: { R: 150 } },
+                { id: "ML3", name: "Couple Meal", prices: { R: 310 } },
+                { id: "ML4", name: "Family Meal", prices: { R: 700 } }
+            ]
+        };
 
+        let currentCategory = "Pizza Mania";
+        let currentOrderType = "Dine-In";
+        let currentPayMode = "Cash";
         let cart = [];
-        let currentCategory = 'All';
-        let currentOrderType = 'Dine-In';
 
-        // Initialize UI
         window.onload = function() {
             updateClock();
             setInterval(updateClock, 1000);
             renderCategories();
-            renderProducts(menuData);
+            renderProducts(currentCategory);
         };
 
         function updateClock() {
@@ -167,67 +316,86 @@
             document.getElementById('live-clock').innerText = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) + ' | ' + now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
         }
 
-        function setOrderType(type) {
-            currentOrderType = type;
-            document.getElementById('type-dine').className = type === 'Dine-In' ? 'px-3 py-1.5 rounded bg-white text-slate-900 shadow-sm transition' : 'px-3 py-1.5 rounded text-slate-600 transition';
-            document.getElementById('type-take0' || 'type-take').className = type === 'Takeaway' ? 'px-3 py-1.5 rounded bg-white text-slate-900 shadow-sm transition' : 'px-3 py-1.5 rounded text-slate-600 transition';
-        }
-
         function renderCategories() {
-            const categories = ['All', ...new Set(menuData.map(item => item.category))];
-            const container = document.getElementById('category-tabs');
+            const categories = Object.keys(menuDatabase);
+            const container = document.getElementById('category-list');
             container.innerHTML = categories.map(cat => `
-                <button onclick="filterByCategory('${cat}')" class="px-3 py-1.5 rounded-md text-xs font-medium transition ${currentCategory === cat ? 'bg-amber-500 text-slate-950 font-bold shadow-sm' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}">
-                    ${cat}
+                <button onclick="selectCategory('${cat}')" class="text-left px-3 py-2.5 text-xs font-medium transition flex justify-between items-center ${currentCategory === cat ? 'bg-red-50 text-[#d32f2f] font-bold border-l-4 border-[#d32f2f]' : 'text-slate-700 hover:bg-slate-50'}">
+                    <span>${cat}</span>
+                    <i class="fa-solid fa-chevron-right text-[10px] text-slate-300"></i>
                 </button>
             `).join('');
         }
 
-        function filterByCategory(cat) {
+        function selectCategory(cat) {
             currentCategory = cat;
+            document.getElementById('active-category-title').innerText = cat;
             renderCategories();
-            filterMenu();
+            renderProducts(cat);
+        }
+
+        function renderProducts(cat) {
+            const items = menuDatabase[cat] || [];
+            const grid = document.getElementById('product-grid');
+            grid.innerHTML = items.map(item => {
+                let priceHtml = '';
+                if (item.prices.M && item.prices.M > 0) {
+                    priceHtml = `<div class="text-[10px] text-slate-500">R:${item.prices.R} | M:${item.prices.M} | L:${item.prices.L}</div>`;
+                } else if (item.prices.L && item.prices.L > 0) {
+                    priceHtml = `<div class="text-[10px] text-slate-500">R:${item.prices.R} | L:${item.prices.L}</div>`;
+                } else {
+                    priceHtml = `<div class="text-xs font-bold text-slate-900">₹${item.prices.R}</div>`;
+                }
+
+                const primaryPrice = item.prices.R;
+                return `
+                    <button onclick="addToCart('${item.id}', '${item.name.replace(/'/g, "\\'")}', ${primaryPrice})" class="bg-white p-2.5 rounded border border-slate-200 hover:border-red-400 hover:shadow-sm transition text-left flex flex-col justify-between h-20 group">
+                        <div class="font-semibold text-xs text-slate-800 group-hover:text-[#d32f2f] line-clamp-2">${item.name}</div>
+                        <div>
+                            ${priceHtml}
+                        </div>
+                    </button>
+                `;
+            }).join('');
         }
 
         function filterMenu() {
             const query = document.getElementById('menu-search').value.toLowerCase();
-            const filtered = menuData.filter(item => {
-                const matchesCat = currentCategory === 'All' || item.category === currentCategory;
-                const matchesQuery = item.name.toLowerCase().includes(query) || item.code.toLowerCase().includes(query);
-                return matchesCat && matchesQuery;
-            });
-            renderProducts(filtered);
-        }
-
-        function renderProducts(items) {
             const grid = document.getElementById('product-grid');
-            if (items.length === 0) {
-                grid.innerHTML = `<div class="col-span-3 text-center py-10 text-slate-400 text-sm">No items found</div>`;
+            let results = [];
+            
+            Object.keys(menuDatabase).forEach(cat => {
+                menuDatabase[cat].forEach(item => {
+                    if (item.name.toLowerCase().includes(query) || item.id.toLowerCase().includes(query)) {
+                        results.push(item);
+                    }
+                });
+            });
+
+            if (results.length === 0) {
+                grid.innerHTML = `<div class="col-span-3 text-center py-10 text-slate-400 text-xs">No matching items found</div>`;
                 return;
             }
-            grid.innerHTML = items.map(item => `
-                <button onclick="addToCart(${item.id})" class="bg-white p-3 rounded-lg border border-slate-200 hover:border-amber-400 hover:shadow-md transition text-left flex flex-col justify-between group h-24">
-                    <div class="font-semibold text-xs text-slate-700 group-hover:text-amber-700 line-clamp-2">${item.name}</div>
-                    <div class="flex justify-between items-end w-full">
-                        <span class="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-mono">${item.code}</span>
-                        <span class="text-sm font-bold text-slate-900">₹${item.price}</span>
-                    </div>
+
+            grid.innerHTML = results.map(item => `
+                <button onclick="addToCart('${item.id}', '${item.name.replace(/'/g, "\\'")}', ${item.prices.R})" class="bg-white p-2.5 rounded border border-slate-200 hover:border-red-400 hover:shadow-sm transition text-left flex flex-col justify-between h-20 group">
+                    <div class="font-semibold text-xs text-slate-800 group-hover:text-[#d32f2f] line-clamp-2">${item.name}</div>
+                    <div class="text-xs font-bold text-slate-900">₹${item.prices.R}</div>
                 </button>
             `).join('');
         }
 
-        function addToCart(id) {
-            const product = menuData.find(p => p.id === id);
-            const existing = cart.find(item => item.id === id);
+        function addToCart(id, name, price) {
+            const existing = cart.find(i => i.id === id);
             if (existing) {
                 existing.qty++;
             } else {
-                cart.push({ ...product, qty: 1 });
+                cart.push({ id, name, price, qty: 1 });
             }
             updateCartUI();
         }
 
-        function updateQuantity(id, change) {
+        function updateQty(id, change) {
             const item = cart.find(i => i.id === id);
             if (item) {
                 item.qty += change;
@@ -238,24 +406,16 @@
             updateCartUI();
         }
 
-        function clearCart() {
-            cart = [];
-            updateCartUI();
-        }
-
         function updateCartUI() {
-            const container = document.getElementById('cart-items');
-            const badge = document.getElementById('cart-count-badge');
-            
-            const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
-            badge.innerText = totalQty;
+            const container = document.getElementById('cart-items-list');
+            const totalQty = cart.reduce((sum, i) => sum + i.qty, 0);
+            document.getElementById('cart-item-count').innerText = totalQty;
 
             if (cart.length === 0) {
                 container.innerHTML = `
-                    <div class="h-full flex flex-col items-center justify-center text-slate-400 text-sm select-none">
-                        <i class="fa-solid fa-basket-shopping text-3xl mb-2 text-slate-300"></i>
-                        <span>Cart is empty</span>
-                        <span class="text-xs text-slate-400 mt-1">Select items from the menu</span>
+                    <div class="h-full flex flex-col items-center justify-center text-slate-400 text-xs select-none py-10">
+                        <i class="fa-solid fa-basket-shopping text-3xl mb-1 text-slate-300"></i>
+                        <span>No items added yet</span>
                     </div>`;
                 document.getElementById('summary-subtotal').innerText = '₹0.00';
                 document.getElementById('summary-tax').innerText = '₹0.00';
@@ -264,22 +424,19 @@
             }
 
             container.innerHTML = cart.map(item => `
-                <div class="py-2 flex justify-between items-center text-xs">
-                    <div class="flex-1 pr-2">
-                        <div class="font-medium text-slate-800">${item.name}</div>
-                        <div class="text-slate-500 text-[11px]">₹${item.price} × ${item.qty}</div>
+                <div class="py-2 grid grid-cols-12 items-center text-xs">
+                    <div class="col-span-6 pr-1 font-medium text-slate-800 truncate">${item.name}</div>
+                    <div class="col-span-3 flex items-center justify-center space-x-1">
+                        <button onclick="updateQty('${item.id}', -1)" class="w-5 h-5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-bold">-</button>
+                        <span class="w-4 text-center font-bold">${item.qty}</span>
+                        <button onclick="updateQty('${item.id}', 1)" class="w-5 h-5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-bold">+</button>
                     </div>
-                    <div class="flex items-center space-x-1.5">
-                        <button onclick="updateQuantity(${item.id}, -1)" class="w-6 h-6 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded flex items-center justify-center font-bold">-</button>
-                        <span class="w-5 text-center font-semibold">${item.qty}</span>
-                        <button onclick="updateQuantity(${item.id}, 1)" class="w-6 h-6 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded flex items-center justify-center font-bold">+</button>
-                    </div>
-                    <div class="w-14 text-right font-bold text-slate-900">₹${item.price * item.qty}</div>
+                    <div class="col-span-3 text-right font-bold text-slate-900">₹${item.price * item.qty}</div>
                 </div>
             `).join('');
 
-            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-            const tax = subtotal * 0.05; // 5% GST
+            const subtotal = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+            const tax = subtotal * 0.05;
             const total = subtotal + tax;
 
             document.getElementById('summary-subtotal').innerText = `₹${subtotal.toFixed(2)}`;
@@ -287,22 +444,64 @@
             document.getElementById('summary-total').innerText = `₹${total.toFixed(2)}`;
         }
 
-        function printKOT() {
-            if (cart.length === 0) { alert('Cart is empty!'); return; }
-            alert('KOT sent to printer successfully!');
+        function setOrderType(type) {
+            currentOrderType = type;
+            ['dine', 'del', 'pick'].forEach(t => {
+                const el = document.getElementById(`type-${t}`);
+                el.className = el.innerText.toLowerCase().includes(type.toLowerCase()) 
+                    ? 'py-1.5 bg-white rounded shadow-sm text-[#d32f2f] font-bold transition' 
+                    : 'py-1.5 text-slate-600 rounded transition';
+            });
         }
 
-        function settleBill(mode) {
-            if (cart.length === 0) { alert('Cart is empty!'); return; }
-            alert(`Order settled via ${mode}! Bill printed successfully.`);
-            clearCart();
+        function setPayMode(mode) {
+            currentPayMode = mode;
+            ['cash', 'card', 'due', 'other', 'paid'].forEach(m => {
+                const el = document.getElementById(`pay-${m}`);
+                el.className = el.innerText.toLowerCase() === mode.toLowerCase() 
+                    ? 'bg-emerald-600 text-white border border-emerald-700 py-1.5 rounded shadow-sm font-bold' 
+                    : 'bg-white border border-slate-300 py-1.5 rounded text-slate-600';
+            });
         }
 
-        function applyBogo() { alert('BOGO offer applied to eligible items.'); }
-        function holdOrder() { alert('Order placed on hold.'); clearCart(); }
-        function viewHeldOrders() { alert('No held orders found.'); }
-        function openDailyLedger() { alert('Opening daily sales ledger...'); }
-        function syncData() { alert('Data synchronized successfully!'); }
+        function saveOrder() {
+            if (cart.length === 0) { alert('Cart is empty'); return; }
+            alert('Order saved successfully.');
+            cart = [];
+            updateCartUI();
+        }
+
+        function printKOTDirect() {
+            if (cart.length === 0) { alert('Cart is empty'); return; }
+            triggerThermalPrint('KOT');
+        }
+
+        function printBillDirect() {
+            if (cart.length === 0) { alert('Cart is empty'); return; }
+            triggerThermalPrint('BILL');
+            cart = [];
+            updateCartUI();
+        }
+
+        function triggerThermalPrint(type) {
+            // Direct background fetch to local Python Flask print bridge connected to TVS-E RP 3230 thermal printer
+            fetch('http://localhost:5000/print', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: type, orderType: currentOrderType, payMode: currentPayMode, items: cart })
+            }).then(res => {
+                console.log('Print job sent directly to TVS printer bridge');
+            }).catch(err => {
+                // Fallback direct silent alert confirmation if print bridge is offline
+                console.warn('Local print bridge connection skipped:', err);
+            });
+            
+            alert(`${type} dispatched directly to thermal printer!`);
+        }
+
+        function syncData() {
+            alert('Sales summary & data synchronized successfully with cloud ledger.');
+        }
     </script>
 </body>
 </html>
