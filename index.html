@@ -11,6 +11,13 @@
         ::-webkit-scrollbar-track { background: #f8fafc; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(20px); }
+            15% { opacity: 1; transform: translateY(0); }
+            85% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(20px); }
+        }
+        .toast-anim { animation: fadeInOut 2.5s ease-in-out forwards; }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans h-screen flex flex-col overflow-hidden select-none">
@@ -25,14 +32,17 @@
                 <i class="fa-solid fa-circle text-emerald-400 text-[8px] mr-1 animate-pulse"></i> Terminal Active: PC-01
             </span>
         </div>
-        <div class="flex items-center space-x-4 text-xs font-medium">
+        <div class="flex items-center space-x-3 text-xs font-medium">
             <div class="bg-red-900 px-3 py-1 rounded text-red-200 border border-red-800">
                 <i class="fa-solid fa-clock mr-1"></i> <span id="live-clock"></span>
             </div>
+            <button onclick="openMenuEditor()" class="bg-white text-[#d32f2f] hover:bg-red-50 px-2.5 py-1 rounded font-bold shadow transition">
+                <i class="fa-solid fa-pen-to-square mr-1"></i> Edit Menu
+            </button>
             <button onclick="viewHeldOrdersModal()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 px-2.5 py-1 rounded font-bold shadow transition">
                 <i class="fa-solid fa-pause mr-1"></i> Held (<span id="held-count">0</span>)
             </button>
-            <button onclick="syncData()" class="bg-white text-[#d32f2f] hover:bg-red-50 px-3 py-1 rounded font-bold shadow transition">
+            <button onclick="syncData()" class="bg-white text-[#d32f2f] hover:bg-red-50 px-2.5 py-1 rounded font-bold shadow transition">
                 <i class="fa-solid fa-rotate mr-1"></i> Sync
             </button>
         </div>
@@ -46,9 +56,7 @@
             <div class="p-2 bg-slate-50 border-b border-slate-200 font-bold text-[11px] text-slate-600 uppercase tracking-wide">
                 Categories
             </div>
-            <div id="category-list" class="flex flex-col divide-y divide-slate-100">
-                <!-- Injected categories -->
-            </div>
+            <div id="category-list" class="flex flex-col divide-y divide-slate-100"></div>
         </aside>
 
         <!-- 2. PRODUCT ITEM GRID -->
@@ -64,9 +72,7 @@
                 </div>
             </div>
 
-            <div id="product-grid" class="flex-1 p-3 grid grid-cols-3 gap-2.5 overflow-y-auto content-start">
-                <!-- Injected products -->
-            </div>
+            <div id="product-grid" class="flex-1 p-3 grid grid-cols-3 gap-2.5 overflow-y-auto content-start"></div>
         </section>
 
         <!-- 3. ORDER CART & SETTLEMENT PANEL -->
@@ -96,11 +102,10 @@
                 </div>
             </div>
 
-            <!-- Cart Summary & Modifiers (BOGO, Extra Charges, Discount) -->
+            <!-- Cart Summary & Modifiers -->
             <div class="p-3 border-t border-slate-200 bg-slate-50 space-y-1.5 text-xs">
                 <div class="flex justify-between text-slate-600"><span>Subtotal:</span> <span id="summary-subtotal" class="font-medium text-slate-800">₹0.00</span></div>
                 
-                <!-- BOGO Toggle & Extra/Discount -->
                 <div class="grid grid-cols-3 gap-1.5 pt-1 border-t border-slate-200">
                     <button onclick="toggleBogo()" id="bogo-btn" class="bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 py-1 rounded text-[11px] font-bold transition flex items-center justify-center">
                         <i class="fa-solid fa-tag text-amber-500 mr-1"></i> BOGO: <span id="bogo-status" class="ml-1 text-slate-400">OFF</span>
@@ -156,16 +161,63 @@
                 <h3 class="font-bold text-sm text-slate-900"><i class="fa-solid fa-pause text-amber-500 mr-1.5"></i> Held Orders</h3>
                 <button onclick="closeHeldOrdersModal()" class="text-slate-400 hover:text-slate-600 font-bold"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div id="held-orders-list" class="flex-1 overflow-y-auto space-y-2">
-                <!-- Held orders injected here -->
-            </div>
+            <div id="held-orders-list" class="flex-1 overflow-y-auto space-y-2"></div>
             <button onclick="closeHeldOrdersModal()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 py-2 rounded text-xs font-semibold transition">Close</button>
         </div>
     </div>
 
+    <!-- EDIT MENU MODAL -->
+    <div id="menu-editor-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl w-[500px] p-5 space-y-4 max-h-[85vh] flex flex-col">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="font-bold text-sm text-slate-900"><i class="fa-solid fa-pen-to-square text-[#d32f2f] mr-1.5"></i> Edit Menu & Prices</h3>
+                <button onclick="closeMenuEditor()" class="text-slate-400 hover:text-slate-600 font-bold"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="flex gap-2">
+                <select id="editor-cat-select" onchange="renderEditorItems()" class="bg-slate-50 border border-slate-300 rounded px-2 py-1.5 text-xs flex-1 focus:outline-none"></select>
+                <button onclick="openAddItemModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-1.5 rounded text-xs transition">+ Add Item</button>
+            </div>
+            <div id="editor-items-list" class="flex-1 overflow-y-auto space-y-2 divide-y divide-slate-100"></div>
+            <button onclick="closeMenuEditor()" class="w-full bg-slate-700 hover:bg-slate-800 text-white py-2 rounded text-xs font-semibold transition">Done</button>
+        </div>
+    </div>
+
+    <!-- ADD/EDIT ITEM MODAL -->
+    <div id="item-form-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl w-80 p-5 space-y-3">
+            <h3 id="item-form-title" class="font-bold text-sm text-slate-900 border-b pb-1">Add New Item</h3>
+            <input type="hidden" id="form-item-id">
+            <div>
+                <label class="text-[10px] font-bold text-slate-500 uppercase">Item Name</label>
+                <input type="text" id="form-item-name" class="w-full bg-slate-50 border border-slate-300 px-2.5 py-1.5 rounded text-xs focus:outline-none focus:border-red-500">
+            </div>
+            <div class="grid grid-cols-3 gap-2">
+                <div>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase">Regular (R)</label>
+                    <input type="number" id="form-item-r" class="w-full bg-slate-50 border border-slate-300 px-2 py-1.5 rounded text-xs focus:outline-none focus:border-red-500" value="0">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase">Medium (M)</label>
+                    <input type="number" id="form-item-m" class="w-full bg-slate-50 border border-slate-300 px-2 py-1.5 rounded text-xs focus:outline-none focus:border-red-500" value="0">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase">Large (L)</label>
+                    <input type="number" id="form-item-l" class="w-full bg-slate-50 border border-slate-300 px-2 py-1.5 rounded text-xs focus:outline-none focus:border-red-500" value="0">
+                </div>
+            </div>
+            <div class="flex gap-2 pt-2">
+                <button onclick="saveMenuItem()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded text-xs font-bold transition">Save</button>
+                <button onclick="closeItemFormModal()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 py-2 rounded text-xs font-semibold transition">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NON-INTRUSIVE TOAST NOTIFICATION CONTAINER -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
     <!-- POS Logic -->
     <script>
-        const menuDatabase = {
+        let menuDatabase = JSON.parse(localStorage.getItem('delicious_eatz_menu')) || {
             "Pizza Mania": [
                 { id: "PM1", name: "Onion Pizza", prices: { R: 70 } },
                 { id: "PM2", name: "Capsicum Pizza", prices: { R: 80 } },
@@ -323,7 +375,7 @@
             ]
         };
 
-        let currentCategory = "Pizza Mania";
+        let currentCategory = Object.keys(menuDatabase)[0];
         let currentOrderType = "Dine-In";
         let currentPayMode = "Cash";
         let cart = [];
@@ -337,6 +389,16 @@
             renderCategories();
             renderProducts(currentCategory);
         };
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-slate-900 text-white border-slate-700' : 'bg-red-600 text-white border-red-700';
+            toast.className = `toast-anim ${bgColor} px-3 py-2 rounded-md shadow-lg text-xs font-semibold border flex items-center space-x-2`;
+            toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check text-emerald-400' : 'fa-triangle-exclamation text-white'}"></i><span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 2500);
+        }
 
         function updateClock() {
             const now = new Date();
@@ -501,8 +563,6 @@
 
         function updateCartUI() {
             const container = document.getElementById('cart-items-list');
-            const totalQty = cart.reduce((sum, i) => sum + i.qty, 0);
-
             if (cart.length === 0) {
                 container.innerHTML = `
                     <div class="h-full flex flex-col items-center justify-center text-slate-400 text-xs select-none py-10">
@@ -514,11 +574,6 @@
                 return;
             }
 
-            // Calculate BOGO discounts if active
-            let subtotal = 0;
-            let itemRows = [];
-
-            // Expand cart into individual items for BOGO calculation if needed
             let expandedItems = [];
             cart.forEach(item => {
                 for (let q = 0; q < item.qty; q++) {
@@ -527,26 +582,17 @@
             });
 
             if (bogoActive && expandedItems.length >= 2) {
-                // Sort by price ascending to give cheapest free
                 expandedItems.sort((a, b) => a.price - b.price);
                 const freeCount = Math.floor(expandedItems.length / 2);
-                for (let i = 0; i < freeCount; i++) {
-                    expandedItems[i].effectivePrice = 0;
-                }
-                for (let i = freeCount; i < expandedItems.length; i++) {
-                    expandedItems[i].effectivePrice = expandedItems[i].price;
-                }
+                for (let i = 0; i < freeCount; i++) expandedItems[i].effectivePrice = 0;
+                for (let i = freeCount; i < expandedItems.length; i++) expandedItems[i].effectivePrice = expandedItems[i].price;
             } else {
                 expandedItems.forEach(i => i.effectivePrice = i.price);
             }
 
             container.innerHTML = cart.map(item => {
-                const itemEffTotal = expandedItems
-                    .filter(ei => ei.cartId === item.cartId)
-                    .reduce((sum, ei) => sum + ei.effectivePrice, 0);
-
+                const itemEffTotal = expandedItems.filter(ei => ei.cartId === item.cartId).reduce((sum, ei) => sum + ei.effectivePrice, 0);
                 const hasDiscountApplied = bogoActive && itemEffTotal < (item.price * item.qty);
-
                 return `
                     <div class="py-2 grid grid-cols-12 items-center text-xs">
                         <div class="col-span-6 pr-1 font-medium text-slate-800 truncate">
@@ -566,7 +612,7 @@
                 `;
             }).join('');
 
-            subtotal = expandedItems.reduce((sum, i) => sum + i.effectivePrice, 0);
+            const subtotal = expandedItems.reduce((sum, i) => sum + i.effectivePrice, 0);
             const extra = parseFloat(document.getElementById('extra-charges').value) || 0;
             const discount = parseFloat(document.getElementById('discount-amount').value) || 0;
             const total = subtotal + extra - discount;
@@ -575,8 +621,109 @@
             document.getElementById('summary-total').innerText = `₹${Math.max(0, total).toFixed(2)}`;
         }
 
+        // EDIT MENU FUNCTIONS
+        function openMenuEditor() {
+            const select = document.getElementById('editor-cat-select');
+            select.innerHTML = Object.keys(menuDatabase).map(cat => `<option value="${cat}">${cat}</option>`).join('');
+            renderEditorItems();
+            document.getElementById('menu-editor-modal').classList.remove('hidden');
+        }
+
+        function closeMenuEditor() {
+            document.getElementById('menu-editor-modal').classList.add('hidden');
+            renderProducts(currentCategory);
+        }
+
+        function renderEditorItems() {
+            const cat = document.getElementById('editor-cat-select').value;
+            const items = menuDatabase[cat] || [];
+            const container = document.getElementById('editor-items-list');
+
+            if (items.length === 0) {
+                container.innerHTML = `<div class="text-center text-slate-400 text-xs py-5">No items in this category</div>`;
+                return;
+            }
+
+            container.innerHTML = items.map(item => `
+                <div class="py-2 flex justify-between items-center text-xs">
+                    <div>
+                        <div class="font-bold text-slate-800">${item.name}</div>
+                        <div class="text-slate-500 text-[11px]">R: ₹${item.prices.R} ${item.prices.M ? `| M: ₹${item.prices.M}` : ''} ${item.prices.L ? `| L: ₹${item.prices.L}` : ''}</div>
+                    </div>
+                    <div class="space-x-1">
+                        <button onclick="openEditItemModal('${cat}', '${item.id}')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 py-1 rounded font-semibold">Edit</button>
+                        <button onclick="deleteMenuItem('${cat}', '${item.id}')" class="bg-rose-100 hover:bg-rose-200 text-rose-700 px-2.5 py-1 rounded font-semibold">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openAddItemModal() {
+            document.getElementById('item-form-title').innerText = "Add New Item";
+            document.getElementById('form-item-id').value = '';
+            document.getElementById('form-item-name').value = '';
+            document.getElementById('form-item-r').value = '0';
+            document.getElementById('form-item-m').value = '0';
+            document.getElementById('form-item-l').value = '0';
+            document.getElementById('item-form-modal').classList.remove('hidden');
+        }
+
+        function openEditItemModal(cat, id) {
+            const item = menuDatabase[cat].find(i => i.id === id);
+            if (!item) return;
+            document.getElementById('item-form-title').innerText = "Edit Item";
+            document.getElementById('form-item-id').value = id;
+            document.getElementById('form-item-name').value = item.name;
+            document.getElementById('form-item-r').value = item.prices.R || 0;
+            document.getElementById('form-item-m').value = item.prices.M || 0;
+            document.getElementById('form-item-l').value = item.prices.L || 0;
+            document.getElementById('item-form-modal').classList.remove('hidden');
+        }
+
+        function closeItemFormModal() {
+            document.getElementById('item-form-modal').classList.add('hidden');
+        }
+
+        function saveMenuItem() {
+            const cat = document.getElementById('editor-cat-select').value;
+            const id = document.getElementById('form-item-id').value;
+            const name = document.getElementById('form-item-name').value.trim();
+            const r = parseFloat(document.getElementById('form-item-r').value) || 0;
+            const m = parseFloat(document.getElementById('form-item-m').value) || 0;
+            const l = parseFloat(document.getElementById('form-item-l').value) || 0;
+
+            if (!name) { showToast('Please enter item name', 'error'); return; }
+
+            let prices = { R: r };
+            if (m > 0) prices.M = m;
+            if (l > 0) prices.L = l;
+
+            if (id) {
+                const item = menuDatabase[cat].find(i => i.id === id);
+                if (item) {
+                    item.name = name;
+                    item.prices = prices;
+                }
+            } else {
+                const newId = 'CUSTOM_' + Date.now();
+                menuDatabase[cat].push({ id: newId, name, prices });
+            }
+
+            localStorage.setItem('delicious_eatz_menu', JSON.stringify(menuDatabase));
+            closeItemFormModal();
+            renderEditorItems();
+            showToast('Menu saved successfully!');
+        }
+
+        function deleteMenuItem(cat, id) {
+            menuDatabase[cat] = menuDatabase[cat].filter(i => i.id !== id);
+            localStorage.setItem('delicious_eatz_menu', JSON.stringify(menuDatabase));
+            renderEditorItems();
+            showToast('Item deleted successfully!');
+        }
+
         function holdCurrentOrder() {
-            if (cart.length === 0) { alert('Cart is empty!'); return; }
+            if (cart.length === 0) { showToast('Cart is empty!', 'error'); return; }
             const name = document.getElementById('customer-name').value || 'Walk-in';
             const phone = document.getElementById('customer-phone').value || '';
             
@@ -590,7 +737,7 @@
             });
 
             document.getElementById('held-count').innerText = heldOrders.length;
-            alert('Order placed on hold successfully.');
+            showToast('Order placed on hold successfully.');
             clearActiveOrder();
         }
 
@@ -627,6 +774,7 @@
                 document.getElementById('held-count').innerText = heldOrders.length;
                 closeHeldOrdersModal();
                 updateCartUI();
+                showToast('Order restored successfully.');
             }
         }
 
@@ -661,12 +809,12 @@
         }
 
         function printKOTDirect() {
-            if (cart.length === 0) { alert('Cart is empty!'); return; }
+            if (cart.length === 0) { showToast('Cart is empty!', 'error'); return; }
             triggerThermalPrint('KOT');
         }
 
         function printBillDirect() {
-            if (cart.length === 0) { alert('Cart is empty!'); return; }
+            if (cart.length === 0) { showToast('Cart is empty!', 'error'); return; }
             triggerThermalPrint('BILL');
             clearActiveOrder();
         }
@@ -684,11 +832,11 @@
             }).catch(err => {
                 console.warn('Local print bridge connection skipped:', err);
             });
-            alert(`${type} dispatched directly to thermal printer for ${name}!`);
+            showToast(`${type} dispatched directly to thermal printer for ${name}!`);
         }
 
         function syncData() {
-            alert('Sales summary & data synchronized successfully with cloud ledger.');
+            showToast('Sales summary & data synchronized successfully.');
         }
     </script>
 </body>
