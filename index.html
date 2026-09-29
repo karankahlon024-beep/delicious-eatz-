@@ -85,8 +85,8 @@
 
             <!-- Customer Details & Contact Input -->
             <div class="p-2 bg-red-50/40 border-b border-slate-200 grid grid-cols-2 gap-1.5 text-xs">
-                <input type="text" id="customer-name" placeholder="Customer Name" class="bg-white border border-slate-300 px-2 py-1 rounded focus:outline-none focus:border-red-500">
-                <input type="tel" id="customer-phone" placeholder="Phone / Contact" class="bg-white border border-slate-300 px-2 py-1 rounded focus:outline-none focus:border-red-500">
+                <input type="text" id="customer-name" placeholder="Customer Name (M: ...)" class="bg-white border border-slate-300 px-2 py-1 rounded focus:outline-none focus:border-red-500">
+                <input type="text" id="customer-address" placeholder="Address / Location" class="bg-white border border-slate-300 px-2 py-1 rounded focus:outline-none focus:border-red-500">
             </div>
 
             <div class="grid grid-cols-12 bg-slate-200 px-3 py-1.5 text-[11px] font-bold text-slate-600">
@@ -667,15 +667,17 @@
         }
 
         // SALES LEDGER & PERMANENT STORAGE FUNCTIONS
-        function recordCompletedOrder(type, cartSnapshot, subtotal, extra, discount, total, customerName, customerPhone) {
+        function recordCompletedOrder(type, cartSnapshot, subtotal, extra, discount, total, customerName, customerAddress) {
+            const billNo = Math.floor(1000 + Math.random() * 9000);
             const orderRecord = {
                 id: 'INV_' + Date.now(),
+                billNo,
                 timestamp: new Date().toISOString(),
-                dateStr: new Date().toLocaleDateString('en-IN'),
-                timeStr: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
+                dateStr: new Date().toLocaleDateString('en-IN', {day:'2-digit', month:'2-digit', year:'2-digit'}),
+                timeStr: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false }),
                 type,
                 customerName: customerName || 'Walk-in',
-                customerPhone: customerPhone || '-',
+                customerAddress: customerAddress || '-',
                 payMode: currentPayMode,
                 items: cartSnapshot,
                 subtotal,
@@ -686,13 +688,14 @@
 
             permanentSalesLedger.unshift(orderRecord);
             localStorage.setItem('delicious_eatz_sales', JSON.stringify(permanentSalesLedger));
+            return orderRecord;
         }
 
         function openSalesLedgerModal() {
-            const todayStr = new Date().toLocaleDateString('en-IN');
+            const todayStr = new Date().toLocaleDateString('en-IN', {day:'2-digit', month:'2-digit', year:'2-digit'});
             const yesterdayDate = new Date();
             yesterdayDate.setDate(yesterdayDate.getDate() - 1);
-            const yesterdayStr = yesterdayDate.toLocaleDateString('en-IN');
+            const yesterdayStr = yesterdayDate.toLocaleDateString('en-IN', {day:'2-digit', month:'2-digit', year:'2-digit'});
             const currentMonth = new Date().getMonth();
             const currentYear = new Date().getFullYear();
 
@@ -718,8 +721,8 @@
                 list.innerHTML = permanentSalesLedger.slice(0, 50).map(o => `
                     <div class="py-2 flex justify-between items-center text-xs">
                         <div>
-                            <div class="font-bold text-slate-800">${o.customerName} (${o.customerPhone}) - <span class="text-[#d32f2f]">₹${o.total.toFixed(2)}</span></div>
-                            <div class="text-slate-500 text-[11px]">${o.dateStr} | ${o.timeStr} | ${o.type} | Pay: ${o.payMode} | Items: ${o.items.reduce((s,i)=>s+i.qty,0)}</div>
+                            <div class="font-bold text-slate-850">${o.customerName} (Bill #${o.billNo}) - <span class="text-[#d32f2f]">₹${o.total.toFixed(2)}</span></div>
+                            <div class="text-slate-500 text-[11px]">${o.dateStr} ${o.timeStr} | ${o.type} | Pay: ${o.payMode} | Items: ${o.items.reduce((s,i)=>s+i.qty,0)}</div>
                         </div>
                         <button onclick="reprintInvoice('${o.id}')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 py-1 rounded font-semibold">Reprint</button>
                     </div>
@@ -736,7 +739,7 @@
         function reprintInvoice(id) {
             const ord = permanentSalesLedger.find(o => o.id === id);
             if (ord) {
-                executePrint('BILL', ord.type, ord.payMode, ord.customerName, ord.customerPhone, ord.extra, ord.discount, ord.items, ord.total);
+                executePrint(ord);
             }
         }
 
@@ -844,12 +847,12 @@
         function holdCurrentOrder() {
             if (cart.length === 0) { showToast('Cart is empty!', 'error'); return; }
             const name = document.getElementById('customer-name').value || 'Walk-in';
-            const phone = document.getElementById('customer-phone').value || '';
+            const address = document.getElementById('customer-address').value || '';
             
             heldOrders.push({
                 id: Date.now(),
                 name,
-                phone,
+                address,
                 orderType: currentOrderType,
                 cart: [...cart],
                 time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
@@ -868,7 +871,7 @@
                 list.innerHTML = heldOrders.map(o => `
                     <div class="bg-slate-50 border border-slate-200 p-2.5 rounded flex justify-between items-center text-xs">
                         <div>
-                            <div class="font-bold text-slate-800">${o.name} (${o.phone || 'No phone'})</div>
+                            <div class="font-bold text-slate-800">${o.name} (${o.address || 'No address'})</div>
                             <div class="text-slate-500 text-[11px]">${o.orderType} | Items: ${o.cart.reduce((s,i)=>s+i.qty,0)} | ${o.time}</div>
                         </div>
                         <button onclick="restoreHeldOrder(${o.id})" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded transition">Restore</button>
@@ -887,7 +890,7 @@
             if (idx !== -1) {
                 cart = heldOrders[idx].cart;
                 document.getElementById('customer-name').value = heldOrders[idx].name;
-                document.getElementById('customer-phone').value = heldOrders[idx].phone;
+                document.getElementById('customer-address').value = heldOrders[idx].address;
                 setOrderType(heldOrders[idx].orderType);
                 heldOrders.splice(idx, 1);
                 document.getElementById('held-count').innerText = heldOrders.length;
@@ -900,7 +903,7 @@
         function clearActiveOrder() {
             cart = [];
             document.getElementById('customer-name').value = '';
-            document.getElementById('customer-phone').value = '';
+            document.getElementById('customer-address').value = '';
             document.getElementById('extra-charges').value = 0;
             document.getElementById('discount-amount').value = 0;
             if (bogoActive) toggleBogo();
@@ -930,42 +933,63 @@
 
         function printKOTDirect() {
             if (cart.length === 0) { showToast('Cart is empty!', 'error'); return; }
-            executePrint('KOT', currentOrderType, currentPayMode, document.getElementById('customer-name').value, document.getElementById('customer-phone').value, 0, 0, cart, 0);
+            const name = document.getElementById('customer-name').value || 'Walk-in';
+            const address = document.getElementById('customer-address').value || '';
+            const subtotal = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+            
+            const kotRecord = {
+                billNo: 'KOT',
+                dateStr: new Date().toLocaleDateString('en-IN', {day:'2-digit', month:'2-digit', year:'2-digit'}),
+                timeStr: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false }),
+                type: currentOrderType,
+                customerName: name,
+                customerAddress: address,
+                items: [...cart],
+                subtotal,
+                extra: 0,
+                discount: 0,
+                total: subtotal
+            };
+            executePrint(kotRecord);
         }
 
         function printBillDirect() {
             if (cart.length === 0) { showToast('Cart is empty!', 'error'); return; }
             const name = document.getElementById('customer-name').value || 'Walk-in';
-            const phone = document.getElementById('customer-phone').value || '';
+            const address = document.getElementById('customer-address').value || '';
             const extra = parseFloat(document.getElementById('extra-charges').value) || 0;
             const discount = parseFloat(document.getElementById('discount-amount').value) || 0;
             
             const subtotal = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
             const total = subtotal + extra - discount;
 
-            recordCompletedOrder(currentOrderType, [...cart], subtotal, extra, discount, total, name, phone);
-            executePrint('BILL', currentOrderType, currentPayMode, name, phone, extra, discount, cart, total);
+            const orderRecord = recordCompletedOrder(currentOrderType, [...cart], subtotal, extra, discount, total, name, address);
+            executePrint(orderRecord);
             clearActiveOrder();
         }
 
-        function executePrint(type, orderType, payMode, name, phone, extra, discount, items, total) {
+        function executePrint(ord) {
             fetch('http://localhost:5000/print', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ type, orderType, payMode, name, phone, extra, discount, items, total })
+                body: JSON.stringify(ord)
             }).then(res => {
-                showToast(`${type} dispatched directly to thermal printer!`);
+                showToast(`Receipt dispatched directly to thermal printer!`);
             }).catch(err => {
-                // Fallback clean receipt window with zero page margins to suppress browser headers/footers
-                const subtotal = items.reduce((s, i) => s + (i.price * i.qty), 0);
+                // Exact replica thermal window matching the left receipt format in image_9.png
                 const printWindow = window.open('', '_blank', 'width=350,height=600');
                 
-                let htmlItems = items.map(i => `
+                let htmlItems = ord.items.map(i => `
                     <tr>
-                        <td style="padding: 3px 0;">${i.qty} x ${i.name}</td>
-                        <td style="text-align: right; padding: 3px 0;">₹${i.price * i.qty}</td>
+                        <td style="padding: 2px 0; font-size: 11px;" colspan="2">${i.name}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding-bottom: 4px; font-size: 11px;">${i.qty}</td>
+                        <td style="text-align: right; padding-bottom: 4px; font-size: 11px;">${i.price.toFixed(2)} &nbsp;&nbsp; ${(i.price * i.qty).toFixed(2)}</td>
                     </tr>
                 `).join('');
+
+                const totalQty = ord.items.reduce((s, i) => s + i.qty, 0);
 
                 printWindow.document.write(`
                     <html>
@@ -976,39 +1000,53 @@
                             body { font-family: 'Courier New', monospace; font-size: 11px; width: 270px; margin: 0 auto; color: #000; padding: 5px; }
                             .center { text-align: center; }
                             .bold { font-weight: bold; }
-                            .line { border-bottom: 1px dashed #000; margin: 5px 0; }
+                            .line { border-bottom: 1px dashed #000; margin: 4px 0; }
                             table { width: 100%; border-collapse: collapse; }
                         </style>
                     </head>
                     <body onload="window.print(); window.close();">
-                        <div class="center bold" style="font-size: 14px;">DELICIOUS EATZ</div>
-                        <div class="center" style="font-size: 10px;">Near HDFC Bank, Khudda</div>
-                        <div class="center" style="font-size: 10px;">Ph: 83600-83600</div>
+                        <div class="center bold" style="font-size: 15px;">Delicious Eatz</div>
+                        <div class="center" style="font-size: 10px;">Vop Budhabarh Tehsil Hajipur Dist<br>Hoshiarpur</div>
+                        <div class="center" style="font-size: 10px; margin-top: 2px;">Ph: 7888950664, 8360084534</div>
                         <div class="line"></div>
-                        <div>Type: ${orderType} (${type})</div>
-                        <div>Customer: ${name}</div>
-                        <div>Phone: ${phone || '-'}</div>
-                        <div>Date: ${new Date().toLocaleDateString('en-IN')} ${new Date().toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'})}</div>
+                        <div style="font-size: 11px;">Name: ${ord.customerName}</div>
+                        <div style="font-size: 11px;">Adr: ${ord.customerAddress}</div>
+                        <div class="line"></div>
+                        <table style="font-size: 11px;">
+                            <tr>
+                                <td>Date: ${ord.dateStr}<br>${ord.timeStr}</td>
+                                <td style="text-align: right;">${ord.type}: 1<br>Bill No.: ${ord.billNo}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">Cashier: biller</td>
+                            </tr>
+                        </table>
                         <div class="line"></div>
                         <table>
+                            <tr class="bold" style="border-bottom: 1px solid #000;">
+                                <td style="padding-bottom: 3px;">Item</td>
+                                <td style="text-align: right; padding-bottom: 3px;">Qty. Price Amount</td>
+                            </tr>
                             ${htmlItems}
                         </table>
                         <div class="line"></div>
-                        ${type === 'BILL' ? `
-                            <table>
-                                <tr><td>Subtotal:</td><td style="text-align: right;">₹${subtotal.toFixed(2)}</td></tr>${extra > 0 ? `<tr><td>Extra Charges:</td><td style="text-align: right;">₹${extra.toFixed(2)}</td></tr>` : ''}
-                                ${discount > 0 ? `<tr><td>Discount:</td><td style="text-align: right;">-₹${discount.toFixed(2)}</td></tr>` : ''}
-                                <tr class="bold" style="font-size: 13px;"><td>TOTAL:</td><td style="text-align: right;">₹${total.toFixed(2)}</td></tr>
-                            </table>
-                            <div class="center" style="margin-top: 5px;">Payment Mode: ${payMode}</div>
-                        ` : ''}
+                        <table style="font-size: 11px;">
+                            <tr>
+                                <td>Total Qty: ${totalQty}</td>
+                                <td style="text-align: right;">Sub Total: ${ord.subtotal.toFixed(2)}</td>
+                            </tr>
+                            ${ord.extra > 0 ? `<tr><td colspan="2" style="text-align: right;">Extra: ${ord.extra.toFixed(2)}</td></tr>` : ''}
+                            ${ord.discount > 0 ? `<tr><td colspan="2" style="text-align: right;">Discount: -${ord.discount.toFixed(2)}</td></tr>` : ''}
+                        </table>
                         <div class="line"></div>
-                        <div class="center" style="margin-top: 5px;">Thank You! Visit Again</div>
+                        <div class="center bold" style="font-size: 14px;">Grand Total ₹${ord.total.toFixed(2)}</div>
+                        <div class="line"></div>
+                        <div class="center" style="margin-top: 6px; font-weight: bold;">Thanks</div>
                     </body>
                     </html>
                 `);
                 printWindow.document.close();
-                showToast(`${type} receipt generated.`);
+                showToast(`Receipt generated.`);
             });
         }
     </script>
