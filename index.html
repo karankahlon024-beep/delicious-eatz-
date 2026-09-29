@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delicious Eatz - POS Terminal (Petpooja Layout)</title>
+    <title>Delicious Eatz - POS Terminal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -35,23 +35,11 @@
         </div>
     </header>
 
-    <!-- Main Workspace Layout -->
+    <!-- Main Workspace Layout (Removed Left Icon Rail, now 3 Columns) -->
     <main class="flex-1 grid grid-cols-12 overflow-hidden bg-slate-200 gap-[1px]">
 
-        <!-- 1. LEFTMOST ICON RAIL (Col Span 1) -->
-        <aside class="col-span-1 bg-[#263238] text-slate-300 flex flex-col items-center py-2 space-y-4">
-            <button class="p-2.5 hover:bg-slate-700 rounded text-amber-400 transition" title="POS Dashboard"><i class="fa-solid fa-cash-register text-lg"></i></button>
-            <button class="p-2.5 hover:bg-slate-700 rounded transition" title="Search"><i class="fa-solid fa-magnifying-glass text-base"></i></button>
-            <button class="p-2.5 hover:bg-slate-700 rounded transition" title="Add Extra Cheese"><i class="fa-solid fa-cheese text-base"></i></button>
-            <button class="p-2.5 hover:bg-slate-700 rounded transition" title="Menu Items"><i class="fa-solid fa-burger text-base"></i></button>
-            <button class="p-2.5 hover:bg-slate-700 rounded transition" title="Reports"><i class="fa-solid fa-chart-line text-base"></i></button>
-            <div class="flex-1"></div>
-            <div class="text-[10px] text-slate-400 text-center font-mono px-1">28°C<br>ENG</div>
-            <button class="p-2 hover:bg-red-600 rounded text-red-300 hover:text-white transition" title="Logout"><i class="fa-solid fa-power-off"></i></button>
-        </aside>
-
-        <!-- 2. CATEGORY SIDEBAR (Col Span 2) -->
-        <section class="col-span-2 bg-white flex flex-col border-r border-slate-200 overflow-y-auto">
+        <!-- 1. CATEGORY SIDEBAR (Col Span 3) -->
+        <section class="col-span-3 bg-white flex flex-col border-r border-slate-200 overflow-y-auto">
             <div class="p-2.5 bg-slate-50 border-b border-slate-200 font-bold text-xs text-slate-600 uppercase tracking-wide">
                 Categories
             </div>
@@ -60,7 +48,7 @@
             </div>
         </section>
 
-        <!-- 3. PRODUCT ITEM GRID (Col Span 5) -->
+        <!-- 2. PRODUCT ITEM GRID (Col Span 5) -->
         <section class="col-span-5 bg-slate-50 flex flex-col overflow-hidden border-r border-slate-200">
             <!-- Search & Filter bar -->
             <div class="p-2.5 bg-white border-b border-slate-200 flex items-center space-x-2">
@@ -69,7 +57,7 @@
                     <input type="text" id="menu-search" oninput="filterMenu()" placeholder="Search item by name or code..." 
                            class="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-red-500">
                 </div>
-                <div id="active-category-title" class="text-xs font-bold text-[#d32f2f] px-2 py-1 bg-red-50 rounded border border-red-200">
+                <div id="active-category-title" class="text-xs font-bold text-[#d32f2f] px-2 py-1 bg-red-50 rounded border border-red-200 whitespace-nowrap">
                     Pizza Mania
                 </div>
             </div>
@@ -80,7 +68,7 @@
             </div>
         </section>
 
-        <!-- 4. ORDER CART & SETTLEMENT PANEL (Col Span 4) -->
+        <!-- 3. ORDER CART & SETTLEMENT PANEL (Col Span 4) -->
         <section class="col-span-4 bg-white flex flex-col overflow-hidden">
             <!-- Order Type Selector Tabs -->
             <div class="grid grid-cols-3 bg-slate-100 p-1 border-b border-slate-200 text-xs font-semibold text-center">
@@ -138,9 +126,8 @@
 
     </main>
 
-    <!-- POS Logic & Full Menu Database -->
+    <!-- POS Logic & Corrected Menu Database -->
     <script>
-        // Complete Delicious Eatz Menu Database matched to your menu cards
         const menuDatabase = {
             "Pizza Mania": [
                 { id: "PM1", name: "Onion Pizza", prices: { R: 70, M: 0, L: 0 } },
@@ -162,7 +149,7 @@
                 { id: "SP5", name: "Mix Veg Pizza", prices: { R: 150, M: 300, L: 400 } }
             ],
             "1 Veg": [
-                { id: "1V1", name: "Makhni Lover Pizza", prices: { R: 190, M: 380, L: 590 } },
+                { id: "1V1", name: "Makhni Lover", prices: { R: 190, M: 380, L: 590 } },
                 { id: "1V2", name: "Farm House Pizza", prices: { R: 190, M: 380, L: 590 } },
                 { id: "1V3", name: "Delicious Pasta Pizza", prices: { R: 190, M: 380, L: 590 } },
                 { id: "1V4", name: "Paneer Lover Pizza", prices: { R: 190, M: 380, L: 590 } },
@@ -180,7 +167,7 @@
             ],
             "3 Veg": [
                 { id: "3V1", name: "Kadhai Lover Pizza", prices: { R: 270, M: 550, L: 650 } },
-                { id: "3V2", name: "Tandoori Panner Lover Pizza", prices: { R: 270, M: 550, L: 650 } },
+                { id: "3V2", name: "Tandoori Paneer Lover Pizza", prices: { R: 270, M: 550, L: 650 } },
                 { id: "3V3", name: "Achari Lover Pizza", prices: { R: 270, M: 550, L: 650 } },
                 { id: "3V4", name: "Delicious Eatz Special Pizza", prices: { R: 270, M: 550, L: 650 } }
             ],
@@ -190,7 +177,7 @@
                 { id: "VS3", name: "Loaded Fries", prices: { R: 120, L: 150 } },
                 { id: "VS4", name: "Garlic Bread", prices: { R: 100 } },
                 { id: "VS5", name: "Paneer Garlic Bread", prices: { R: 120, L: 120 } },
-                { id: "VS6", name: "Calazone", prices: { R: 100 } },
+                { id: "VS6", name: "Calzone", prices: { R: 100 } },
                 { id: "VS7", name: "Potato Pops", prices: { R: 70 } },
                 { id: "VS8", name: "Veg Fingers", prices: { R: 80 } },
                 { id: "VS9", name: "Veg Parcel", prices: { R: 60 } },
@@ -198,7 +185,7 @@
                 { id: "VS11", name: "Mix Veg Parcel", prices: { R: 100 } }
             ],
             "Burger": [
-                { id: "BG1", name: "Allu Patty Burger", prices: { R: 40 } },
+                { id: "BG1", name: "Aloo Patty Burger", prices: { R: 40 } },
                 { id: "BG2", name: "Herb Patty Burger", prices: { R: 50 } },
                 { id: "BG3", name: "Spicy Burger", prices: { R: 60 } },
                 { id: "BG4", name: "Cheesy Burger", prices: { R: 70 } },
@@ -227,7 +214,7 @@
             ],
             "Wraps": [
                 { id: "WP1", name: "Mix Veg Wrap", prices: { R: 80 } },
-                { id: "WP2", name: "Allu Tikki Wrap", prices: { R: 80 } },
+                { id: "WP2", name: "Aloo Tikki Wrap", prices: { R: 80 } },
                 { id: "WP3", name: "Paneer Wrap", prices: { R: 100 } },
                 { id: "WP4", name: "Spicy Paneer Wrap", prices: { R: 120 } },
                 { id: "WP5", name: "Spicy Wrap", prices: { R: 80 } },
@@ -292,7 +279,7 @@
                 { id: "CF4", name: "Black Coffee", prices: { R: 50 } }
             ],
             "Meals": [
-                { id: "ML1", name: "Allu Tikki Meal", prices: { R: 130 } },
+                { id: "ML1", name: "Aloo Tikki Meal", prices: { R: 130 } },
                 { id: "ML2", name: "Single Meal", prices: { R: 150 } },
                 { id: "ML3", name: "Couple Meal", prices: { R: 310 } },
                 { id: "ML4", name: "Family Meal", prices: { R: 700 } }
@@ -347,13 +334,10 @@
                     priceHtml = `<div class="text-xs font-bold text-slate-900">₹${item.prices.R}</div>`;
                 }
 
-                const primaryPrice = item.prices.R;
                 return `
-                    <button onclick="addToCart('${item.id}', '${item.name.replace(/'/g, "\\'")}', ${primaryPrice})" class="bg-white p-2.5 rounded border border-slate-200 hover:border-red-400 hover:shadow-sm transition text-left flex flex-col justify-between h-20 group">
+                    <button onclick="addToCart('${item.id}', '${item.name.replace(/'/g, "\\'")}', ${item.prices.R})" class="bg-white p-2.5 rounded border border-slate-200 hover:border-red-400 hover:shadow-sm transition text-left flex flex-col justify-between h-20 group">
                         <div class="font-semibold text-xs text-slate-800 group-hover:text-[#d32f2f] line-clamp-2">${item.name}</div>
-                        <div>
-                            ${priceHtml}
-                        </div>
+                        <div>${priceHtml}</div>
                     </button>
                 `;
             }).join('');
@@ -484,18 +468,13 @@
         }
 
         function triggerThermalPrint(type) {
-            // Direct background fetch to local Python Flask print bridge connected to TVS-E RP 3230 thermal printer
             fetch('http://localhost:5000/print', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ type: type, orderType: currentOrderType, payMode: currentPayMode, items: cart })
-            }).then(res => {
-                console.log('Print job sent directly to TVS printer bridge');
             }).catch(err => {
-                // Fallback direct silent alert confirmation if print bridge is offline
                 console.warn('Local print bridge connection skipped:', err);
             });
-            
             alert(`${type} dispatched directly to thermal printer!`);
         }
 
