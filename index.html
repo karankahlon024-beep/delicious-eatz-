@@ -18,6 +18,11 @@
             100% { opacity: 0; transform: translateY(20px); }
         }
         .toast-anim { animation: fadeInOut 2.5s ease-in-out forwards; }
+        @media print {
+            body * { visibility: hidden; }
+            #print-receipt-area, #print-receipt-area * { visibility: visible; }
+            #print-receipt-area { position: absolute; left: 0; top: 0; width: 100%; }
+        }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans h-screen flex flex-col overflow-hidden select-none">
@@ -32,18 +37,18 @@
                 <i class="fa-solid fa-circle text-emerald-400 text-[8px] mr-1 animate-pulse"></i> Terminal Active: PC-01
             </span>
         </div>
-        <div class="flex items-center space-x-3 text-xs font-medium">
+        <div class="flex items-center space-x-2 text-xs font-medium">
             <div class="bg-red-900 px-3 py-1 rounded text-red-200 border border-red-800">
                 <i class="fa-solid fa-clock mr-1"></i> <span id="live-clock"></span>
             </div>
+            <button onclick="openSalesLedgerModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded font-bold shadow transition">
+                <i class="fa-solid fa-chart-line mr-1"></i> Sales Ledger
+            </button>
             <button onclick="openMenuEditor()" class="bg-white text-[#d32f2f] hover:bg-red-50 px-2.5 py-1 rounded font-bold shadow transition">
                 <i class="fa-solid fa-pen-to-square mr-1"></i> Edit Menu
             </button>
             <button onclick="viewHeldOrdersModal()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 px-2.5 py-1 rounded font-bold shadow transition">
                 <i class="fa-solid fa-pause mr-1"></i> Held (<span id="held-count">0</span>)
-            </button>
-            <button onclick="syncData()" class="bg-white text-[#d32f2f] hover:bg-red-50 px-2.5 py-1 rounded font-bold shadow transition">
-                <i class="fa-solid fa-rotate mr-1"></i> Sync
             </button>
         </div>
     </header>
@@ -133,7 +138,7 @@
                 <button onclick="setPayMode('Paid')" id="pay-paid" class="bg-white border border-slate-300 py-1.5 rounded text-slate-600">Paid</button>
             </div>
 
-            <!-- Action Footer with Dustbin Delete Option -->
+            <!-- Action Footer -->
             <div class="grid grid-cols-6 gap-1 p-2 bg-white border-t border-slate-200">
                 <button onclick="clearActiveOrder()" class="bg-rose-100 hover:bg-rose-200 text-rose-700 py-2 rounded text-xs font-bold transition flex items-center justify-center" title="Delete Order"><i class="fa-solid fa-trash-can"></i></button>
                 <button onclick="holdCurrentOrder()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 py-2 rounded text-xs font-bold transition shadow-sm">Hold</button>
@@ -143,6 +148,38 @@
         </section>
 
     </main>
+
+    <!-- HIDDEN RECEIPT AREA FOR DIRECT THERMAL PRINTING -->
+    <div id="print-receipt-area" class="hidden font-mono text-[11px] p-2 bg-white text-black leading-tight"></div>
+
+    <!-- SALES LEDGER MODAL -->
+    <div id="sales-ledger-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl w-[600px] p-5 space-y-4 max-h-[85vh] flex flex-col">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="font-bold text-sm text-slate-900"><i class="fa-solid fa-chart-line text-emerald-600 mr-1.5"></i> Permanent Sales Ledger</h3>
+                <button onclick="closeSalesLedgerModal()" class="text-slate-400 hover:text-slate-600 font-bold"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <!-- Summary Stats Cards -->
+            <div class="grid grid-cols-3 gap-3">
+                <div class="bg-slate-50 border border-slate-200 p-3 rounded text-center">
+                    <div class="text-[10px] uppercase font-bold text-slate-500">Today's Sales</div>
+                    <div id="stat-today" class="text-base font-extrabold text-emerald-600 mt-0.5">₹0.00</div>
+                </div>
+                <div class="bg-slate-50 border border-slate-200 p-3 rounded text-center">
+                    <div class="text-[10px] uppercase font-bold text-slate-500">Yesterday's Sales</div>
+                    <div id="stat-yesterday" class="text-base font-extrabold text-slate-800 mt-0.5">₹0.00</div>
+                </div>
+                <div class="bg-slate-50 border border-slate-200 p-3 rounded text-center">
+                    <div class="text-[10px] uppercase font-bold text-slate-500">This Month Sales</div>
+                    <div id="stat-month" class="text-base font-extrabold text-indigo-600 mt-0.5">₹0.00</div>
+                </div>
+            </div>
+            <!-- Recent Transactions List -->
+            <div class="text-xs font-bold text-slate-700 pt-1">Recent Permanent Records</div>
+            <div id="ledger-orders-list" class="flex-1 overflow-y-auto space-y-2 divide-y divide-slate-100 border border-slate-200 rounded p-2"></div>
+            <button onclick="closeSalesLedgerModal()" class="w-full bg-slate-700 hover:bg-slate-800 text-white py-2 rounded text-xs font-semibold transition">Close</button>
+        </div>
+    </div>
 
     <!-- SIZE SELECTOR MODAL -->
     <div id="size-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center z-50">
@@ -214,7 +251,7 @@
         </div>
     </div>
 
-    <!-- TOAST NOTIFICATION CONTAINER -->
+    <!-- TOAST NOTIFICATIONS -->
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none"></div>
 
     <!-- POS Logic -->
@@ -377,6 +414,9 @@
             ]
         };
 
+        // Permanent Sales Ledger storage initialization
+        let permanentSalesLedger = JSON.parse(localStorage.getItem('delicious_eatz_sales')) || [];
+
         let currentCategory = Object.keys(menuDatabase)[0];
         let currentOrderType = "Dine-In";
         let currentPayMode = "Cash";
@@ -528,8 +568,6 @@
         function addToCart(id, name, size, price, category) {
             const cartId = `${id}-${size}`;
             const existing = cart.find(i => i.cartId === cartId);
-            
-            // Check if item belongs to veg pizza categories (Special Veg Pizza, 1 Veg, 2 Veg, 3 Veg) and is Medium or Large
             const pizzaCategories = ["Special Veg Pizza", "1 Veg", "2 Veg", "3 Veg"];
             const isEligibleBogo = pizzaCategories.includes(category) && (size === 'Medium' || size === 'Large');
 
@@ -581,7 +619,6 @@
                 return;
             }
 
-            // Expand cart for BOGO calculation strictly on eligible Medium/Large veg pizzas
             let expandedItems = [];
             cart.forEach(item => {
                 for (let q = 0; q < item.qty; q++) {
@@ -636,6 +673,80 @@
 
             document.getElementById('summary-subtotal').innerText = `₹${subtotal.toFixed(2)}`;
             document.getElementById('summary-total').innerText = `₹${Math.max(0, total).toFixed(2)}`;
+        }
+
+        // SALES LEDGER & PERMANENT STORAGE FUNCTIONS
+        function recordCompletedOrder(type, cartSnapshot, subtotal, extra, discount, total, customerName, customerPhone) {
+            const orderRecord = {
+                id: 'INV_' + Date.now(),
+                timestamp: new Date().toISOString(),
+                dateStr: new Date().toLocaleDateString('en-IN'),
+                timeStr: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }),
+                type,
+                customerName: customerName || 'Walk-in',
+                customerPhone: customerPhone || '-',
+                payMode: currentPayMode,
+                items: cartSnapshot,
+                subtotal,
+                extra,
+                discount,
+                total
+            };
+
+            permanentSalesLedger.unshift(orderRecord);
+            localStorage.setItem('delicious_eatz_sales', JSON.stringify(permanentSalesLedger));
+        }
+
+        function openSalesLedgerModal() {
+            const todayStr = new Date().toLocaleDateString('en-IN');
+            const yesterdayDate = new Date();
+            yesterdayDate.setDate(yesterdayDate.getDate() - 1);
+            const yesterdayStr = yesterdayDate.toLocaleDateString('en-IN');
+            const currentMonth = new Date().getMonth();
+            const currentYear = new Date().getFullYear();
+
+            let todayTotal = 0;
+            let yesterdayTotal = 0;
+            let monthTotal = 0;
+
+            permanentSalesLedger.forEach(ord => {
+                const ordDate = new Date(ord.timestamp);
+                if (ord.dateStr === todayStr) todayTotal += ord.total;
+                if (ord.dateStr === yesterdayStr) yesterdayTotal += ord.total;
+                if (ordDate.getMonth() === currentMonth && ordDate.getFullYear() === currentYear) monthTotal += ord.total;
+            });
+
+            document.getElementById('stat-today').innerText = `₹${todayTotal.toFixed(2)}`;
+            document.getElementById('stat-yesterday').innerText = `₹${yesterdayTotal.toFixed(2)}`;
+            document.getElementById('stat-month').innerText = `₹${monthTotal.toFixed(2)}`;
+
+            const list = document.getElementById('ledger-orders-list');
+            if (permanentSalesLedger.length === 0) {
+                list.innerHTML = `<div class="text-center text-slate-400 text-xs py-10">No sales recorded yet</div>`;
+            } else {
+                list.innerHTML = permanentSalesLedger.slice(0, 50).map(o => `
+                    <div class="py-2 flex justify-between items-center text-xs">
+                        <div>
+                            <div class="font-bold text-slate-800">${o.customerName} (${o.customerPhone}) - <span class="text-[#d32f2f]">₹${o.total.toFixed(2)}</span></div>
+                            <div class="text-slate-500 text-[11px]">${o.dateStr} | ${o.timeStr} | ${o.type} | Pay: ${o.payMode} | Items: ${o.items.reduce((s,i)=>s+i.qty,0)}</div>
+                        </div>
+                        <button onclick="reprintInvoice('${o.id}')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 py-1 rounded font-semibold">Reprint</button>
+                    </div>
+                `).join('');
+            }
+
+            document.getElementById('sales-ledger-modal').classList.remove('hidden');
+        }
+
+        function closeSalesLedgerModal() {
+            document.getElementById('sales-ledger-modal').classList.add('hidden');
+        }
+
+        function reprintInvoice(id) {
+            const ord = permanentSalesLedger.find(o => o.id === id);
+            if (ord) {
+                executePrint('BILL', ord.type, ord.payMode, ord.customerName, ord.customerPhone, ord.extra, ord.discount, ord.items, ord.total);
+            }
         }
 
         // EDIT MENU FUNCTIONS
@@ -828,33 +939,68 @@
 
         function printKOTDirect() {
             if (cart.length === 0) { showToast('Cart is empty!', 'error'); return; }
-            triggerThermalPrint('KOT');
+            executePrint('KOT', currentOrderType, currentPayMode, document.getElementById('customer-name').value, document.getElementById('customer-phone').value, 0, 0, cart, 0);
         }
 
         function printBillDirect() {
             if (cart.length === 0) { showToast('Cart is empty!', 'error'); return; }
-            triggerThermalPrint('BILL');
-            clearActiveOrder();
-        }
-
-        function triggerThermalPrint(type) {
             const name = document.getElementById('customer-name').value || 'Walk-in';
             const phone = document.getElementById('customer-phone').value || '';
             const extra = parseFloat(document.getElementById('extra-charges').value) || 0;
             const discount = parseFloat(document.getElementById('discount-amount').value) || 0;
             
+            const subtotal = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+            const total = subtotal + extra - discount;
+
+            // Record into permanent ledger before clearing
+            recordCompletedOrder(currentOrderType, [...cart], subtotal, extra, discount, total, name, phone);
+
+            executePrint('BILL', currentOrderType, currentPayMode, name, phone, extra, discount, cart, total);
+            clearActiveOrder();
+        }
+
+        function executePrint(type, orderType, payMode, name, phone, extra, discount, items, total) {
+            const receiptArea = document.getElementById('print-receipt-area');
+            
+            let itemsHtml = items.map(i => `
+                <div style="display: flex; justify-content: space-between;">
+                    <span>${i.qty}x ${i.name}</span>
+                    <span>₹${i.price * i.qty}</span>
+                </div>
+            `).join('');
+
+            receiptArea.innerHTML = `
+                <div style="text-align: center; font-weight: bold; font-size: 14px;">DELICIOUS EATZ</div>
+                <div style="text-align: center; font-size: 10px;">Near HDFC Bank, Khudda</div>
+                <div style="text-align: center; font-size: 10px;">Ph: 83600-8XXXX</div>
+                <div style="text-align: center; margin: 5px 0;">--------------------------------</div>
+                <div>Type: ${orderType} | ${type}</div>
+                <div>Customer: ${name} (${phone})</div>
+                <div>Date: ${new Date().toLocaleDateString('en-IN')} ${new Date().toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'})}</div>
+                <div style="text-align: center; margin: 5px 0;">--------------------------------</div>
+                ${itemsHtml}
+                <div style="text-align: center; margin: 5px 0;">--------------------------------</div>
+                ${type === 'BILL' ? `
+                    <div>Subtotal: ₹${items.reduce((s,i)=>s+(i.price*i.qty),0).toFixed(2)}</div>${extra > 0 ? `<div>Extra: ₹${extra.toFixed(2)}</div>` : ''}
+                    ${discount > 0 ? `<div>Discount: -₹${discount.toFixed(2)}</div>` : ''}
+                    <div style="font-weight: bold; font-size: 12px;">TOTAL: ₹${total.toFixed(2)}</div>
+                    <div>Payment: ${payMode}</div>
+                ` : ''}
+                <div style="text-align: center; margin-top: 10px;">Thank You! Visit Again</div>
+            `;
+
+            // Try local thermal print bridge first
             fetch('http://localhost:5000/print', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ type, orderType: currentOrderType, payMode: currentPayMode, name, phone, bogo: bogoActive, extra, discount, items: cart })
+                body: JSON.stringify({ type, orderType, payMode, name, phone, extra, discount, items, total })
             }).catch(err => {
-                console.warn('Local print bridge connection skipped:', err);
+                // Fallback direct browser silent print window if bridge is offline
+                console.warn('Local print bridge offline, triggering direct print dialog.');
+                window.print();
             });
-            showToast(`${type} dispatched directly to thermal printer for ${name}!`);
-        }
 
-        function syncData() {
-            showToast('Sales summary & data synchronized successfully.');
+            showToast(`${type} sent to printer successfully!`);
         }
     </script>
 </body>
