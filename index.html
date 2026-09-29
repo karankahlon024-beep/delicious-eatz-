@@ -15,7 +15,7 @@
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans h-screen flex flex-col overflow-hidden select-none">
 
-    <!-- Top Petpooja Header Bar (Removed Khudda) -->
+    <!-- Top Petpooja Header Bar -->
     <header class="bg-[#d32f2f] text-white px-3 py-2 flex justify-between items-center shadow-md">
         <div class="flex items-center space-x-3">
             <div class="bg-white text-[#d32f2f] font-extrabold px-2.5 py-1 rounded text-sm tracking-wide shadow-inner flex items-center">
@@ -29,8 +29,11 @@
             <div class="bg-red-900 px-3 py-1 rounded text-red-200 border border-red-800">
                 <i class="fa-solid fa-clock mr-1"></i> <span id="live-clock"></span>
             </div>
+            <button onclick="viewHeldOrdersModal()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 px-2.5 py-1 rounded font-bold shadow transition">
+                <i class="fa-solid fa-pause mr-1"></i> Held (<span id="held-count">0</span>)
+            </button>
             <button onclick="syncData()" class="bg-white text-[#d32f2f] hover:bg-red-50 px-3 py-1 rounded font-bold shadow transition">
-                <i class="fa-solid fa-rotate mr-1"></i> Sync Data
+                <i class="fa-solid fa-rotate mr-1"></i> Sync
             </button>
         </div>
     </header>
@@ -74,9 +77,10 @@
                 <button onclick="setOrderType('Pick Up')" id="type-pick" class="py-1.5 text-slate-600 rounded transition">Pick Up</button>
             </div>
 
-            <div class="px-3 py-2 bg-red-50/50 border-b border-slate-200 flex justify-between items-center text-xs">
-                <span class="font-bold text-slate-700"><i class="fa-solid fa-chair text-amber-600 mr-1"></i> Table: 3</span>
-                <span class="text-slate-500 font-medium">Items: <span id="cart-item-count" class="font-bold text-slate-800">0</span></span>
+            <!-- Customer Details & Contact Input -->
+            <div class="p-2 bg-red-50/40 border-b border-slate-200 grid grid-cols-2 gap-1.5 text-xs">
+                <input type="text" id="customer-name" placeholder="Customer Name" class="bg-white border border-slate-300 px-2 py-1 rounded focus:outline-none focus:border-red-500">
+                <input type="tel" id="customer-phone" placeholder="Phone / Contact" class="bg-white border border-slate-300 px-2 py-1 rounded focus:outline-none focus:border-red-500">
             </div>
 
             <div class="grid grid-cols-12 bg-slate-200 px-3 py-1.5 text-[11px] font-bold text-slate-600">
@@ -92,19 +96,22 @@
                 </div>
             </div>
 
-            <!-- Cart Summary & Modifiers (Extra Charges & Discount) -->
+            <!-- Cart Summary & Modifiers (BOGO, Extra Charges, Discount) -->
             <div class="p-3 border-t border-slate-200 bg-slate-50 space-y-1.5 text-xs">
                 <div class="flex justify-between text-slate-600"><span>Subtotal:</span> <span id="summary-subtotal" class="font-medium text-slate-800">₹0.00</span></div>
                 
-                <!-- Extra Charges & Discount Inputs -->
-                <div class="grid grid-cols-2 gap-2 pt-1 border-t border-slate-200">
+                <!-- BOGO Toggle & Extra/Discount -->
+                <div class="grid grid-cols-3 gap-1.5 pt-1 border-t border-slate-200">
+                    <button onclick="toggleBogo()" id="bogo-btn" class="bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 py-1 rounded text-[11px] font-bold transition flex items-center justify-center">
+                        <i class="fa-solid fa-tag text-amber-500 mr-1"></i> BOGO: <span id="bogo-status" class="ml-1 text-slate-400">OFF</span>
+                    </button>
                     <div class="flex items-center justify-between bg-white px-2 py-1 rounded border border-slate-200">
-                        <span class="text-[11px] text-slate-500">Extra (+):</span>
-                        <input type="number" id="extra-charges" oninput="updateCartUI()" value="0" min="0" class="w-14 text-right font-medium text-slate-800 focus:outline-none">
+                        <span class="text-[10px] text-slate-500">Extra:</span>
+                        <input type="number" id="extra-charges" oninput="updateCartUI()" value="0" min="0" class="w-10 text-right font-medium text-slate-800 focus:outline-none">
                     </div>
                     <div class="flex items-center justify-between bg-white px-2 py-1 rounded border border-slate-200">
-                        <span class="text-[11px] text-slate-500">Disc (-):</span>
-                        <input type="number" id="discount-amount" oninput="updateCartUI()" value="0" min="0" class="w-14 text-right font-medium text-slate-800 focus:outline-none">
+                        <span class="text-[10px] text-slate-500">Disc:</span>
+                        <input type="number" id="discount-amount" oninput="updateCartUI()" value="0" min="0" class="w-10 text-right font-medium text-slate-800 focus:outline-none">
                     </div>
                 </div>
 
@@ -121,10 +128,10 @@
                 <button onclick="setPayMode('Paid')" id="pay-paid" class="bg-white border border-slate-300 py-1.5 rounded text-slate-600">Paid</button>
             </div>
 
-            <div class="grid grid-cols-4 gap-1 p-2 bg-white border-t border-slate-200">
-                <button onclick="saveOrder()" class="bg-slate-700 hover:bg-slate-800 text-white py-2 rounded text-xs font-bold transition shadow-sm">Save</button>
-                <button onclick="printKOTDirect()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 py-2 rounded text-xs font-bold transition shadow-sm">KOT</button>
-                <button onclick="printBillDirect()" class="bg-[#d32f2f] hover:bg-red-700 text-white py-2 rounded text-xs font-bold transition shadow-sm col-span-2">KOT & Print Bill</button>
+            <div class="grid grid-cols-5 gap-1 p-2 bg-white border-t border-slate-200">
+                <button onclick="holdCurrentOrder()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 py-2 rounded text-xs font-bold transition shadow-sm">Hold</button>
+                <button onclick="printKOTDirect()" class="bg-slate-700 hover:bg-slate-800 text-white py-2 rounded text-xs font-bold transition shadow-sm">KOT</button>
+                <button onclick="printBillDirect()" class="bg-[#d32f2f] hover:bg-red-700 text-white py-2 rounded text-xs font-bold transition shadow-sm col-span-3">Print Bill</button>
             </div>
         </section>
 
@@ -137,10 +144,22 @@
                 <h3 id="modal-item-name" class="font-bold text-sm text-slate-900">Select Size</h3>
                 <button onclick="closeSizeModal()" class="text-slate-400 hover:text-slate-600 font-bold"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div id="modal-size-options" class="space-y-2">
-                <!-- Size options injected here -->
-            </div>
+            <div id="modal-size-options" class="space-y-2"></div>
             <button onclick="closeSizeModal()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 py-2 rounded text-xs font-semibold transition">Cancel</button>
+        </div>
+    </div>
+
+    <!-- HELD ORDERS MODAL -->
+    <div id="held-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl w-96 p-5 space-y-4 max-h-[80vh] flex flex-col">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 class="font-bold text-sm text-slate-900"><i class="fa-solid fa-pause text-amber-500 mr-1.5"></i> Held Orders</h3>
+                <button onclick="closeHeldOrdersModal()" class="text-slate-400 hover:text-slate-600 font-bold"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="held-orders-list" class="flex-1 overflow-y-auto space-y-2">
+                <!-- Held orders injected here -->
+            </div>
+            <button onclick="closeHeldOrdersModal()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-700 py-2 rounded text-xs font-semibold transition">Close</button>
         </div>
     </div>
 
@@ -308,6 +327,8 @@
         let currentOrderType = "Dine-In";
         let currentPayMode = "Cash";
         let cart = [];
+        let heldOrders = [];
+        let bogoActive = false;
         let activeItemForModal = null;
 
         window.onload = function() {
@@ -462,10 +483,25 @@
             updateCartUI();
         }
 
+        function toggleBogo() {
+            bogoActive = !bogoActive;
+            const btn = document.getElementById('bogo-btn');
+            const status = document.getElementById('bogo-status');
+            if (bogoActive) {
+                btn.className = "bg-amber-100 border border-amber-400 text-amber-900 py-1 rounded text-[11px] font-bold transition flex items-center justify-center shadow-inner";
+                status.innerText = "ON";
+                status.className = "ml-1 text-amber-700 font-extrabold";
+            } else {
+                btn.className = "bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 py-1 rounded text-[11px] font-bold transition flex items-center justify-center";
+                status.innerText = "OFF";
+                status.className = "ml-1 text-slate-400";
+            }
+            updateCartUI();
+        }
+
         function updateCartUI() {
             const container = document.getElementById('cart-items-list');
             const totalQty = cart.reduce((sum, i) => sum + i.qty, 0);
-            document.getElementById('cart-item-count').innerText = totalQty;
 
             if (cart.length === 0) {
                 container.innerHTML = `
@@ -478,25 +514,130 @@
                 return;
             }
 
-            container.innerHTML = cart.map(item => `
-                <div class="py-2 grid grid-cols-12 items-center text-xs">
-                    <div class="col-span-6 pr-1 font-medium text-slate-800 truncate">${item.name}</div>
-                    <div class="col-span-3 flex items-center justify-center space-x-1">
-                        <button onclick="updateQty('${item.cartId}', -1)" class="w-5 h-5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-bold">-</button>
-                        <span class="w-4 text-center font-bold">${item.qty}</span>
-                        <button onclick="updateQty('${item.cartId}', 1)" class="w-5 h-5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-bold">+</button>
-                    </div>
-                    <div class="col-span-3 text-right font-bold text-slate-900">₹${item.price * item.qty}</div>
-                </div>
-            `).join('');
+            // Calculate BOGO discounts if active
+            let subtotal = 0;
+            let itemRows = [];
 
-            const subtotal = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+            // Expand cart into individual items for BOGO calculation if needed
+            let expandedItems = [];
+            cart.forEach(item => {
+                for (let q = 0; q < item.qty; q++) {
+                    expandedItems.push({ ...item, unitQty: 1 });
+                }
+            });
+
+            if (bogoActive && expandedItems.length >= 2) {
+                // Sort by price ascending to give cheapest free
+                expandedItems.sort((a, b) => a.price - b.price);
+                const freeCount = Math.floor(expandedItems.length / 2);
+                for (let i = 0; i < freeCount; i++) {
+                    expandedItems[i].effectivePrice = 0;
+                }
+                for (let i = freeCount; i < expandedItems.length; i++) {
+                    expandedItems[i].effectivePrice = expandedItems[i].price;
+                }
+            } else {
+                expandedItems.forEach(i => i.effectivePrice = i.price);
+            }
+
+            container.innerHTML = cart.map(item => {
+                const itemEffTotal = expandedItems
+                    .filter(ei => ei.cartId === item.cartId)
+                    .reduce((sum, ei) => sum + ei.effectivePrice, 0);
+
+                const hasDiscountApplied = bogoActive && itemEffTotal < (item.price * item.qty);
+
+                return `
+                    <div class="py-2 grid grid-cols-12 items-center text-xs">
+                        <div class="col-span-6 pr-1 font-medium text-slate-800 truncate">
+                            ${item.name}
+                            ${hasDiscountApplied ? '<span class="text-[9px] bg-amber-100 text-amber-800 px-1 rounded ml-1 font-bold">BOGO</span>' : ''}
+                        </div>
+                        <div class="col-span-3 flex items-center justify-center space-x-1">
+                            <button onclick="updateQty('${item.cartId}', -1)" class="w-5 h-5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-bold">-</button>
+                            <span class="w-4 text-center font-bold">${item.qty}</span>
+                            <button onclick="updateQty('${item.cartId}', 1)" class="w-5 h-5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded font-bold">+</button>
+                        </div>
+                        <div class="col-span-3 text-right font-bold text-slate-900">
+                            ${hasDiscountApplied ? `<span class="line-through text-slate-400 text-[10px] mr-1">₹${item.price * item.qty}</span>` : ''}
+                            ₹${itemEffTotal}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            subtotal = expandedItems.reduce((sum, i) => sum + i.effectivePrice, 0);
             const extra = parseFloat(document.getElementById('extra-charges').value) || 0;
             const discount = parseFloat(document.getElementById('discount-amount').value) || 0;
             const total = subtotal + extra - discount;
 
             document.getElementById('summary-subtotal').innerText = `₹${subtotal.toFixed(2)}`;
             document.getElementById('summary-total').innerText = `₹${Math.max(0, total).toFixed(2)}`;
+        }
+
+        function holdCurrentOrder() {
+            if (cart.length === 0) { alert('Cart is empty!'); return; }
+            const name = document.getElementById('customer-name').value || 'Walk-in';
+            const phone = document.getElementById('customer-phone').value || '';
+            
+            heldOrders.push({
+                id: Date.now(),
+                name,
+                phone,
+                orderType: currentOrderType,
+                cart: [...cart],
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            });
+
+            document.getElementById('held-count').innerText = heldOrders.length;
+            alert('Order placed on hold successfully.');
+            clearActiveOrder();
+        }
+
+        function viewHeldOrdersModal() {
+            const list = document.getElementById('held-orders-list');
+            if (heldOrders.length === 0) {
+                list.innerHTML = `<div class="text-center text-slate-400 text-xs py-10">No held orders found</div>`;
+            } else {
+                list.innerHTML = heldOrders.map(o => `
+                    <div class="bg-slate-50 border border-slate-200 p-2.5 rounded flex justify-between items-center text-xs">
+                        <div>
+                            <div class="font-bold text-slate-800">${o.name} (${o.phone || 'No phone'})</div>
+                            <div class="text-slate-500 text-[11px]">${o.orderType} | Items: ${o.cart.reduce((s,i)=>s+i.qty,0)} | ${o.time}</div>
+                        </div>
+                        <button onclick="restoreHeldOrder(${o.id})" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded transition">Restore</button>
+                    </div>
+                `).join('');
+            }
+            document.getElementById('held-modal').classList.remove('hidden');
+        }
+
+        function closeHeldOrdersModal() {
+            document.getElementById('held-modal').classList.add('hidden');
+        }
+
+        function restoreHeldOrder(id) {
+            const idx = heldOrders.findIndex(o => o.id === id);
+            if (idx !== -1) {
+                cart = heldOrders[idx].cart;
+                document.getElementById('customer-name').value = heldOrders[idx].name;
+                document.getElementById('customer-phone').value = heldOrders[idx].phone;
+                setOrderType(heldOrders[idx].orderType);
+                heldOrders.splice(idx, 1);
+                document.getElementById('held-count').innerText = heldOrders.length;
+                closeHeldOrdersModal();
+                updateCartUI();
+            }
+        }
+
+        function clearActiveOrder() {
+            cart = [];
+            document.getElementById('customer-name').value = '';
+            document.getElementById('customer-phone').value = '';
+            document.getElementById('extra-charges').value = 0;
+            document.getElementById('discount-amount').value = 0;
+            if (bogoActive) toggleBogo();
+            updateCartUI();
         }
 
         function setOrderType(type) {
@@ -519,41 +660,31 @@
             });
         }
 
-        function saveOrder() {
-            if (cart.length === 0) { alert('Cart is empty'); return; }
-            alert('Order saved successfully.');
-            cart = [];
-            document.getElementById('extra-charges').value = 0;
-            document.getElementById('discount-amount').value = 0;
-            updateCartUI();
-        }
-
         function printKOTDirect() {
-            if (cart.length === 0) { alert('Cart is empty'); return; }
+            if (cart.length === 0) { alert('Cart is empty!'); return; }
             triggerThermalPrint('KOT');
         }
 
         function printBillDirect() {
-            if (cart.length === 0) { alert('Cart is empty'); return; }
+            if (cart.length === 0) { alert('Cart is empty!'); return; }
             triggerThermalPrint('BILL');
-            cart = [];
-            document.getElementById('extra-charges').value = 0;
-            document.getElementById('discount-amount').value = 0;
-            updateCartUI();
+            clearActiveOrder();
         }
 
         function triggerThermalPrint(type) {
+            const name = document.getElementById('customer-name').value || 'Walk-in';
+            const phone = document.getElementById('customer-phone').value || '';
             const extra = parseFloat(document.getElementById('extra-charges').value) || 0;
             const discount = parseFloat(document.getElementById('discount-amount').value) || 0;
             
             fetch('http://localhost:5000/print', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ type: type, orderType: currentOrderType, payMode: currentPayMode, extra: extra, discount: discount, items: cart })
+                body: JSON.stringify({ type, orderType: currentOrderType, payMode: currentPayMode, name, phone, bogo: bogoActive, extra, discount, items: cart })
             }).catch(err => {
                 console.warn('Local print bridge connection skipped:', err);
             });
-            alert(`${type} dispatched directly to thermal printer!`);
+            alert(`${type} dispatched directly to thermal printer for ${name}!`);
         }
 
         function syncData() {
