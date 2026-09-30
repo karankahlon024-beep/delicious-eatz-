@@ -631,6 +631,11 @@
         grand: grand
       };
 
+      // If we are updating an existing held order, remove the old one first
+      if (activeResumedHoldId) {
+        heldOrders = heldOrders.filter(h => h.hold_id !== activeResumedHoldId);
+      }
+
       heldOrders.unshift(heldEntry);
       saveState();
       resetCartFields();
@@ -1199,6 +1204,7 @@
       orders.unshift(record);
       syncToCloud(record);
 
+      // Remove from held orders if it was opened from a held ticket
       if (activeResumedHoldId) {
         heldOrders = heldOrders.filter(h => h.hold_id !== activeResumedHoldId);
         activeResumedHoldId = null;
@@ -1244,6 +1250,7 @@
       orders.unshift(record);
       syncToCloud(record);
 
+      // Remove from held orders if it was opened from a held ticket
       if (activeResumedHoldId) {
         heldOrders = heldOrders.filter(h => h.hold_id !== activeResumedHoldId);
         activeResumedHoldId = null;
