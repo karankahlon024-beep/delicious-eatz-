@@ -670,17 +670,21 @@
         }
 
         // SALES LEDGER & PERMANENT STORAGE FUNCTIONS
-        function recordCompletedOrder(type, cartSnapshot, subtotal, extra, discount, total, customerName, customerAddress) {
+        function recordCompletedOrder(type, cartSnapshot, subtotal, extra, discount, total, customerName) {
             const billNo = Math.floor(1000 + Math.random() * 9000);
+            const now = new Date();
+            const pad = n => n.toString().padStart(2, '0');
+            const dateStr = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear().toString().slice(-2)}`;
+            const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
             const orderRecord = {
                 id: 'INV_' + Date.now(),
                 billNo,
-                timestamp: new Date().toISOString(),
-                dateStr: new Date().toLocaleDateString('en-IN', {day:'2-digit', month:'2-digit', year:'2-digit'}),
-                timeStr: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false }),
+                timestamp: now.toISOString(),
+                dateStr,
+                timeStr,
                 type,
                 customerName: customerName || 'Walk-in',
-                customerAddress: customerAddress || '-',
                 payMode: currentPayMode,
                 items: cartSnapshot,
                 subtotal,
@@ -695,12 +699,14 @@
         }
 
         function openSalesLedgerModal() {
-            const todayStr = new Date().toLocaleDateString('en-IN', {day:'2-digit', month:'2-digit', year:'2-digit'});
+            const now = new Date();
+            const pad = n => n.toString().padStart(2, '0');
+            const todayStr = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear().toString().slice(-2)}`;
             const yesterdayDate = new Date();
-            yesterdayDate.setDate(yesterdayDate.getDate() - 1);
-            const yesterdayStr = yesterdayDate.toLocaleDateString('en-IN', {day:'2-digit', month:'2-digit', year:'2-digit'});
-            const currentMonth = new Date().getMonth();
-            const currentYear = new Date().getFullYear();
+            yesterdayDate.setDate(now.getDate() - 1);
+            const yesterdayStr = `${pad(yesterdayDate.getDate())}/${pad(yesterdayDate.getMonth()+1)}/${yesterdayDate.getFullYear().toString().slice(-2)}`;
+            const currentMonth = now.getMonth();
+            const currentYear = now.getFullYear();
 
             let todayTotal = 0;
             let yesterdayTotal = 0;
@@ -850,12 +856,10 @@
         function holdCurrentOrder() {
             if (cart.length === 0) { showToast('Cart is empty!', 'error'); return; }
             const name = document.getElementById('customer-name').value || 'Walk-in';
-            const address = document.getElementById('customer-address').value || '';
             
             heldOrders.push({
                 id: Date.now(),
                 name,
-                address,
                 orderType: currentOrderType,
                 cart: [...cart],
                 time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
@@ -874,7 +878,7 @@
                 list.innerHTML = heldOrders.map(o => `
                     <div class="bg-slate-50 border border-slate-200 p-2.5 rounded flex justify-between items-center text-xs">
                         <div>
-                            <div class="font-bold text-slate-800">${o.name} (${o.address || 'No address'})</div>
+                            <div class="font-bold text-slate-800">${o.name}</div>
                             <div class="text-slate-500 text-[11px]">${o.orderType} | Items: ${o.cart.reduce((s,i)=>s+i.qty,0)} | ${o.time}</div>
                         </div>
                         <button onclick="restoreHeldOrder(${o.id})" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3 py-1.5 rounded transition">Restore</button>
@@ -893,7 +897,6 @@
             if (idx !== -1) {
                 cart = heldOrders[idx].cart;
                 document.getElementById('customer-name').value = heldOrders[idx].name;
-                document.getElementById('customer-address').value = heldOrders[idx].address;
                 setOrderType(heldOrders[idx].orderType);
                 heldOrders.splice(idx, 1);
                 document.getElementById('held-count').innerText = heldOrders.length;
@@ -936,17 +939,18 @@
 
         function printKOTDirect() {
             if (cart.length === 0) { showToast('Cart is empty!', 'error'); return; }
-            const name = document.getElementById('customer-name').value || 'Walk-in';
-            const address = document.getElementById('customer-address').value || '';
+            const now = new Date();
+            const pad = n => n.toString().padStart(2, '0');
+            const dateStr = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear().toString().slice(-2)}`;
+            const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
             const subtotal = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
             
             const kotRecord = {
                 billNo: 'KOT',
-                dateStr: new Date().toLocaleDateString('en-IN', {day:'2-digit', month:'2-digit', year:'2-digit'}),
-                timeStr: new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false }),
+                dateStr,
+                timeStr,
                 type: currentOrderType,
-                customerName: name,
-                customerAddress: address,
+                customerName: document.getElementById('customer-name').value || 'Walk-in',
                 items: [...cart],
                 subtotal,
                 extra: 0,
@@ -959,14 +963,13 @@
         function printBillDirect() {
             if (cart.length === 0) { showToast('Cart is empty!', 'error'); return; }
             const name = document.getElementById('customer-name').value || 'Walk-in';
-            const address = document.getElementById('customer-address').value || '';
             const extra = parseFloat(document.getElementById('extra-charges').value) || 0;
             const discount = parseFloat(document.getElementById('discount-amount').value) || 0;
             
             const subtotal = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
             const total = subtotal + extra - discount;
 
-            const orderRecord = recordCompletedOrder(currentOrderType, [...cart], subtotal, extra, discount, total, name, address);
+            const orderRecord = recordCompletedOrder(currentOrderType, [...cart], subtotal, extra, discount, total, name);
             generateAndSendPrint(orderRecord);
             clearActiveOrder();
         }
@@ -983,16 +986,16 @@
                 const doc = frame.contentWindow.document;
                 doc.open();
 
-                // EXACT REPLICA OF THE LEFTFECT PERFECT RECEIPT LAYOUT WITH 100% PURE BLACK BOLD TEXT
+                // EXACT 100% MATCH TO THE LEFT PERFECT RECEIPT LAYOUT IN IMAGE 12
                 let htmlItems = ord.items.map(i => `
                     <tr>
-                        <td style="padding: 3px 0; font-weight: 900; font-size: 12px; color: #000;" colspan="4">${i.name.toUpperCase()}</td>
+                        <td style="padding: 2px 0; font-weight: 900; font-size: 13px; color: #000;" colspan="4">${i.name.toUpperCase()}</td>
                     </tr>
                     <tr>
-                        <td style="padding-bottom: 5px; font-weight: 800; font-size: 11.5px; color: #000; width: 44%;"></td>
-                        <td style="padding-bottom: 5px; text-align: center; font-weight: 800; font-size: 11.5px; color: #000; width: 14%;">${i.qty}</td>
-                        <td style="padding-bottom: 5px; text-align: right; font-weight: 800; font-size: 11.5px; color: #000; width: 21%;">${i.price.toFixed(2)}</td>
-                        <td style="padding-bottom: 5px; text-align: right; font-weight: 900; font-size: 12px; color: #000; width: 21%;">${(i.price * i.qty).toFixed(2)}</td>
+                        <td style="padding-bottom: 5px; width: 44%;"></td>
+                        <td style="padding-bottom: 5px; text-align: center; font-weight: 900; font-size: 12.5px; color: #000; width: 14%;">${i.qty}</td>
+                        <td style="padding-bottom: 5px; text-align: right; font-weight: 900; font-size: 12.5px; color: #000; width: 21%;">${i.price.toFixed(2)}</td>
+                        <td style="padding-bottom: 5px; text-align: right; font-weight: 900; font-size: 13px; color: #000; width: 21%;">${(i.price * i.qty).toFixed(2)}</td>
                     </tr>
                 `).join('');
 
@@ -1003,7 +1006,7 @@
                     <head>
                         <style>
                             @page { size: auto; margin: 0mm; }
-                            body { font-family: 'Courier New', monospace; font-size: 11.5px; width: 270px; margin: 0; color: #000; padding: 5px; font-weight: 800; }
+                            body { font-family: 'Courier New', monospace; font-size: 12px; width: 270px; margin: 0; color: #000; padding: 5px; font-weight: 900; }
                             .center { text-align: center; }
                             .bold { font-weight: 900; }
                             .line { border-bottom: 1.5px solid #000; margin: 5px 0; }
@@ -1012,24 +1015,21 @@
                     </head>
                     <body>
                         <div class="center bold" style="font-size: 16px; color: #000;">Delicious Eatz</div>
-                        <div class="center" style="font-size: 11px; color: #000; font-weight: 700;">Vop Budhabarh Tehsil Hajipur Dist Hoshiarpur</div>
-                        <div class="center" style="font-size: 11px; color: #000; font-weight: 700; margin-top: 2px;">Ph: 7888950664, 8360084534</div>
+                        <div class="center" style="font-size: 11px; color: #000; font-weight: 800;">Vop Budhabarh Tehsil Hajipur Dist Hoshiarpur</div>
+                        <div class="center" style="font-size: 11px; color: #000; font-weight: 800; margin-top: 2px;">Ph: 7888950664, 8360084534</div>
                         <div class="line"></div>
-                        <div style="font-size: 11.5px; color: #000; font-weight: 800;">Name: ${ord.customerName}</div>
-                        <div style="font-size: 11.5px; color: #000; font-weight: 800;">Adr: ${ord.customerAddress}</div>
-                        <div class="line"></div>
-                        <table style="font-size: 11.5px; color: #000; font-weight: 800;">
+                        <table style="font-size: 12px; color: #000; font-weight: 900;">
                             <tr>
                                 <td>Date: ${ord.dateStr}<br>${ord.timeStr}</td>
                                 <td style="text-align: right;">${ord.type}: 1<br>Bill No.: ${ord.billNo}</td>
                             </tr>
                             <tr>
-                                <td colspan="2" style="padding-top: 3px;">Cashier: biller</td>
+                                <td colspan="2" style="padding-top: 4px;">Cashier: biller</td>
                             </tr>
                         </table>
                         <div class="line"></div>
                         <table>
-                            <tr class="bold" style="border-bottom: 1.5px solid #000; font-size: 12px; color: #000;">
+                            <tr class="bold" style="border-bottom: 1.5px solid #000; font-size: 12.5px; color: #000;">
                                 <td style="padding-bottom: 4px; width: 44%;">Item</td>
                                 <td style="text-align: center; padding-bottom: 4px; width: 14%;">Qty.</td>
                                 <td style="text-align: right; padding-bottom: 4px; width: 21%;">Price</td>
@@ -1047,9 +1047,9 @@
                             ${ord.discount > 0 ? `<tr><td colspan="2" style="text-align: right;">Discount: -${ord.discount.toFixed(2)}</td></tr>` : ''}
                         </table>
                         <div class="line"></div>
-                        <div class="center bold" style="font-size: 15px; color: #000;">Grand Total ₹${ord.total.toFixed(2)}</div>
+                        <div class="center bold" style="font-size: 16px; color: #000;">Grand Total ₹${ord.total.toFixed(2)}</div>
                         <div class="line"></div>
-                        <div class="center bold" style="margin-top: 8px; font-size: 13px; color: #000;">Thanks</div>
+                        <div class="center bold" style="margin-top: 8px; font-size: 14px; color: #000;">Thanks</div>
                     </body>
                     </html>
                 `);
