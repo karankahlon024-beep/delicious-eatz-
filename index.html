@@ -24,7 +24,7 @@
         <i class="fa-solid fa-bolt mr-1 text-[10px]"></i> POS
       </div>
       <span class="font-extrabold text-sm tracking-tight text-white">EATZ</span>
-      <span class="text-[10px] text-neutral-400 bg-[#1e293b] px-2 py-0.5 rounded font-mono">CLOUD SYNC</span>
+      <span class="text-[10px] text-neutral-400 bg-[#1e293b] px-2 py-0.5 rounded font-mono">LOCAL STORAGE</span>
     </div>
 
     <div class="flex items-center space-x-1.5">
@@ -159,7 +159,7 @@
     <div class="bg-white rounded-xl shadow-xl overflow-hidden flex flex-col flex-1 border border-neutral-300">
       <div class="p-3 bg-[#0f172a] text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
         <div>
-          <h2 class="text-sm font-black uppercase tracking-wider">Sales Ledger & Cloud Sync</h2>
+          <h2 class="text-sm font-black uppercase tracking-wider">Sales Ledger (Local Storage)</h2>
           <p id="sales-report-date-tag" class="text-[11px] text-neutral-400 font-mono">Today</p>
         </div>
 
@@ -274,8 +274,6 @@
   </div>
 
   <script>
-    const SHEETDB_API = 'https://sheetdb.io/api/v1/mbu5t23na13vg';
-
     const DEFAULT_MENU = [
       { id: 1451, name: 'Tandoori Mayo Dip', category: 'Dips', price_regular: 20, available: true },
       { id: 1452, name: 'Cheese Dip', category: 'Dips', price_regular: 30, available: true },
@@ -917,73 +915,25 @@
     }
 
     function syncToCloud(record) {
-      const payload = {
-        data: {
-          Invoice: record.invoice_no,
-          Time: new Date(record.time).toLocaleString(),
-          Mode: record.mode + (record.table ? ' T' + record.table : ''),
-          Payment: record.payment_mode || 'Cash',
-          Discount: (Number(record.discount) || 0) + (Number(record.bogo_discount) || 0),
-          Total: Number(record.grand_total) || 0,
-          Phone: record.phone || '',
-          Location: record.location || ''
-        }
-      };
-
-      fetch(SHEETDB_API, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      }).catch(err => console.error('Cloud Sync Error:', err));
+      let localSales = JSON.parse(localStorage.getItem('de_local_sales_v33')) || [];
+      localSales.unshift(record);
+      localStorage.setItem('de_local_sales_v33', JSON.stringify(localSales));
     }
 
     function fetchCloudSales() {
-      fetch(SHEETDB_API)
-        .then(res => res.json())
-        .then(data => {
-          if (Array.isArray(data) && data.length > 0) {
-            const cloudOrders = data.map(row => {
-              let parsedTime = new Date();
-              if (row.Time) {
-                const parts = row.Time.split(', ');
-                if (parts.length === 2) {
-                  const dateParts = parts[0].split('/');
-                  if (dateParts.length === 3) {
-                    parsedTime = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]} ${parts[1]}`);
-                  }
-                } else {
-                  parsedTime = new Date(row.Time);
-                }
-              }
+      const localSales = JSON.parse(localStorage.getItem('de_local_sales_v33')) || [];
+      
+      const existingInvoices = new Set(orders.map(o => o.invoice_no));
+      localSales.forEach(co => {
+        if (!existingInvoices.has(co.invoice_no)) {
+          orders.push(co);
+        }
+      });
 
-              return {
-                invoice_no: row.Invoice ? row.Invoice.toString() : '0000',
-                time: isNaN(parsedTime.getTime()) ? new Date().toISOString() : parsedTime.toISOString(),
-                mode: row.Mode ? row.Mode.split(' T')[0] : 'Dine In',
-                table: row.Mode && row.Mode.includes('T') ? row.Mode.split('T')[1] : null,
-                payment_mode: row.Payment || 'Cash',
-                discount: Number(row.Discount) || 0,
-                bogo_discount: 0,
-                grand_total: Number(row.Total) || 0,
-                phone: row.Phone || null,
-                location: row.Location || null
-              };
-            }).reverse();
-
-            const existingInvoices = new Set(orders.map(o => o.invoice_no));
-            cloudOrders.forEach(co => {
-              if (!existingInvoices.has(co.invoice_no)) {
-                orders.push(co);
-              }
-            });
-
-            saveState();
-            if (!document.getElementById('view-sales').classList.contains('hidden')) {
-              renderSalesReport();
-            }
-          }
-        })
-        .catch(err => console.error('Cloud Fetch Error:', err));
+      saveState();
+      if (!document.getElementById('view-sales').classList.contains('hidden')) {
+        renderSalesReport();
+      }
     }
 
     function generateKOTHTML() {
@@ -1039,7 +989,7 @@
         <body>
           <div class="center header-title">KOT</div>
           <div class="center type-banner">${orderTypeLabel}</div>
-          ${phoneVal || locationVal ? `<div class="customer-meta">${phoneVal ? 'Ph: ' + phoneVal : ''}${phoneVal && locationVal ? ' | ' : ''}${locationVal ? 'Loc: ' + locationVal : ''}</div>` : ''}
+          ${phoneVal || locationVal ? `<div class="customer-meta">${phoneVal ? 'Ph: ' + phoneVal : ''}${phoneVal && locationVal ? ' \vert{} ' : ''}${locationVal ? 'Loc: ' + locationVal : ''}</div>` : ''}
           <table>
             <thead>
               <tr>
