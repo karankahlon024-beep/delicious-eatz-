@@ -986,7 +986,6 @@
                 const doc = frame.contentWindow.document;
                 doc.open();
 
-                // EXACT 100% MATCH TO THE LEFT PERFECT RECEIPT LAYOUT IN IMAGE 12
                 let htmlItems = ord.items.map(i => `
                     <tr>
                         <td style="padding: 2px 0; font-weight: 900; font-size: 13px; color: #000;" colspan="4">${i.name.toUpperCase()}</td>
@@ -1038,18 +1037,18 @@
                             ${htmlItems}
                         </table>
                         <div class="line"></div>
-                        <table style="font-size: 12px; color: #000; font-weight: 900;">
+                        <table style="font-size: 13px; color: #000; font-weight: 900;">
                             <tr>
-                                <td>Total Qty: ${totalQty}</td>
-                                <td style="text-align: right;">Sub Total: ${ord.subtotal.toFixed(2)}</td>
+                                <td style="font-weight: 900;">Total Qty: ${totalQty}</td>
+                                <td style="text-align: right; font-weight: 900;">Sub Total: ${ord.subtotal.toFixed(2)}</td>
                             </tr>
-                            ${ord.extra > 0 ? `<tr><td colspan="2" style="text-align: right;">Extra: ${ord.extra.toFixed(2)}</td></tr>` : ''}
-                            ${ord.discount > 0 ? `<tr><td colspan="2" style="text-align: right;">Discount: -${ord.discount.toFixed(2)}</td></tr>` : ''}
+                            ${ord.extra > 0 ? `<tr><td colspan="2" style="text-align: right; font-weight: 900;">Extra: ${ord.extra.toFixed(2)}</td></tr>` : ''}
+                            ${ord.discount > 0 ? `<tr><td colspan="2" style="text-align: right; font-weight: 900;">Discount: -${ord.discount.toFixed(2)}</td></tr>` : ''}
                         </table>
                         <div class="line"></div>
-                        <div class="center bold" style="font-size: 16px; color: #000;">Grand Total ₹${ord.total.toFixed(2)}</div>
+                        <div class="center bold" style="font-size: 16px; color: #000; font-weight: 900;">Grand Total ₹${ord.total.toFixed(2)}</div>
                         <div class="line"></div>
-                        <div class="center bold" style="margin-top: 8px; font-size: 14px; color: #000;">Thanks</div>
+                        <div class="center bold" style="margin-top: 8px; font-size: 14px; color: #000; font-weight: 900;">Thanks</div>
                     </body>
                     </html>
                 `);
