@@ -983,13 +983,15 @@
                 const doc = frame.contentWindow.document;
                 doc.open();
 
+                // Exact formatting match to the left-side image_10.png receipt
                 let htmlItems = ord.items.map(i => `
                     <tr>
-                        <td style="padding: 2px 0; font-size: 11px;" colspan="2">${i.name}</td>
+                        <td colspan="3" style="padding-top: 4px; font-weight: bold; font-size: 11.5px;">${i.name.toUpperCase()}</td>
                     </tr>
                     <tr>
                         <td style="padding-bottom: 4px; font-size: 11px;">${i.qty}</td>
-                        <td style="text-align: right; padding-bottom: 4px; font-size: 11px;">${i.price.toFixed(2)} &nbsp;&nbsp; ${(i.price * i.qty).toFixed(2)}</td>
+                        <td style="text-align: right; padding-bottom: 4px; font-size: 11px;">${i.price.toFixed(2)}</td>
+                        <td style="text-align: right; padding-bottom: 4px; font-size: 11px; font-weight: bold;">${(i.price * i.qty).toFixed(2)}</td>
                     </tr>
                 `).join('');
 
@@ -1012,23 +1014,21 @@
                         <div class="center" style="font-size: 10px;">Vop Budhabarh Tehsil Hajipur Dist<br>Hoshiarpur</div>
                         <div class="center" style="font-size: 10px; margin-top: 2px;">Ph: 7888950664, 8360084534</div>
                         <div class="line"></div>
-                        <div style="font-size: 11px;">Name: ${ord.customerName}</div>
-                        <div style="font-size: 11px;">Adr: ${ord.customerAddress}</div>
-                        <div class="line"></div>
                         <table style="font-size: 11px;">
                             <tr>
                                 <td>Date: ${ord.dateStr}<br>${ord.timeStr}</td>
                                 <td style="text-align: right;">${ord.type}: 1<br>Bill No.: ${ord.billNo}</td>
                             </tr>
                             <tr>
-                                <td colspan="2">Cashier: biller</td>
+                                <td colspan="2" style="padding-top: 2px;">Cashier: biller</td>
                             </tr>
                         </table>
                         <div class="line"></div>
                         <table>
                             <tr class="bold" style="border-bottom: 1px solid #000;">
-                                <td style="padding-bottom: 3px;">Item</td>
-                                <td style="text-align: right; padding-bottom: 3px;">Qty. Price Amount</td>
+                                <td style="padding-bottom: 3px; width: 50%;">Item</td>
+                                <td style="text-align: right; padding-bottom: 3px; width: 25%;">Qty. Price</td>
+                                <td style="text-align: right; padding-bottom: 3px; width: 25%;">Amount</td>
                             </tr>
                             ${htmlItems}
                         </table>
@@ -1036,7 +1036,7 @@
                         <table style="font-size: 11px;">
                             <tr>
                                 <td>Total Qty: ${totalQty}</td>
-                                <td style="text-align: right;">Sub Total: ${ord.subtotal.toFixed(2)}</td>
+                                <td style="text-align: right;">Sub Total ${ord.subtotal.toFixed(2)}</td>
                             </tr>
                             ${ord.extra > 0 ? `<tr><td colspan="2" style="text-align: right;">Extra: ${ord.extra.toFixed(2)}</td></tr>` : ''}
                             ${ord.discount > 0 ? `<tr><td colspan="2" style="text-align: right;">Discount: -${ord.discount.toFixed(2)}</td></tr>` : ''}
