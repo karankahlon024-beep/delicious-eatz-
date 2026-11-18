@@ -415,4 +415,477 @@
     let selectedTable = '1';
     let selectedPayment = 'Cash';
     let isBogoActive = false;
-    let activeSales
+    let activeSalesFilter = 'today';
+    let activeResumedHoldId = null;
+    let isSettling = false;
+
+    function saveState() {
+      localStorage.setItem('de_menu_v33', JSON.stringify(menu));
+      localStorage.setItem('de_petpooja_orders_v33', JSON.stringify(orders));
+      localStorage.setItem('de_held_orders_v33', JSON.stringify(heldOrders));
+      updateHeldBadge();
+      renderTableCards();
+    }
+
+    function updateHeldBadge() {
+      const badge = document.getElementById('held-count-badge');
+      if (badge) badge.innerText = heldOrders.length;
+    }
+
+    function scrollCategories(amount) {
+      const bar = document.getElementById('category-bar');
+      if (bar) bar.scrollBy({ left: amount, behavior: 'smooth' });
+    }
+
+    function handleCatWheel(e) {
+      const bar = document.getElementById('category-bar');
+      if (e.deltaY !== 0 && bar) {
+        e.preventDefault();
+        bar.scrollLeft += e.deltaY;
+      }
+    }
+
+    function toggleBogo() {
+      isBogoActive = !isBogoActive;
+      const btn = document.getElementById('btn-bogo-toggle');
+      if (btn) {
+        if (isBogoActive) {
+          btn.classList.remove('bg-white', 'text-neutral-800', 'border-[#cbd5e1]');
+          btn.classList.add('bg-black', 'text-white', 'border-black');
+        } else {
+          btn.classList.add('bg-white', 'text-neutral-800', 'border-[#cbd5e1]');
+          btn.classList.remove('bg-black', 'text-white', 'border-black');
+        }
+      }
+      recalcCart();
+    }
+
+    function resetMenuToOriginal() {
+      if (confirm('Reset menu back to factory prices?')) {
+        menu = JSON.parse(JSON.stringify(DEFAULT_MENU));
+        saveState();
+        renderCategories();
+        renderItems();
+        renderMenuEditor();
+      }
+    }
+
+    function getUniqueCategories() {
+      const cats = new Set(DEFAULT_CATEGORIES);
+      menu.forEach(it => cats.add(it.category));
+      return Array.from(cats);
+    }
+
+    function renderTableCards() {
+      const container = document.getElementById('table-cards-container');
+      if (!container) return;
+      container.innerHTML = '';
+      const tableList = ['1', '2', '3', '4', '5', '6', '7', '8'];
+
+      tableList.forEach(t => {
+        const runningHeld = heldOrders.find(h => h.mode === 'Dine In' && h.table === t);
+        const isOccupied = !!runningHeld;
+
+        const card = document.createElement('button');
+        card.onclick = () => openTableRegister(t, runningHeld ? runningHeld.hold_id : null);
+        card.className = `pos-btn p-3 rounded-2xl border-2 flex flex-col justify-between text-left h-28 transition shadow-md ${
+          isOccupied ? 'bg-amber-500/10 border-amber-500 hover:bg-amber-500/20' : 'bg-[#131d31] border-[#1e293b] hover:border-white hover:bg-[#1a263f]'
+        }`;
+
+        card.innerHTML = `
+          <div class="flex justify-between items-start w-full">
+            <span class="text-2xl font-black ${isOccupied ? 'text-amber-400 font-mono' : 'text-white'}">${t}</span>
+            <span class="text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${isOccupied ? 'bg-amber-500 text-black font-bold' : 'bg-[#1e293b] text-neutral-400'}">${isOccupied ? 'RUNNING' : 'VACANT'}</span>
+          </div>
+          <div class="w-full">
+            <p class="text-[10px] font-bold text-neutral-400">TABLE ${t}</p>
+            <p class="font-mono text-sm font-black ${isOccupied ? 'text-amber-400' : 'text-neutral-500'}">${isOccupied ? '₹' + runningHeld.grand : 'READY'}</p>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function renderCategories() {
+      const bar = document.getElementById('category-bar');
+      if (!bar) return;
+      bar.innerHTML = '';
+      const allCats = ['All', ...getUniqueCategories()];
+      allCats.forEach(cat => {
+        const btn = document.createElement('button');
+        btn.innerText = cat;
+        btn.className = `pos-btn px-3 py-1.5 rounded-lg font-black whitespace-nowrap text-xs transition flex-shrink-0 ${
+          cat === activeCategory ? 'bg-black text-white shadow' : 'bg-white text-neutral-800 hover:bg-neutral-200 border border-[#cbd5e1]'
+        }`;
+        btn.onclick = () => {
+          activeCategory = cat;
+          renderCategories();
+          renderItems();
+        };
+        bar.appendChild(btn);
+      });
+    }
+
+    function renderItems() {
+      const grid = document.getElementById('items-grid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      const searchInput = document.getElementById('item-search');
+      const query = searchInput ? searchInput.value.toLowerCase() : '';
+
+      const items = menu.filter(it => {
+        const matchesCat = activeCategory === 'All' || it.category === activeCategory;
+        const matchesQuery = it.name.toLowerCase().includes(query);
+        return matchesCat && matchesQuery;
+      });
+
+      items.forEach(it => {
+        const hasSizes = it.price_medium !== undefined && it.price_medium !== null && it.price_medium > 0;
+        const btn = document.createElement('button');
+        btn.className = `pos-btn bg-white hover:bg-[#f1f5f9] border border-[#cbd5e1] active:border-black rounded-xl p-2.5 flex flex-col justify-between text-left h-24 transition shadow-xs ${!it.available ? 'opacity-40' : ''}`;
+        btn.onclick = () => handleItemSelect(it);
+
+        btn.innerHTML = `
+          <div>
+            <span class="text-[8px] font-black text-neutral-400 block uppercase tracking-wider">${it.category}</span>
+            <p class="text-[12px] font-black text-neutral-900 line-clamp-2 leading-tight mt-0.5">${it.name}</p>
+          </div>
+          <div class="flex justify-between items-center w-full mt-1">
+            <span class="font-mono text-sm font-black text-black">₹${it.price_regular}</span>
+            ${hasSizes ? '<span class="text-[8px] px-1.5 py-0.5 rounded bg-neutral-100 text-black border border-neutral-300 font-extrabold">SIZES</span>' : ''}
+          </div>
+        `;
+        grid.appendChild(btn);
+      });
+    }
+
+    function handleItemSelect(item) {
+      if (!item.available) return alert('This item is currently disabled.');
+      if (item.price_medium !== undefined && item.price_medium !== null && item.price_medium > 0) {
+        const titleEl = document.getElementById('size-modal-title');
+        if (titleEl) titleEl.innerText = item.name;
+        const container = document.getElementById('size-modal-options');
+        if (container) {
+          container.innerHTML = `
+            <button onclick="addToCart(${item.id}, 'r', ${item.price_regular})" class="pos-btn w-full py-2.5 bg-[#f1f5f9] hover:bg-[#e2e8f0] border border-[#cbd5e1] rounded-xl flex justify-between px-3 text-xs font-black text-black">
+              <span>Regular (r)</span><span class="font-mono font-black">₹${item.price_regular}</span>
+            </button>
+            <button onclick="addToCart(${item.id}, 'm', ${item.price_medium})" class="pos-btn w-full py-2.5 bg-[#f1f5f9] hover:bg-[#e2e8f0] border border-[#cbd5e1] rounded-xl flex justify-between px-3 text-xs font-black text-black">
+              <span>Medium (m)</span><span class="font-mono font-black">₹${item.price_medium}</span>
+            </button>
+            <button onclick="addToCart(${item.id}, 'l', ${item.price_large})" class="pos-btn w-full py-2.5 bg-[#f1f5f9] hover:bg-[#e2e8f0] border border-[#cbd5e1] rounded-xl flex justify-between px-3 text-xs font-black text-black">
+              <span>Large (l)</span><span class="font-mono font-black">₹${item.price_large}</span>
+            </button>
+          `;
+        }
+        const modal = document.getElementById('size-modal');
+        if (modal) modal.classList.remove('hidden');
+      } else {
+        addToCart(item.id, 'Std', item.price_regular);
+      }
+    }
+
+    function closeSizeModal() {
+      const modal = document.getElementById('size-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function addToCart(id, variant, price) {
+      const item = menu.find(i => i.id === id);
+      if (!item) return;
+      const key = `${id}_${variant}`;
+      if (cart[key]) {
+        cart[key].qty += 1;
+      } else {
+        cart[key] = { id, name: item.name, category: item.category, variant, price, qty: 1 };
+      }
+      closeSizeModal();
+      renderCart();
+    }
+
+    function updateQty(key, delta) {
+      if (cart[key]) {
+        cart[key].qty += delta;
+        if (cart[key].qty <= 0) delete cart[key];
+      }
+      renderCart();
+    }
+
+    function removeItem(key) {
+      delete cart[key];
+      renderCart();
+    }
+
+    function clearCart() {
+      if (Object.keys(cart).length === 0) return;
+      if (confirm('Clear running order?')) resetCartFields();
+    }
+
+    function resetCartFields() {
+      cart = {};
+      activeResumedHoldId = null;
+      const discInput = document.getElementById('cart-discount');
+      const delInput = document.getElementById('cart-delivery');
+      const phoneInput = document.getElementById('customer-phone-input');
+      const locInput = document.getElementById('customer-location-input');
+
+      if (discInput) discInput.value = 0;
+      if (delInput) delInput.value = 0;
+      if (phoneInput) phoneInput.value = '';
+      if (locInput) locInput.value = '';
+      if (isBogoActive) toggleBogo();
+      renderCart();
+    }
+
+    function holdCurrentCart() {
+      const itemsInCart = Object.values(cart);
+      if (itemsInCart.length === 0) return alert('Cart is empty.');
+
+      const { sub, disc, delivery, bogoDiscount, grand } = recalcCart();
+      const phoneEl = document.getElementById('customer-phone-input');
+      const locEl = document.getElementById('customer-location-input');
+      const phone = phoneEl ? phoneEl.value.trim() : '';
+      const location = locEl ? locEl.value.trim() : '';
+
+      const heldEntry = {
+        hold_id: `HOLD-${Date.now().toString().slice(-4)}`,
+        timestamp: new Date().toISOString(),
+        mode: currentOrderMode,
+        table: currentOrderMode === 'Dine In' ? selectedTable : null,
+        phone: phone || null,
+        location: location || null,
+        cart: JSON.parse(JSON.stringify(cart)),
+        isBogoActive: isBogoActive,
+        bogoDiscount: bogoDiscount,
+        discount: disc,
+        delivery: delivery,
+        grand: grand
+      };
+
+      if (activeResumedHoldId) {
+        heldOrders = heldOrders.filter(h => h.hold_id !== activeResumedHoldId);
+      }
+
+      heldOrders.unshift(heldEntry);
+      saveState();
+      resetCartFields();
+      switchView('tables');
+    }
+
+    function resumeHeldOrder(holdId) {
+      const idx = heldOrders.findIndex(h => h.hold_id === holdId);
+      if (idx === -1) return;
+
+      const target = heldOrders[idx];
+      cart = JSON.parse(JSON.stringify(target.cart));
+      
+      const discEl = document.getElementById('cart-discount');
+      const delEl = document.getElementById('cart-delivery');
+      const phoneEl = document.getElementById('customer-phone-input');
+      const locEl = document.getElementById('customer-location-input');
+
+      if (discEl) discEl.value = target.discount || 0;
+      if (delEl) delEl.value = target.delivery || 0;
+      if (target.phone && phoneEl) phoneEl.value = target.phone;
+      if (target.location && locEl) locEl.value = target.location;
+      
+      if (target.isBogoActive !== isBogoActive) {
+        toggleBogo();
+      }
+
+      activeResumedHoldId = holdId;
+      selectedTable = target.table || '1';
+      currentOrderMode = target.mode || 'Dine In';
+
+      saveState();
+      switchView('register');
+      renderCart();
+    }
+
+    function deleteHeldOrder(holdId) {
+      if (confirm('Delete this held order?')) {
+        heldOrders = heldOrders.filter(h => h.hold_id !== holdId);
+        saveState();
+        renderHeldOrders();
+      }
+    }
+
+    function renderHeldOrders() {
+      const container = document.getElementById('held-orders-list');
+      if (!container) return;
+      container.innerHTML = '';
+      
+      const badge = document.getElementById('held-total-badge');
+      if (badge) badge.innerText = `${heldOrders.length} Held`;
+
+      if (heldOrders.length === 0) {
+        container.innerHTML = '<p class="text-neutral-400 text-xs py-10 text-center bg-white rounded-xl border border-neutral-300">No orders currently on hold.</p>';
+        return;
+      }
+
+      heldOrders.forEach(h => {
+        const card = document.createElement('div');
+        card.className = 'bg-white border border-[#cbd5e1] p-3 rounded-xl flex justify-between items-center shadow-sm';
+        const summaryItems = Object.values(h.cart).map(i => `${i.name} (x${i.qty})`).join(', ');
+
+        card.innerHTML = `
+          <div class="flex-1 pr-3">
+            <div class="flex items-center space-x-2">
+              <span class="font-mono font-bold text-black text-xs">${h.hold_id}</span>
+              <span class="px-2 py-0.5 rounded text-[10px] bg-[#f1f5f9] border border-[#cbd5e1] text-black font-extrabold uppercase">${h.mode}${h.table ? ' T' + h.table : ''}</span>
+              ${h.isBogoActive ? '<span class="px-1.5 py-0.5 rounded text-[9px] bg-black text-white font-black">BOGO</span>' : ''}
+            </div>
+            <p class="text-[11px] text-neutral-600 line-clamp-1 mt-1 font-semibold">${summaryItems}</p>
+            <p class="font-mono font-black text-black text-sm mt-1">₹${h.grand}</p>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button onclick="resumeHeldOrder('${h.hold_id}')" class="pos-btn px-3 py-1.5 bg-black hover:bg-neutral-800 text-white text-xs font-black rounded-lg">Resume</button>
+            <button onclick="deleteHeldOrder('${h.hold_id}')" class="pos-btn px-2.5 py-1.5 bg-[#f1f5f9] hover:bg-[#e2e8f0] text-neutral-600 text-xs rounded-lg border border-[#cbd5e1]"><i class="fa-solid fa-trash"></i></button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function renderCart() {
+      const container = document.getElementById('cart-items-container');
+      if (!container) return;
+      container.innerHTML = '';
+      const entries = Object.entries(cart);
+
+      if (entries.length === 0) {
+        container.innerHTML = `
+          <div class="h-36 flex flex-col items-center justify-center text-neutral-400 text-xs">
+            <i class="fa-solid fa-receipt text-2xl mb-2 text-neutral-300"></i>
+            <span class="font-bold">No Items in Current Ticket</span>
+          </div>
+        `;
+      } else {
+        entries.forEach(([key, it]) => {
+          const isEligibleBogo = ['1 Veg', '2 Veg', '3 Veg'].includes(it.category) && (it.variant === 'm' || it.variant === 'l');
+          const row = document.createElement('div');
+          row.className = 'bg-[#f8fafc] border border-[#e2e8f0] rounded-lg p-2 flex items-center justify-between text-xs shadow-xs';
+          row.innerHTML = `
+            <div class="flex-1 pr-1 truncate">
+              <div class="flex items-center space-x-1.5">
+                <p class="font-black text-neutral-900 truncate text-[11px]">${it.name.toUpperCase()}</p>
+                ${isEligibleBogo && isBogoActive ? '<span class="text-[8px] bg-black text-white px-1.5 py-0.2 rounded font-mono font-black">BOGO</span>' : ''}
+              </div>
+              <p class="text-[9px] font-bold text-neutral-400">${it.variant !== 'Std' ? '(' + it.variant + ') · ' : ''}₹${it.price}</p>
+            </div>
+            <div class="flex items-center space-x-1.5 flex-shrink-0">
+              <button onclick="updateQty('${key}', -1)" class="w-5 h-5 rounded bg-[#e2e8f0] text-black font-black flex items-center justify-center text-xs">-</button>
+              <span class="w-4 text-center font-mono font-black text-black text-xs">${it.qty}</span>
+              <button onclick="updateQty('${key}', 1)" class="w-5 h-5 rounded bg-[#e2e8f0] text-black font-black flex items-center justify-center text-xs">+</button>
+              <span class="w-12 text-right font-mono font-black text-black text-xs">₹${it.price * it.qty}</span>
+              <button onclick="removeItem('${key}')" class="text-neutral-400 hover:text-black pl-1 text-xs"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+          `;
+          container.appendChild(row);
+        });
+      }
+
+      recalcCart();
+    }
+
+    function recalcCart() {
+      let sub = 0;
+      let totalItemsCount = 0;
+      let bogoEligibleUnits = [];
+
+      Object.values(cart).forEach(it => {
+        sub += it.price * it.qty;
+        totalItemsCount += it.qty;
+        if (isBogoActive && ['1 Veg', '2 Veg', '3 Veg'].includes(it.category) && (it.variant === 'm' || it.variant === 'l')) {
+          for (let q = 0; q < it.qty; q++) {
+            bogoEligibleUnits.push(it.price);
+          }
+        }
+      });
+
+      bogoEligibleUnits.sort((a, b) => a - b);
+      let freePizzaCount = Math.floor(bogoEligibleUnits.length / 2);
+      let bogoDiscount = 0;
+      for (let i = 0; i < freePizzaCount; i++) {
+        bogoDiscount += bogoEligibleUnits[i];
+      }
+
+      const discEl = document.getElementById('cart-discount');
+      const delEl = document.getElementById('cart-delivery');
+      const manualDisc = Math.max(0, parseFloat(discEl ? discEl.value : 0) || 0);
+      const delivery = Math.max(0, parseFloat(delEl ? delEl.value : 0) || 0);
+      
+      const totalDisc = Math.min(sub, bogoDiscount + manualDisc);
+      const grand = Math.max(0, sub - totalDisc + delivery);
+
+      const subEl = document.getElementById('cart-subtotal');
+      const grandEl = document.getElementById('cart-grand');
+      if (subEl) subEl.innerText = `₹${sub}`;
+      if (grandEl) grandEl.innerText = `₹${grand}`;
+
+      const bogoInfo = document.getElementById('bogo-applied-info');
+      const bogoAmt = document.getElementById('bogo-discount-amount');
+      if (isBogoActive && bogoDiscount > 0) {
+        if (bogoInfo) bogoInfo.classList.remove('hidden');
+        if (bogoAmt) bogoAmt.innerText = `-₹${bogoDiscount} (${freePizzaCount} Free)`;
+      } else {
+        if (bogoInfo) bogoInfo.classList.add('hidden');
+      }
+
+      return { sub, disc: manualDisc, delivery, bogoDiscount, totalDisc, grand, totalItemsCount };
+    }
+
+    function setOrderMode(mode, btn) {
+      currentOrderMode = mode;
+      document.querySelectorAll('.mode-btn').forEach(b => {
+        b.className = 'mode-btn py-1 rounded text-[10px] font-bold uppercase tracking-wider bg-white border border-[#cbd5e1] text-neutral-700';
+      });
+      if (btn) btn.className = 'mode-btn py-1 rounded text-[10px] font-black uppercase tracking-wider bg-black text-white';
+    }
+
+    function setPayment(mode, btn) {
+      selectedPayment = mode;
+      document.querySelectorAll('.pay-btn').forEach(b => {
+        b.className = 'pay-btn py-1 rounded text-[10px] font-bold uppercase bg-white border border-[#cbd5e1] text-neutral-700';
+      });
+      if (btn) btn.className = 'pay-btn py-1 rounded text-[10px] font-black uppercase bg-amber-400 text-black border border-amber-500 shadow-xs';
+    }
+
+    function openTableRegister(tbl, holdId = null) {
+      selectedTable = tbl;
+      currentOrderMode = 'Dine In';
+      const invTag = document.getElementById('current-invoice-tag');
+      if (invTag) invTag.innerText = `#TBL-${tbl}`;
+      
+      if (holdId) {
+        resumeHeldOrder(holdId);
+      } else {
+        resetCartFields();
+        switchView('register');
+      }
+
+      const mBtn = Array.from(document.querySelectorAll('.mode-btn')).find(b => b.innerText.includes('DINE'));
+      if (mBtn) setOrderMode('Dine In', mBtn);
+    }
+
+    function setModeAndOpen(mode) {
+      resetCartFields();
+      currentOrderMode = mode;
+      const invTag = document.getElementById('current-invoice-tag');
+      if (invTag) invTag.innerText = mode === 'Delivery' ? '#DELIVERY' : '#PICKUP';
+      switchView('register');
+      const btn = Array.from(document.querySelectorAll('.mode-btn')).find(b => b.innerText.includes(mode === 'Takeaway' ? 'PICKUP' : 'DELIVERY'));
+      if (btn) setOrderMode(mode, btn);
+    }
+
+    function filterSales(timeFrame) {
+      activeSalesFilter = timeFrame;
+      const btnToday = document.getElementById('btn-sales-today');
+      const btnYest = document.getElementById('btn-sales-yesterday');
+      const btnMonth = document.getElementById('btn-sales-month');
+      const btnCustom = document.getElementById('btn-sales-custom');
+
+      [btnToday, btnYest, btnMonth].forEach(b => {
+        if (b) b.className = 'px-2 py-1 bg-[#1e293b] hover:bg-[#334155] border border-neutral-700 rounded-lg text-xs font-bold text-white';
+      });
+      if (btnCustom) btnCustom.className = 'px-2 py-0.5 bg-neutral-700 hover:bg-neutral-60
